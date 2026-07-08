@@ -71,4 +71,27 @@ export class ProfileService {
 
     return (data || []) as Profile[];
   }
+
+  /**
+   * Retrieves a single user profile by their username.
+   * Preconditions:
+   * - username must be a non-empty string.
+   */
+  async getProfileByUsername(username: string): Promise<Profile | null> {
+    if (!username || username.trim() === '') {
+      throw new Error('Username is required');
+    }
+
+    const { data, error } = await this.supabase
+      .from('profiles')
+      .select('*')
+      .eq('username', username.trim())
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch profile by username: ${error.message}`);
+    }
+
+    return data as Profile | null;
+  }
 }

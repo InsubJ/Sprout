@@ -7,6 +7,8 @@ class SupabaseQueryMockBuilder {
   public neq = vi.fn().mockReturnValue(this);
   public ilike = vi.fn().mockReturnValue(this);
   public in = vi.fn().mockReturnValue(this);
+  public eq = vi.fn().mockReturnValue(this);
+  public maybeSingle = vi.fn().mockReturnValue(this);
 
   private resolveValue: any = { data: null, error: null };
 
@@ -110,6 +112,38 @@ describe('ProfileService', () => {
       mockBuilder.setResult(null, { message: 'Fetch failed' });
 
       await expect(service.getProfilesByIds([otherUserId])).rejects.toThrow('Failed to fetch profiles: Fetch failed');
+    });
+  });
+
+  describe('getProfileByUsername', () => {
+    it('should fetch a single profile by username successfully', async () => {
+      mockBuilder.setResult(mockProfile);
+
+      const result = await service.getProfileByUsername('alice');
+
+      expect(mockSupabase.from).toHaveBeenCalledWith('profiles');
+      expect(mockBuilder.select).toHaveBeenCalled();
+      expect(mockBuilder.eq).toHaveBeenCalledWith('username', 'alice');
+      expect(mockBuilder.maybeSingle).toHaveBeenCalled();
+      expect(result).toEqual(mockProfile);
+    });
+
+    it('should return null if profile not found', async () => {
+      mockBuilder.setResult(null);
+
+      const result = await service.getProfileByUsername('nonexistent');
+
+      expect(result).toBeNull();
+    });
+
+    it('should throw error if username is empty', async () => {
+      await expect(service.getProfileByUsername('')).rejects.toThrow('Username is required');
+    });
+
+    it('should throw error if query fails', async () => {
+      mockBuilder.setResult(null, { message: 'Database error' });
+
+      await expect(service.getProfileByUsername('alice')).rejects.toThrow('Failed to fetch profile by username: Database error');
     });
   });
 });
