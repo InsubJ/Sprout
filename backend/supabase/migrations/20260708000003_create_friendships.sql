@@ -3,12 +3,12 @@ CREATE TABLE IF NOT EXISTS public.friendships (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL, -- requester
     friend_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL, -- receiver
-    status VARCHAR(20) DEFAULT 'pending' NOT NULL, -- 'pending', 'accepted'
+    status VARCHAR(20) DEFAULT 'pending' NOT NULL, -- 'pending', 'accepted', 'declined'
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
     
     -- Design by Contract / Constraints
     CONSTRAINT friendships_not_self CHECK (user_id <> friend_id),
-    CONSTRAINT friendships_status_val CHECK (status IN ('pending', 'accepted'))
+    CONSTRAINT friendships_status_val CHECK (status IN ('pending', 'accepted', 'declined'))
 );
 
 -- Composite unique key on user pairs (enforcing single relationship in any direction)
