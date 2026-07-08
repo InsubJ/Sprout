@@ -1,4 +1,4 @@
-﻿import { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export class StorageServiceError extends Error {
   constructor(message: string) {
@@ -120,8 +120,8 @@ export class StorageService {
       throw new StorageValidationError('Path must be a non-empty string');
     }
 
-    const { data, error } = await this.supabase.storage
-      .from(BUCKET_NAME)
+    const { data, error } = await (this.supabase.storage
+      .from(BUCKET_NAME) as any)
       .delete([path.trim()]);
 
     if (error) {
