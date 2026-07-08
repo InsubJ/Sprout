@@ -14,6 +14,9 @@ export interface HabitCardProps {
   plantType?: string;
   difficultyTier?: DifficultyTier;
   onWater?: () => void;
+  onNudge?: () => void;
+  isNudged?: boolean;
+  nudgeLoading?: boolean;
 }
 
 const FREQUENCY_LABELS: Record<HabitFrequency, string> = {
@@ -44,6 +47,9 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   plantType = 'Seedling',
   difficultyTier = 'common',
   onWater,
+  onNudge,
+  isNudged = false,
+  nudgeLoading = false,
 }) => {
   // Preconditions validation
   if (!name || !name.trim()) {
@@ -194,6 +200,18 @@ export const HabitCard: React.FC<HabitCardProps> = ({
               <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z" />
             </svg>
             Water
+          </button>
+        )}
+        {status === 'withered' && onNudge && (
+          <button
+            type="button"
+            className={styles.nudgeButton}
+            onClick={onNudge}
+            disabled={isNudged || nudgeLoading}
+            data-testid="nudge-button"
+            aria-label={isNudged ? "Already nudged today" : "Nudge friend"}
+          >
+            {isNudged ? 'Nudged' : 'Nudge'}
           </button>
         )}
         {status === 'completed' && (

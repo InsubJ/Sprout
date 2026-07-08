@@ -3,6 +3,8 @@
 import React from 'react';
 import { useFriendForest } from '../../../hooks/useFriendForest';
 import { HabitCard } from '../../../components/habit/HabitCard';
+import { useWitherNudge } from '../../../hooks/useWitherNudge';
+import { NudgeService } from '../../../services/nudgeService';
 import styles from './FriendForestPage.module.css';
 
 const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -14,11 +16,13 @@ export interface FriendForestPageProps {
   searchParams?: {
     currentUserId?: string;
   };
+  customNudgeService?: NudgeService;
 }
 
 export default function FriendForestPage({
   params,
   searchParams,
+  customNudgeService,
 }: FriendForestPageProps) {
   // Preconditions Check
   const { username } = params;
@@ -40,6 +44,24 @@ export default function FriendForestPage({
     loading,
     error,
   } = useFriendForest(username, currentUserId);
+
+  const {
+    nudgedHabits,
+    loadingHabits,
+    sendNudge,
+    checkNudgeStatus,
+  } = useWitherNudge(currentUserId, friendProfile?.id, customNudgeService);
+
+  // Load nudge statuses for withered public habits
+  React.useEffect(() => {
+    if (friendProfile && friendProfile.id !== currentUserId) {
+      publicHabits.forEach(habit => {
+        if (habit.status === 'withered') {
+          checkNudgeStatus(habit.id);
+        }
+      });
+    }
+  }, [friendProfile, publicHabits, currentUserId, checkNudgeStatus]);
 
   const getInitials = (displayName: string | null, uname: string) => {
     const name = displayName || uname;
@@ -184,21 +206,27 @@ export default function FriendForestPage({
                   </div>
                 ) : (
                   <div className={styles.grid} data-testid="habits-grid">
-                    {publicHabits.map(habit => (
-                      <HabitCard
-                        key={habit.id}
-                        name={habit.name}
-                        frequency={habit.frequency}
-                        status={habit.status}
-                        currentStreak={habit.current_streak}
-                        currentWaterings={habit.current_waterings}
-                        targetWaterings={habit.target_waterings}
-                        witherThreshold={habit.wither_threshold}
-                        consecutiveMisses={habit.consecutive_misses}
-                        plantType={habit.plant_type}
-                        difficultyTier={habit.difficulty_tier}
-                      />
-                    ))}
+                    {publicHabits.map(habit => {
+                      const isVisitor = friendProfile && friendProfile.id !== currentUserId;
+                      return (
+                        <HabitCard
+                          key={habit.id}
+                          name={habit.name}
+                          frequency={habit.frequency}
+                          status={habit.status}
+                          currentStreak={habit.current_streak}
+                          currentWaterings={habit.current_waterings}
+                          targetWaterings={habit.target_waterings}
+                          witherThreshold={habit.wither_threshold}
+                          consecutiveMisses={habit.consecutive_misses}
+                          plantType={habit.plant_type}
+                          difficultyTier={habit.difficulty_tier}
+                          onNudge={isVisitor && habit.status === 'withered' ? () => sendNudge(habit.id) : undefined}
+                          isNudged={!!nudgedHabits[habit.id]}
+                          nudgeLoading={!!loadingHabits[habit.id]}
+                        />
+                      );
+                    })}
                   </div>
                 )}
               </section>
