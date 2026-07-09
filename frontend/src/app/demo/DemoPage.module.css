@@ -1,0 +1,193 @@
+/* DemoPage.module.css */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  font-family: var(--font-outfit), sans-serif;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-evergreen);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--color-evergreen);
+  opacity: 0.8;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+/* Control Panel */
+.controlPanel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 8px 32px 0 rgba(27, 59, 43, 0.05);
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.controlLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-evergreen);
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 5px;
+  background: rgba(27, 59, 43, 0.1);
+  outline: none;
+  transition: opacity .2s;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-forest-green);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.buttonRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.statusBtn {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid rgba(27, 59, 43, 0.15);
+  background: white;
+  color: var(--color-evergreen);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.statusBtn:hover {
+  background: rgba(45, 90, 39, 0.05);
+}
+
+.activeHealthy {
+  background: rgba(45, 90, 39, 0.15);
+  color: var(--color-forest-green);
+  border-color: var(--color-forest-green);
+  font-weight: 600;
+}
+
+.activeWithered {
+  background: rgba(194, 101, 85, 0.15);
+  color: #c26555;
+  border-color: #c26555;
+  font-weight: 600;
+}
+
+.activeCompleted {
+  background: rgba(234, 168, 155, 0.15);
+  color: #eaa89b;
+  border-color: #eaa89b;
+  font-weight: 600;
+}
+
+.selectInput {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(27, 59, 43, 0.15);
+  background: white;
+  color: var(--color-evergreen);
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Plants Grid */
+.plantsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2rem;
+}
+
+.plantCard {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(27, 59, 43, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.plantCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px 0 rgba(27, 59, 43, 0.08);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.plantName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-evergreen);
+  margin: 0;
+}
+
+.tierBadge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 50px;
+}
+
+.svgContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.cardDetails {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.8rem;
+  color: var(--color-evergreen);
+  opacity: 0.7;
+  border-top: 1px solid rgba(27, 59, 43, 0.06);
+  padding-top: 0.8rem;
+}

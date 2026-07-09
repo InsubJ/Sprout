@@ -1,123 +1,254 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect, useContext } from 'react';
+import { useAuth } from '../components/common/AppProviders';
+import { useHabits } from '../hooks/useHabits';
+import { HabitCard } from '../components/habit/HabitCard';
+import { Modal } from '../components/common/Modal';
+import { HabitForm, HabitFormData } from '../components/habit/HabitForm';
+import { LogServiceContext } from '../services/LogServiceContext';
+import { HabitServiceContext } from '../services/HabitServiceContext';
+import { ReflectionService } from '../services/reflectionService';
+import { getDifficultyTier, assignSpecies } from '../utils/difficulty';
+import styles from './Dashboard.module.css';
 
 export default function HomePage() {
+  const { currentUser, login, isMockMode } = useAuth();
+  const [usernameInput, setUsernameInput] = useState('');
+  const [loginError, setLoginError] = useState<string | null>(null);
+  
+  // Dashboard states
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [wateringId, setWateringId] = useState<string | null>(null);
+
+  // Custom contexts for watering
+  const logService = useContext(LogServiceContext);
+  const habitService = useContext(HabitServiceContext);
+
+  // Hook for user's habits (only runs if currentUser is not null)
+  const { habits, fetchHabits, addHabit, loading, error } = useHabits(
+    currentUser?.id || '11111111-1111-1111-1111-111111111111'
+  );
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    if (!usernameInput.trim()) {
+      setLoginError('Please enter a username');
+      return;
+    }
+    try {
+      await login(usernameInput.trim());
+    } catch (err: any) {
+      setLoginError(err.message || 'Login failed');
+    }
+  };
+
+  const handleWaterHabit = async (habitId: string) => {
+    if (!logService || !habitService || !currentUser) return;
+    try {
+      setWateringId(habitId);
+      await logService.createLog({ habit_id: habitId, user_id: currentUser.id });
+      const logs = await logService.getLogsByHabitId(habitId);
+      await habitService.checkAndCompleteHabit(habitId, logs, new ReflectionService());
+      await fetchHabits();
+    } catch (err: any) {
+      alert(err.message || 'Watering failed');
+    } finally {
+      setWateringId(null);
+    }
+  };
+
+  const handleAddHabit = async (data: HabitFormData) => {
+    if (!currentUser) return;
+    setIsSubmitting(true);
+    try {
+      const difficultyTier = getDifficultyTier({
+        frequency: data.frequency,
+        wither_threshold: Number(data.wither_threshold),
+        target_waterings: Number(data.target_waterings)
+      });
+      const plantType = assignSpecies(difficultyTier);
+
+      await addHabit({
+        user_id: currentUser.id,
+        name: data.name,
+        description: data.description,
+        frequency: data.frequency,
+        target_waterings: Number(data.target_waterings),
+        wither_threshold: Number(data.wither_threshold),
+        plant_type: plantType,
+        difficulty_tier: difficultyTier,
+        flexible_rules: data.flexible_rules
+      });
+      setIsAddOpen(false);
+    } catch (err: any) {
+      alert(err.message || 'Failed to create habit');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Stats calculation
+  const activeProgress = React.useMemo(() => {
+    let healthyCount = 0;
+    let witheredCount = 0;
+    let completedCount = 0;
+
+    habits.forEach(h => {
+      if (h.status === 'healthy') healthyCount++;
+      else if (h.status === 'withered') witheredCount++;
+      else if (h.status === 'completed') completedCount++;
+    });
+
+    return {
+      totalHabits: habits.length,
+      healthyCount,
+      witheredCount,
+      completedCount,
+    };
+  }, [habits]);
+
+  // LOGIN SCREEN
+  if (!currentUser) {
+    return (
+      <div className={styles.loginContainer}>
+        <div className={styles.loginCard}>
+          <div className={styles.loginLogo}>🌱</div>
+          <h1 className={styles.loginTitle}>Welcome to Sprout</h1>
+          <p className={styles.loginSubtitle}>
+            Cultivate your habits, grow a beautiful virtual forest, and connect with your friends.
+          </p>
+
+          <form onSubmit={handleLoginSubmit} className={styles.loginForm}>
+            <div className={styles.inputGroup}>
+              <label htmlFor="username" className={styles.inputLabel}>
+                Enter Username to Log In
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                placeholder="e.g. admin, alice, bob, charlie"
+                className={styles.loginInput}
+              />
+              {loginError && <span className={styles.errorText}>{loginError}</span>}
+            </div>
+
+            <button type="submit" className={styles.loginSubmitBtn}>
+              Enter Forest
+            </button>
+          </form>
+
+          <div className={styles.demoAccounts}>
+            <p className={styles.demoLabel}>Or choose a pre-populated profile:</p>
+            <div className={styles.demoChips}>
+              {['admin', 'alice', 'bob', 'charlie'].map((uname) => (
+                <button
+                  key={uname}
+                  onClick={() => {
+                    setUsernameInput(uname);
+                    login(uname);
+                  }}
+                  className={styles.demoChip}
+                >
+                  @{uname}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // LOGGED IN DASHBOARD
   return (
-    <div style={{
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '4rem 2rem',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '3rem'
-    }}>
-      <section style={{
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '1.5rem',
-        maxWidth: '800px'
-      }}>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          padding: '0.5rem 1rem',
-          borderRadius: '50px',
-          background: 'var(--color-sage)',
-          border: '1px solid rgba(45, 90, 39, 0.2)',
-          fontSize: '0.875rem',
-          color: 'var(--color-forest-green)',
-          fontWeight: 600
-        }}>
-          <span>🌱</span> Welcome to the next level of habit tracking
+    <div className={styles.dashboard}>
+      <header className={styles.dashboardHeader}>
+        <div>
+          <h1 className={styles.dashboardTitle}>Your Habits Canopy</h1>
+          <p className={styles.dashboardSubtitle}>
+            Grow your virtual forest by maintaining real-life consistency.
+          </p>
         </div>
-        <h1 style={{
-          fontSize: '3.5rem',
-          fontWeight: 700,
-          color: 'var(--color-evergreen)',
-          lineHeight: 1.15,
-          letterSpacing: '-0.02em'
-        }}>
-          Grow Healthy Habits, <br />
-          <span style={{
-            backgroundImage: 'linear-gradient(135deg, var(--color-forest-green), var(--color-pink))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            One Drop at a Time
-          </span>
-        </h1>
-        <p style={{
-          fontSize: '1.25rem',
-          color: 'var(--color-evergreen)',
-          opacity: 0.8,
-          lineHeight: 1.6,
-          maxWidth: '600px'
-        }}>
-          Every habit you keep waters a virtual plant in your personal forest. 
-          Connect with friends, nudge each other, and see your collective resilience bloom.
-        </p>
+        <button onClick={() => setIsAddOpen(true)} className={styles.plantSeedBtn}>
+          🌱 Plant New Seed
+        </button>
+      </header>
+
+      {/* Stats Bar */}
+      <section className={styles.statsBar}>
+        <div className={styles.statCard}>
+          <div className={styles.statValue}>{activeProgress.totalHabits}</div>
+          <div className={styles.statLabel}>Total Trees</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statValue} style={{ color: '#2d5a27' }}>
+            {activeProgress.healthyCount}
+          </div>
+          <div className={styles.statLabel}>Healthy</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statValue} style={{ color: '#c26555' }}>
+            {activeProgress.witheredCount}
+          </div>
+          <div className={styles.statLabel}>Withered</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statValue} style={{ color: '#eaa89b' }}>
+            {activeProgress.completedCount}
+          </div>
+          <div className={styles.statLabel}>Fully Grown</div>
+        </div>
       </section>
 
-      <section style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '2rem',
-        width: '100%'
-      }}>
-        <div style={{
-          padding: '2rem',
-          borderRadius: '16px',
-          background: 'rgba(255, 255, 255, 0.4)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.6)',
-          boxShadow: '0 8px 32px 0 rgba(27, 59, 43, 0.05)',
-          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-          cursor: 'pointer'
-        }}>
-          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>💧</div>
-          <h2 style={{ fontSize: '1.25rem', color: 'var(--color-evergreen)', marginBottom: '0.5rem' }}>Consistency is Care</h2>
-          <p style={{ color: 'var(--color-evergreen)', opacity: 0.8, fontSize: '0.95rem', lineHeight: 1.5 }}>
-            Water your plants regularly. Miss too many days, and your plant will begin to wither, requiring a friend's helper droplet to revive.
-          </p>
+      {/* Grid of habits */}
+      {loading ? (
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner} />
+          <p>Walking into the woods...</p>
         </div>
+      ) : error ? (
+        <div className={styles.errorContainer}>
+          <p>Error: {error}</p>
+        </div>
+      ) : habits.length === 0 ? (
+        <div className={styles.emptyState}>
+          <span className={styles.emptyIcon}>🌱</span>
+          <h3>Your forest is empty!</h3>
+          <p>Plant your very first seed to begin your gamified consistency journey.</p>
+          <button onClick={() => setIsAddOpen(true)} className={styles.plantSeedBtn}>
+            Plant First Seed
+          </button>
+        </div>
+      ) : (
+        <div className={styles.grid}>
+          {habits.map(habit => (
+            <HabitCard
+              key={habit.id}
+              name={habit.name}
+              frequency={habit.frequency}
+              status={habit.status}
+              currentStreak={habit.current_streak}
+              currentWaterings={habit.current_waterings}
+              targetWaterings={habit.target_waterings}
+              witherThreshold={habit.wither_threshold}
+              consecutiveMisses={habit.consecutive_misses}
+              plantType={habit.plant_type}
+              difficultyTier={habit.difficulty_tier}
+              onWater={() => handleWaterHabit(habit.id)}
+            />
+          ))}
+        </div>
+      )}
 
-        <div style={{
-          padding: '2rem',
-          borderRadius: '16px',
-          background: 'rgba(255, 255, 255, 0.4)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.6)',
-          boxShadow: '0 8px 32px 0 rgba(27, 59, 43, 0.05)',
-          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-          cursor: 'pointer'
-        }}>
-          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🌸</div>
-          <h2 style={{ fontSize: '1.25rem', color: 'var(--color-evergreen)', marginBottom: '0.5rem' }}>Botanical Tiers</h2>
-          <p style={{ color: 'var(--color-evergreen)', opacity: 0.8, fontSize: '0.95rem', lineHeight: 1.5 }}>
-            Nurture everything from Common Pothos to Mythical Ethereal Sakura. Your consistency shapes the symmetry, blooms, and story of your mature plants.
-          </p>
-        </div>
-
-        <div style={{
-          padding: '2rem',
-          borderRadius: '16px',
-          background: 'rgba(255, 255, 255, 0.4)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.6)',
-          boxShadow: '0 8px 32px 0 rgba(27, 59, 43, 0.05)',
-          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-          cursor: 'pointer'
-        }}>
-          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>✨</div>
-          <h2 style={{ fontSize: '1.25rem', color: 'var(--color-evergreen)', marginBottom: '0.5rem' }}>Shared Monument Forests</h2>
-          <p style={{ color: 'var(--color-evergreen)', opacity: 0.8, fontSize: '0.95rem', lineHeight: 1.5 }}>
-            Harvest completed plants to write a nostalgic, AI-generated poetic journey summary. Showcase your trees in a shared canopy with friends.
-          </p>
-        </div>
-      </section>
+      {/* Add Habit Modal */}
+      <Modal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} title="Plant New Seed">
+        <HabitForm onSubmit={handleAddHabit} onCancel={() => setIsAddOpen(false)} isSubmitting={isSubmitting} />
+      </Modal>
     </div>
   );
 }

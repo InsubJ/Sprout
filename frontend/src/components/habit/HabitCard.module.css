@@ -1,4 +1,4 @@
-﻿.card {
+.card {
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.6);
@@ -369,4 +369,45 @@
   border-radius: 12px;
   border: 1px dashed rgba(45, 90, 39, 0.1);
   min-height: 180px;
+  position: relative;
 }
+
+.wateringCanBtn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: var(--color-forest-green);
+  color: var(--color-sand);
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(45, 90, 39, 0.25);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 10;
+}
+
+.wateringCanBtn:hover {
+  background: var(--color-evergreen);
+  transform: scale(1.12);
+  box-shadow: 0 6px 14px rgba(27, 59, 43, 0.35);
+}
+
+.wateringCanBtn:active {
+  transform: scale(0.95);
+}
+
+.wateringCanIcon {
+  width: 22px;
+  height: 22px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wateringCanBtn:hover .wateringCanIcon {
+  transform: rotate(-25deg) scale(1.05);
+}
+
