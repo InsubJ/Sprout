@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HabitFrequency, HabitStatus, DifficultyTier } from '../../types/habit';
 import styles from './HabitCard.module.css';
 import { PlantRenderer } from './PlantRenderer';
+import { WaterConfirmModal } from './WaterConfirmModal';
+import { ReflectionBookModal } from './ReflectionBookModal';
 
 export interface HabitCardProps {
   name: string;
@@ -19,6 +21,15 @@ export interface HabitCardProps {
   onNudge?: () => void;
   isNudged?: boolean;
   nudgeLoading?: boolean;
+  hideName?: boolean;
+  hideDescription?: boolean;
+  shareNameFriends?: string[];
+  shareDescFriends?: string[];
+  currentViewerId?: string;
+  habitId?: string;
+  description?: string | null;
+  poeticSummary?: string | null;
+  onWaterWithDetails?: (note: string, imageUrl?: string) => void;
 }
 
 const FREQUENCY_LABELS: Record<HabitFrequency, string> = {
@@ -53,6 +64,15 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   onNudge,
   isNudged = false,
   nudgeLoading = false,
+  hideName = false,
+  hideDescription = false,
+  shareNameFriends = [],
+  shareDescFriends = [],
+  currentViewerId,
+  habitId,
+  description = null,
+  poeticSummary = null,
+  onWaterWithDetails,
 }) => {
   // Preconditions validation
   if (!name || !name.trim()) {
@@ -73,6 +93,26 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   if (witherCount < 0) {
     throw new Error('Wither count cannot be negative');
   }
+
+  const [isWaterOpen, setIsWaterOpen] = useState(false);
+  const [isBookOpen, setIsBookOpen] = useState(false);
+
+  const isOwner = !!onWater;
+
+  // Determine if name is hidden from this viewer
+  const isNameHidden =
+    !isOwner &&
+    hideName &&
+    (!currentViewerId || !shareNameFriends.includes(currentViewerId));
+
+  // Determine if description is hidden from this viewer
+  const isDescHidden =
+    !isOwner &&
+    hideDescription &&
+    (!currentViewerId || !shareDescFriends.includes(currentViewerId));
+
+  const displayName = isNameHidden ? 'Private Plant' : name;
+  const displayDescription = isDescHidden ? 'Private description' : description;
 
   // Calculate progress
   const progressPercentage = Math.min(
@@ -137,7 +177,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       <div className={styles.header}>
         <div className={styles.titleSection}>
           <h3 className={styles.name} data-testid="habit-name">
-            {name}
+            {displayName}
           </h3>
           <div className={styles.metaRow}>
             <span className={styles.frequencyBadge} data-testid="habit-frequency">
@@ -164,7 +204,13 @@ export const HabitCard: React.FC<HabitCardProps> = ({
           <button
             type="button"
             className={styles.wateringCanBtn}
-            onClick={onWater}
+            onClick={() => {
+              if (onWaterWithDetails) {
+                setIsWaterOpen(true);
+              } else {
+                onWater();
+              }
+            }}
             data-testid="water-button"
             aria-label="Water plant"
             title="Water plant"
@@ -183,6 +229,20 @@ export const HabitCard: React.FC<HabitCardProps> = ({
               <path d="M18 10l4-2v4l-4-2" />
               <path d="M9 8h4" />
             </svg>
+          </button>
+        )}
+
+        {/* Book Button */}
+        {habitId && (
+          <button
+            type="button"
+            className={styles.bookBtn}
+            onClick={() => setIsBookOpen(true)}
+            data-testid="book-button"
+            aria-label="Open Reflection Book"
+            title="Reflection Book"
+          >
+            📖
           </button>
         )}
       </div>
@@ -240,6 +300,33 @@ export const HabitCard: React.FC<HabitCardProps> = ({
           </div>
         )}
       </div>
+
+      {isWaterOpen && (
+        <WaterConfirmModal
+          isOpen={isWaterOpen}
+          onClose={() => setIsWaterOpen(false)}
+          onSubmit={(note, imageUrl) => {
+            if (onWaterWithDetails) {
+              onWaterWithDetails(note, imageUrl);
+            } else if (onWater) {
+              onWater();
+            }
+          }}
+          plantName={displayName}
+        />
+      )}
+
+      {isBookOpen && habitId && (
+        <ReflectionBookModal
+          isOpen={isBookOpen}
+          onClose={() => setIsBookOpen(false)}
+          habitId={habitId}
+          plantName={displayName}
+          plantType={plantType}
+          description={displayDescription}
+          poeticSummary={poeticSummary}
+        />
+      )}
     </div>
   );
 };

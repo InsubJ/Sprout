@@ -287,3 +287,31 @@
     transform: rotate(360deg);
   }
 }
+
+.pageTabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(45, 90, 39, 0.15);
+  padding-bottom: 0.5rem;
+}
+
+.pageTab {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6e8274;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.pageTab:hover {
+  background-color: rgba(45, 90, 39, 0.05);
+  color: var(--color-evergreen);
+}
+
+.activePageTab {
+  background-color: var(--color-forest-green);
+  color: var(--color-sand) !important;
+}

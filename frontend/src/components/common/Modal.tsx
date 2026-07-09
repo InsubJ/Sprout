@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './Modal.module.css';
 
 export interface ModalProps {
@@ -29,10 +30,17 @@ export const Modal: React.FC<ModalProps> = ({
 
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Manage client-only mount state to prevent SSR hydration mismatches
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   // Manage focus trap: restore focus when closed, focus first element when opened
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && mounted) {
       // Capture the element that currently has focus
       previousFocusRef.current = document.activeElement as HTMLElement;
 
@@ -61,7 +69,7 @@ export const Modal: React.FC<ModalProps> = ({
         previousFocusRef.current.focus();
       }
     };
-  }, [isOpen]);
+  }, [isOpen, mounted]);
 
   // Handle keyboard interaction (Escape to close, Tab to trap focus)
   useEffect(() => {
@@ -115,6 +123,7 @@ export const Modal: React.FC<ModalProps> = ({
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
+  if (!mounted) return null;
 
   // Handle background overlay click to close
   const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -123,7 +132,7 @@ export const Modal: React.FC<ModalProps> = ({
     }
   };
 
-  return (
+  const modalContent = (
     <div
       className={styles.overlay}
       onClick={handleOverlayClick}
@@ -160,4 +169,6 @@ export const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };

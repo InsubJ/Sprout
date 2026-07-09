@@ -12,11 +12,11 @@ export const Navigation: React.FC = () => {
 
   if (!currentUser) return null;
 
-  const forestLink = `/forest/${currentUser.username}`;
+  const sanctuaryLink = `/sanctuary/${currentUser.username}`;
   
   const navItems = [
-    { label: 'Habits', href: '/', icon: '🌿' },
-    { label: 'Forest', href: forestLink, icon: '🌳' },
+    { label: 'Forest', href: '/', icon: '🌿' },
+    { label: 'Sanctuary', href: sanctuaryLink, icon: '🌳' },
     { label: 'Friends', href: '/friends', icon: '👥' },
     { label: 'Demo', href: '/demo', icon: '🧪' },
   ];

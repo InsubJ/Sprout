@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useFriendships } from '../../hooks/useFriendships';
 import { FriendshipService } from '../../services/friendshipService';
 import { ProfileService } from '../../services/profileService';
@@ -215,28 +216,30 @@ export const FriendsManager: React.FC<FriendsManagerProps> = ({
           ) : (
             friends.map(friend => (
               <div key={friend.friendshipId} className={styles.item} data-testid="friend-item">
-                <div className={styles.userInfo}>
-                  {friend.profile.avatar_url ? (
-                    <img
-                      src={friend.profile.avatar_url}
-                      alt={friend.profile.username}
-                      className={styles.avatar}
-                      data-testid="friend-avatar"
-                    />
-                  ) : (
-                    <div className={styles.avatarFallback} data-testid="friend-avatar-fallback">
-                      {getInitials(friend.profile.display_name, friend.profile.username)}
+                <Link href={`/forest/${friend.profile.username}`} className={styles.friendLink} style={{ display: 'flex', width: '100%', textDecoration: 'none', color: 'inherit' }}>
+                  <div className={styles.userInfo}>
+                    {friend.profile.avatar_url ? (
+                      <img
+                        src={friend.profile.avatar_url}
+                        alt={friend.profile.username}
+                        className={styles.avatar}
+                        data-testid="friend-avatar"
+                      />
+                    ) : (
+                      <div className={styles.avatarFallback} data-testid="friend-avatar-fallback">
+                        {getInitials(friend.profile.display_name, friend.profile.username)}
+                      </div>
+                    )}
+                    <div className={styles.userDetails}>
+                      <span className={styles.displayName} data-testid="friend-display-name">
+                        {friend.profile.display_name || friend.profile.username}
+                      </span>
+                      <span className={styles.username} data-testid="friend-username">
+                        @{friend.profile.username}
+                      </span>
                     </div>
-                  )}
-                  <div className={styles.userDetails}>
-                    <span className={styles.displayName} data-testid="friend-display-name">
-                      {friend.profile.display_name || friend.profile.username}
-                    </span>
-                    <span className={styles.username} data-testid="friend-username">
-                      @{friend.profile.username}
-                    </span>
                   </div>
-                </div>
+                </Link>
               </div>
             ))
           )}

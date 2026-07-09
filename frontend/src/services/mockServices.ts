@@ -246,7 +246,11 @@ export class MockHabitService {
       current_streak: input.current_streak || 0,
       max_streak: input.max_streak || 0,
       completed_at: null,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      hide_name: input.hide_name !== undefined ? input.hide_name : false,
+      hide_description: input.hide_description !== undefined ? input.hide_description : false,
+      share_name_friends: input.share_name_friends || [],
+      share_desc_friends: input.share_desc_friends || [],
     };
     habits.unshift(newHabit);
     setStored('sprout_habits', habits);
@@ -359,33 +363,50 @@ export class MockFriendshipService {
 }
 
 export class MockLogService {
-  async createLog(input: { habit_id: string; user_id: string; note?: string }): Promise<HabitLog> {
+  async createLog(input: { habit_id: string; user_id: string; note?: string; image_url?: string }): Promise<HabitLog> {
     const logs = getStored<HabitLog[]>('sprout_logs', DEFAULT_LOGS);
+    const habitLogs = logs.filter(l => l.habit_id === input.habit_id);
+
+    // Get habit frequency
+    const habits = getStored<Habit[]>('sprout_habits', DEFAULT_HABITS);
+    const habitIndex = habits.findIndex(h => h.id === input.habit_id);
+    if (habitIndex === -1) throw new Error('Habit not found');
+    const habit = habits[habitIndex];
+
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    const todayEnd = todayStart + 24 * 60 * 60 * 1000;
+
+    const todaysLogs = habitLogs.filter(l => {
+      const time = new Date(l.created_at).getTime();
+      return time >= todayStart && time < todayEnd;
+    });
+
+    const maxPerDay = habit.frequency === 'twice_daily' ? 2 : 1;
+    if (todaysLogs.length >= maxPerDay) {
+      throw new Error(`You can only water this plant ${maxPerDay} time(s) per day for ${habit.frequency === 'twice_daily' ? 'twice daily' : 'daily/weekly'} habits.`);
+    }
+
     const newLog: HabitLog = {
       id: crypto.randomUUID(),
       habit_id: input.habit_id,
       user_id: input.user_id,
       note: input.note || undefined,
-      image_url: undefined,
+      image_url: input.image_url || undefined,
       created_at: new Date().toISOString()
     };
     logs.unshift(newLog);
     setStored('sprout_logs', logs);
 
     // Also increment habit waterings
-    const habits = getStored<Habit[]>('sprout_habits', DEFAULT_HABITS);
-    const habitIndex = habits.findIndex(h => h.id === input.habit_id);
-    if (habitIndex !== -1) {
-      const habit = habits[habitIndex];
-      habit.current_waterings = Math.min(habit.target_waterings, habit.current_waterings + 1);
-      habit.current_streak = habit.current_streak + 1;
-      habit.max_streak = Math.max(habit.max_streak, habit.current_streak);
-      habit.consecutive_misses = 0;
-      if (habit.status === 'withered') {
-        habit.status = 'healthy';
-      }
-      setStored('sprout_habits', habits);
+    habit.current_waterings = Math.min(habit.target_waterings, habit.current_waterings + 1);
+    habit.current_streak = habit.current_streak + 1;
+    habit.max_streak = Math.max(habit.max_streak, habit.current_streak);
+    habit.consecutive_misses = 0;
+    if (habit.status === 'withered') {
+      habit.status = 'healthy';
     }
+    setStored('sprout_habits', habits);
 
     return newLog;
   }

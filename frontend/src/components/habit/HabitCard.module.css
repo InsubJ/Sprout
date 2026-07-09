@@ -411,3 +411,35 @@
   transform: rotate(-25deg) scale(1.05);
 }
 
+.bookBtn {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  color: var(--color-evergreen);
+  border: 1px solid rgba(45, 90, 39, 0.15);
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 10;
+}
+
+.bookBtn:hover {
+  background: #ffffff;
+  border-color: var(--color-evergreen);
+  transform: scale(1.12);
+  box-shadow: 0 6px 14px rgba(45, 90, 39, 0.15);
+}
+
+.bookBtn:active {
+  transform: scale(0.95);
+}
+

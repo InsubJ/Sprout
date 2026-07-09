@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { HabitFrequency, FlexibleRules } from '../../types/habit';
+import { useAuth } from '../common/AppProviders';
+import { useFriendships } from '../../hooks/useFriendships';
 import styles from './HabitForm.module.css';
 
 export interface HabitFormData {
@@ -9,6 +11,10 @@ export interface HabitFormData {
   target_waterings: number;
   wither_threshold: number;
   flexible_rules: FlexibleRules | null;
+  hide_name?: boolean;
+  hide_description?: boolean;
+  share_name_friends?: string[];
+  share_desc_friends?: string[];
 }
 
 export interface HabitFormProps {
@@ -24,6 +30,9 @@ export const HabitForm: React.FC<HabitFormProps> = ({
   onCancel,
   isSubmitting = false,
 }) => {
+  const { currentUser } = useAuth();
+  const { friends } = useFriendships(currentUser?.id || '');
+
   // Encapsulate form state
   const [name, setName] = useState(initialData?.name || '');
   const [description, setDescription] = useState(initialData?.description || '');
@@ -42,6 +51,12 @@ export const HabitForm: React.FC<HabitFormProps> = ({
   const [flexibleDaysTotal, setFlexibleDaysTotal] = useState<string>(
     initialData?.flexible_rules?.days_total !== undefined ? String(initialData.flexible_rules.days_total) : '7'
   );
+
+  // Privacy rules state
+  const [hideName, setHideName] = useState(initialData?.hide_name || false);
+  const [hideDescription, setHideDescription] = useState(initialData?.hide_description || false);
+  const [shareNameFriends, setShareNameFriends] = useState<string[]>(initialData?.share_name_friends || []);
+  const [shareDescFriends, setShareDescFriends] = useState<string[]>(initialData?.share_desc_friends || []);
 
   // Validation errors state
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -129,6 +144,10 @@ export const HabitForm: React.FC<HabitFormProps> = ({
         target_waterings: parsedWaterings,
         wither_threshold: parsedWither,
         flexible_rules: flexibleRules,
+        hide_name: hideName,
+        hide_description: hideDescription,
+        share_name_friends: shareNameFriends,
+        share_desc_friends: shareDescFriends,
       };
 
       onSubmit(formData);
@@ -273,6 +292,97 @@ export const HabitForm: React.FC<HabitFormProps> = ({
             <span className={styles.errorMessage} data-testid="error-wither-threshold">{errors.wither_threshold}</span>
           )}
         </div>
+      </div>
+
+      {/* Privacy Settings Section */}
+      <div className={styles.privacySection}>
+        <h4 className={styles.subHeading}>Privacy & Sharing Rules</h4>
+        
+        <div className={styles.checkboxGroup}>
+          <label className={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={hideName}
+              onChange={(e) => {
+                setHideName(e.target.checked);
+                if (!e.target.checked) setShareNameFriends([]);
+              }}
+              className={styles.checkbox}
+            />
+            Hide plant name from friends
+          </label>
+        </div>
+
+        {hideName && friends.length > 0 && (
+          <div className={styles.friendsChecklist} data-testid="share-name-friends-section">
+            <span className={styles.checklistLabel}>Allowed friends (can see name):</span>
+            <div className={styles.friendsGrid}>
+              {friends.map(f => {
+                const isChecked = shareNameFriends.includes(f.profile.id);
+                return (
+                  <label key={f.profile.id} className={styles.friendCheckLabel}>
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => {
+                        if (isChecked) {
+                          setShareNameFriends(shareNameFriends.filter(id => id !== f.profile.id));
+                        } else {
+                          setShareNameFriends([...shareNameFriends, f.profile.id]);
+                        }
+                      }}
+                      className={styles.checkbox}
+                    />
+                    @{f.profile.username}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className={styles.checkboxGroup}>
+          <label className={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={hideDescription}
+              onChange={(e) => {
+                setHideDescription(e.target.checked);
+                if (!e.target.checked) setShareDescFriends([]);
+              }}
+              className={styles.checkbox}
+            />
+            Hide description from friends
+          </label>
+        </div>
+
+        {hideDescription && friends.length > 0 && (
+          <div className={styles.friendsChecklist} data-testid="share-desc-friends-section">
+            <span className={styles.checklistLabel}>Allowed friends (can see description):</span>
+            <div className={styles.friendsGrid}>
+              {friends.map(f => {
+                const isChecked = shareDescFriends.includes(f.profile.id);
+                return (
+                  <label key={f.profile.id} className={styles.friendCheckLabel}>
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => {
+                        if (isChecked) {
+                          setShareDescFriends(shareDescFriends.filter(id => id !== f.profile.id));
+                        } else {
+                          setShareDescFriends([...shareDescFriends, f.profile.id]);
+                        }
+                      }}
+                      className={styles.checkbox}
+                    />
+                    @{f.profile.username}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className={styles.actions}>

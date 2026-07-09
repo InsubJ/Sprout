@@ -4,6 +4,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useAuth } from '../components/common/AppProviders';
 import { useHabits } from '../hooks/useHabits';
 import { HabitCard } from '../components/habit/HabitCard';
+import { GardenCarousel } from '../components/habit/GardenCarousel';
 import { Modal } from '../components/common/Modal';
 import { HabitForm, HabitFormData } from '../components/habit/HabitForm';
 import { LogServiceContext } from '../services/LogServiceContext';
@@ -60,6 +61,26 @@ export default function HomePage() {
     }
   };
 
+  const handleWaterHabitWithDetails = async (habitId: string, note: string, imageUrl?: string) => {
+    if (!logService || !habitService || !currentUser) return;
+    try {
+      setWateringId(habitId);
+      await logService.createLog({
+        habit_id: habitId,
+        user_id: currentUser.id,
+        note: note || undefined,
+        image_url: imageUrl || undefined,
+      });
+      const logs = await logService.getLogsByHabitId(habitId);
+      await habitService.checkAndCompleteHabit(habitId, logs, new ReflectionService());
+      await fetchHabits();
+    } catch (err: any) {
+      alert(err.message || 'Watering failed');
+    } finally {
+      setWateringId(null);
+    }
+  };
+
   const handleAddHabit = async (data: HabitFormData) => {
     if (!currentUser) return;
     setIsSubmitting(true);
@@ -80,7 +101,11 @@ export default function HomePage() {
         wither_threshold: Number(data.wither_threshold),
         plant_type: plantType,
         difficulty_tier: difficultyTier,
-        flexible_rules: data.flexible_rules
+        flexible_rules: data.flexible_rules,
+        hide_name: data.hide_name,
+        hide_description: data.hide_description,
+        share_name_friends: data.share_name_friends,
+        share_desc_friends: data.share_desc_friends,
       });
       setIsAddOpen(false);
     } catch (err: any) {
@@ -109,6 +134,9 @@ export default function HomePage() {
       completedCount,
     };
   }, [habits]);
+
+  // Filter in-progress active habits
+  const activeHabits = habits.filter((h) => h.status !== 'completed');
 
   // LOGIN SCREEN
   if (!currentUser) {
@@ -205,7 +233,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Grid of habits */}
+      {/* Carousel of active habits */}
       {loading ? (
         <div className={styles.loadingContainer}>
           <div className={styles.spinner} />
@@ -215,34 +243,22 @@ export default function HomePage() {
         <div className={styles.errorContainer}>
           <p>Error: {error}</p>
         </div>
-      ) : habits.length === 0 ? (
+      ) : activeHabits.length === 0 ? (
         <div className={styles.emptyState}>
           <span className={styles.emptyIcon}>🌱</span>
-          <h3>Your forest is empty!</h3>
-          <p>Plant your very first seed to begin your gamified consistency journey.</p>
+          <h3>Your forest has no active trees in progress!</h3>
+          <p>Plant your very first seed or check your completed trees in the Sanctuary.</p>
           <button onClick={() => setIsAddOpen(true)} className={styles.plantSeedBtn}>
-            Plant First Seed
+            Plant Seed
           </button>
         </div>
       ) : (
-        <div className={styles.grid}>
-          {habits.map(habit => (
-            <HabitCard
-              key={habit.id}
-              name={habit.name}
-              frequency={habit.frequency}
-              status={habit.status}
-              currentStreak={habit.current_streak}
-              currentWaterings={habit.current_waterings}
-              targetWaterings={habit.target_waterings}
-              witherThreshold={habit.wither_threshold}
-              consecutiveMisses={habit.consecutive_misses}
-              plantType={habit.plant_type}
-              difficultyTier={habit.difficulty_tier}
-              onWater={() => handleWaterHabit(habit.id)}
-            />
-          ))}
-        </div>
+        <GardenCarousel
+          habits={activeHabits}
+          currentViewerId={currentUser.id}
+          onWater={handleWaterHabit}
+          onWaterWithDetails={handleWaterHabitWithDetails}
+        />
       )}
 
       {/* Add Habit Modal */}

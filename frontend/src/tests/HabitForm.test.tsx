@@ -4,6 +4,22 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import React, { act } from 'react';
 import { createRoot } from 'react-dom/client';
+
+// Mock Auth and Friendships hooks since HabitForm now displays privacy friend sharing choices
+vi.mock('../components/common/AppProviders', () => ({
+  useAuth: () => ({
+    currentUser: { id: '11111111-1111-1111-1111-111111111111', username: 'admin' },
+  }),
+}));
+
+vi.mock('../../hooks/useFriendships', () => ({
+  useFriendships: () => ({
+    friends: [
+      { friendshipId: 'fs-1', profile: { id: '22222222-2222-2222-2222-222222222222', username: 'alice', display_name: 'Alice' } },
+    ],
+  }),
+}));
+
 import { HabitForm } from '../components/habit/HabitForm';
 
 describe('HabitForm Component', () => {
@@ -233,7 +249,11 @@ describe('HabitForm Component', () => {
       frequency: 'daily',
       target_waterings: 15,
       wither_threshold: 5,
-      flexible_rules: null
+      flexible_rules: null,
+      hide_name: false,
+      hide_description: false,
+      share_name_friends: [],
+      share_desc_friends: []
     });
   });
 

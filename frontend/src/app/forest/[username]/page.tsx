@@ -1,8 +1,10 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { useFriendForest } from '../../../hooks/useFriendForest';
 import { HabitCard } from '../../../components/habit/HabitCard';
+import { GardenCarousel } from '../../../components/habit/GardenCarousel';
 import { useWitherNudge } from '../../../hooks/useWitherNudge';
 import { NudgeService } from '../../../services/nudgeService';
 import styles from './FriendForestPage.module.css';
@@ -113,11 +115,13 @@ function FriendForestPage({
     );
   }
 
+  const activeHabits = publicHabits.filter(h => h.status !== 'completed');
+
   return (
     <div className={styles.container} data-testid="friend-forest-page">
-      <a href="#" className={styles.backLink}>
+      <Link href="/" className={styles.backLink}>
         <span>←</span> Back to Dashboard
-      </a>
+      </Link>
 
       {friendProfile && (
         <>
@@ -154,6 +158,18 @@ function FriendForestPage({
               </span>
             </div>
           </header>
+
+          {/* Sub Navigation Tabs */}
+          {isMutuallyConnected && (
+            <div className={styles.pageTabs}>
+              <span className={`${styles.pageTab} ${styles.activePageTab}`}>
+                🌱 Active Forest
+              </span>
+              <Link href={`/sanctuary/${friendProfile.username}`} className={styles.pageTab}>
+                🏆 Completed Sanctuary
+              </Link>
+            </div>
+          )}
 
           {/* Connection Check / Warning */}
           {!isMutuallyConnected ? (
@@ -197,36 +213,23 @@ function FriendForestPage({
               {/* public trees list */}
               <section className={styles.section} data-testid="trees-section">
                 <h2 className={styles.sectionTitle}>
-                  <span>🌳</span> Public Trees
+                  <span>🌳</span> Active Trees
                 </h2>
-                {publicHabits.length === 0 ? (
+                {activeHabits.length === 0 ? (
                   <div className={styles.emptyState} data-testid="empty-trees-state">
                     <span className={styles.emptyIcon}>🌱</span>
                     <p className={styles.emptyText}>This forest has no public trees planted yet.</p>
                   </div>
                 ) : (
-                  <div className={styles.grid} data-testid="habits-grid">
-                    {publicHabits.map(habit => {
-                      const isVisitor = friendProfile && friendProfile.id !== currentUserId;
-                      return (
-                        <HabitCard
-                          key={habit.id}
-                          name={habit.name}
-                          frequency={habit.frequency}
-                          status={habit.status}
-                          currentStreak={habit.current_streak}
-                          currentWaterings={habit.current_waterings}
-                          targetWaterings={habit.target_waterings}
-                          witherThreshold={habit.wither_threshold}
-                          consecutiveMisses={habit.consecutive_misses}
-                          plantType={habit.plant_type}
-                          difficultyTier={habit.difficulty_tier}
-                          onNudge={isVisitor && habit.status === 'withered' ? () => sendNudge(habit.id) : undefined}
-                          isNudged={!!nudgedHabits[habit.id]}
-                          nudgeLoading={!!loadingHabits[habit.id]}
-                        />
-                      );
-                    })}
+                  <div data-testid="habits-grid">
+                    <GardenCarousel
+                      habits={activeHabits}
+                      currentViewerId={currentUserId}
+                      onNudge={friendProfile && friendProfile.id !== currentUserId ? sendNudge : undefined}
+                      nudgedHabits={nudgedHabits}
+                      nudgeLoading={loadingHabits}
+                      isVisitor={friendProfile && friendProfile.id !== currentUserId}
+                    />
                   </div>
                 )}
               </section>

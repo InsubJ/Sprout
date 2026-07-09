@@ -199,3 +199,64 @@
     transform: translateY(0);
   }
 }
+
+.privacySection {
+  background: rgba(244, 247, 245, 0.6);
+  border: 1px dashed rgba(45, 90, 39, 0.25);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+}
+
+.checkboxLabel {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-evergreen);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-forest-green);
+}
+
+.friendsChecklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 24px;
+  animation: slideDown 0.2s ease-out;
+}
+
+.checklistLabel {
+  font-size: 0.85rem;
+  color: #5c7062;
+  font-weight: 600;
+}
+
+.friendsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.friendCheckLabel {
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--color-evergreen);
+}

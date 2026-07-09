@@ -64,6 +64,32 @@ export class LogService {
       throw new LogValidationError('Invalid create habit log input', validation.errors || []);
     }
 
+    const { habit_id } = validation.data;
+
+    // Fetch habit frequency to determine daily watering limits
+    const { data: habit, error: habitError } = await this.supabase
+      .from('habits')
+      .select('frequency')
+      .eq('id', habit_id)
+      .single();
+
+    if (!habitError && habit) {
+      const logs = await this.getLogsByHabitId(habit_id);
+      const today = new Date();
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+      const todayEnd = todayStart + 24 * 60 * 60 * 1000;
+
+      const todaysLogs = Array.isArray(logs) ? logs.filter(l => {
+        const time = new Date(l.created_at).getTime();
+        return time >= todayStart && time < todayEnd;
+      }) : [];
+
+      const maxPerDay = habit.frequency === 'twice_daily' ? 2 : 1;
+      if (todaysLogs.length >= maxPerDay) {
+        throw new LogValidationError(`You can only water this plant ${maxPerDay} time(s) per day.`);
+      }
+    }
+
     const { data, error } = await this.supabase
       .from('habit_logs')
       .insert([validation.data])

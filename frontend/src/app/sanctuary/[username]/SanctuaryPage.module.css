@@ -1,0 +1,232 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: var(--font-family);
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-forest-green);
+  text-decoration: none;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s ease;
+}
+
+.backLink:hover {
+  transform: translateX(-4px);
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px 0 rgba(27, 59, 43, 0.04);
+  margin-bottom: 2rem;
+}
+
+.avatarContainer {
+  position: relative;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--color-forest-green);
+}
+
+.avatarFallback {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-forest-green), var(--color-pink));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  border: 3px solid white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profileDetails {
+  flex: 1;
+}
+
+.displayName {
+  font-size: 1.8rem;
+  color: var(--color-evergreen);
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.username {
+  font-size: 1rem;
+  color: var(--color-forest-green);
+  opacity: 0.8;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.connectionBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 50px;
+}
+
+.connected {
+  background: rgba(45, 90, 39, 0.1);
+  color: var(--color-forest-green);
+}
+
+.notConnected {
+  background: rgba(139, 69, 19, 0.1);
+  color: #8B4513;
+}
+
+.pageTabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(45, 90, 39, 0.15);
+  padding-bottom: 0.5rem;
+}
+
+.pageTab {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6e8274;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.pageTab:hover {
+  background-color: rgba(45, 90, 39, 0.05);
+  color: var(--color-evergreen);
+}
+
+.activePageTab {
+  background-color: var(--color-forest-green);
+  color: var(--color-sand) !important;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-evergreen);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 60px 20px;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 20px;
+  border: 1px dashed rgba(45, 90, 39, 0.15);
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.75;
+}
+
+.emptyText {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+}
+
+.emptySubtext {
+  font-size: 0.9rem;
+  color: #8c9c91;
+  margin: 0;
+  max-width: 380px;
+  line-height: 1.5;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  color: var(--color-evergreen);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(45, 90, 39, 0.1);
+  border-top-color: var(--color-forest-green);
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.warningBox {
+  padding: 2rem;
+  background: #fff9f0;
+  border: 1px solid #ffe7c4;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.warningIcon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.warningTitle {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #c26555;
+  margin-bottom: 0.5rem;
+}
+
+.warningDescription {
+  font-size: 0.95rem;
+  color: #8c716b;
+  line-height: 1.5;
+  margin: 0;
+}

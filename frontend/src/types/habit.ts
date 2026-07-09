@@ -1,4 +1,4 @@
-﻿export type DifficultyTier = 'common' | 'uncommon' | 'rare' | 'mythical';
+export type DifficultyTier = 'common' | 'uncommon' | 'rare' | 'mythical';
 export type HabitFrequency = 'twice_daily' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'flexible';
 export type HabitStatus = 'healthy' | 'withered' | 'completed';
 
@@ -28,6 +28,10 @@ export interface Habit {
   max_streak: number;
   completed_at: string | null;
   created_at: string;
+  hide_name?: boolean;
+  hide_description?: boolean;
+  share_name_friends?: string[];
+  share_desc_friends?: string[];
 }
 
 export interface CreateHabitInput {
@@ -47,6 +51,10 @@ export interface CreateHabitInput {
   is_public?: boolean;
   current_streak?: number;
   max_streak?: number;
+  hide_name?: boolean;
+  hide_description?: boolean;
+  share_name_friends?: string[];
+  share_desc_friends?: string[];
 }
 
 export interface UpdateHabitInput {
@@ -67,4 +75,8 @@ export interface UpdateHabitInput {
   current_streak?: number;
   max_streak?: number;
   completed_at?: string | null;
+  hide_name?: boolean;
+  hide_description?: boolean;
+  share_name_friends?: string[];
+  share_desc_friends?: string[];
 }

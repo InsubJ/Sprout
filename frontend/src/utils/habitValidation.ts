@@ -1,4 +1,4 @@
-﻿import { CreateHabitInput, UpdateHabitInput, DifficultyTier, HabitFrequency, HabitStatus } from '../types/habit';
+import { CreateHabitInput, UpdateHabitInput, DifficultyTier, HabitFrequency, HabitStatus } from '../types/habit';
 
 export interface ValidationError {
   field: string;
@@ -108,6 +108,34 @@ function validateCommonFields(input: any, errors: ValidationError[]) {
   if (input.is_public !== undefined) {
     if (typeof input.is_public !== 'boolean') {
       errors.push({ field: 'is_public', message: 'Is public must be a boolean' });
+    }
+  }
+
+  // Hide Name
+  if (input.hide_name !== undefined) {
+    if (typeof input.hide_name !== 'boolean') {
+      errors.push({ field: 'hide_name', message: 'Hide name must be a boolean' });
+    }
+  }
+
+  // Hide Description
+  if (input.hide_description !== undefined) {
+    if (typeof input.hide_description !== 'boolean') {
+      errors.push({ field: 'hide_description', message: 'Hide description must be a boolean' });
+    }
+  }
+
+  // Share Name Friends
+  if (input.share_name_friends !== undefined && input.share_name_friends !== null) {
+    if (!Array.isArray(input.share_name_friends) || !input.share_name_friends.every((item: any) => typeof item === 'string')) {
+      errors.push({ field: 'share_name_friends', message: 'share_name_friends must be an array of strings' });
+    }
+  }
+
+  // Share Description Friends
+  if (input.share_desc_friends !== undefined && input.share_desc_friends !== null) {
+    if (!Array.isArray(input.share_desc_friends) || !input.share_desc_friends.every((item: any) => typeof item === 'string')) {
+      errors.push({ field: 'share_desc_friends', message: 'share_desc_friends must be an array of strings' });
     }
   }
 
