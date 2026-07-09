@@ -6,8 +6,11 @@ import {
   mapScoreToTier,
   getDifficultyTier,
   getSpeciesForTier,
-  assignSpecies
+  assignSpecies,
+  RECOMMENDED_SPECIES_FREQUENCIES,
+  getRecommendedFrequencyForSpecies
 } from '../utils/difficulty';
+import { PlantSpecies } from '../types/plant';
 import { DifficultyTier, HabitFrequency } from '../types/habit';
 
 describe('Difficulty Utility (difficulty.ts)', () => {
@@ -120,10 +123,10 @@ describe('Difficulty Utility (difficulty.ts)', () => {
 
   describe('Species Mapping', () => {
     it('should return correct species list for each tier', () => {
-      expect(getSpeciesForTier('common')).toEqual(['Fern', 'Ivy']);
-      expect(getSpeciesForTier('uncommon')).toEqual(['Succulent', 'Bonsai']);
-      expect(getSpeciesForTier('rare')).toEqual(['Orchid', 'Venus Flytrap']);
-      expect(getSpeciesForTier('mythical')).toEqual(['World Tree', 'Golden Lotus']);
+      expect(getSpeciesForTier('common')).toEqual(['pothos', 'spider_plant']);
+      expect(getSpeciesForTier('uncommon')).toEqual(['bonsai', 'lavender', 'sunflower']);
+      expect(getSpeciesForTier('rare')).toEqual(['midnight_rose', 'desert_cactus']);
+      expect(getSpeciesForTier('mythical')).toEqual(['golden_oak', 'ethereal_sakura']);
     });
 
     it('should throw error for invalid tier in getSpeciesForTier', () => {
@@ -131,20 +134,47 @@ describe('Difficulty Utility (difficulty.ts)', () => {
     });
 
     it('should assign species deterministically when index is provided', () => {
-      expect(assignSpecies('common', 0)).toBe('Fern');
-      expect(assignSpecies('common', 1)).toBe('Ivy');
-      expect(assignSpecies('common', 2)).toBe('Fern'); // wrap around
-      expect(assignSpecies('common', 3)).toBe('Ivy');
+      expect(assignSpecies('common', 0)).toBe('pothos');
+      expect(assignSpecies('common', 1)).toBe('spider_plant');
+      expect(assignSpecies('common', 2)).toBe('pothos'); // wrap around
+      expect(assignSpecies('common', 3)).toBe('spider_plant');
     });
 
     it('should assign a valid species from the list when index is not provided', () => {
       const species = assignSpecies('rare');
-      expect(['Orchid', 'Venus Flytrap']).toContain(species);
+      expect(['midnight_rose', 'desert_cactus']).toContain(species);
     });
 
     it('should throw error if index is negative or not integer (Precondition)', () => {
       expect(() => assignSpecies('common', -1)).toThrow('Precondition failed');
       expect(() => assignSpecies('common', 1.5)).toThrow('Precondition failed');
+    });
+  });
+
+  describe('Species Frequency Mapping', () => {
+    it('should map species to natural/recommended frequencies in RECOMMENDED_SPECIES_FREQUENCIES', () => {
+      expect(RECOMMENDED_SPECIES_FREQUENCIES['pothos']).toBe('weekly');
+      expect(RECOMMENDED_SPECIES_FREQUENCIES['spider_plant']).toBe('weekly');
+      expect(RECOMMENDED_SPECIES_FREQUENCIES['bonsai']).toBe('daily');
+      expect(RECOMMENDED_SPECIES_FREQUENCIES['lavender']).toBe('daily');
+      expect(RECOMMENDED_SPECIES_FREQUENCIES['sunflower']).toBe('daily');
+      expect(RECOMMENDED_SPECIES_FREQUENCIES['midnight_rose']).toBe('twice_daily');
+      expect(RECOMMENDED_SPECIES_FREQUENCIES['desert_cactus']).toBe('monthly');
+      expect(RECOMMENDED_SPECIES_FREQUENCIES['golden_oak']).toBe('yearly');
+      expect(RECOMMENDED_SPECIES_FREQUENCIES['ethereal_sakura']).toBe('flexible');
+    });
+
+    it('should retrieve correct frequency via getRecommendedFrequencyForSpecies helper', () => {
+      expect(getRecommendedFrequencyForSpecies('pothos')).toBe('weekly');
+      expect(getRecommendedFrequencyForSpecies('bonsai')).toBe('daily');
+      expect(getRecommendedFrequencyForSpecies('midnight_rose')).toBe('twice_daily');
+      expect(getRecommendedFrequencyForSpecies('desert_cactus')).toBe('monthly');
+      expect(getRecommendedFrequencyForSpecies('golden_oak')).toBe('yearly');
+      expect(getRecommendedFrequencyForSpecies('ethereal_sakura')).toBe('flexible');
+    });
+
+    it('should throw error for invalid species in getRecommendedFrequencyForSpecies', () => {
+      expect(() => getRecommendedFrequencyForSpecies('invalid_species' as PlantSpecies)).toThrow('Precondition failed');
     });
   });
 });

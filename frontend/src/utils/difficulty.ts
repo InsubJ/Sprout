@@ -1,4 +1,5 @@
 import { DifficultyTier, HabitFrequency } from '../types/habit';
+import { PlantSpecies } from '../types/plant';
 
 /**
  * Frequency Multiplier table for plants.
@@ -16,11 +17,33 @@ export const FREQUENCY_MULTIPLIERS: Record<HabitFrequency, number> = {
 /**
  * Species mapping for each difficulty tier.
  */
-export const TIER_SPECIES: Record<DifficultyTier, string[]> = {
-  common: ['Fern', 'Ivy'],
-  uncommon: ['Succulent', 'Bonsai'],
-  rare: ['Orchid', 'Venus Flytrap'],
-  mythical: ['World Tree', 'Golden Lotus'],
+export const TIER_SPECIES: Record<DifficultyTier, PlantSpecies[]> = {
+  common: ['pothos', 'spider_plant'],
+  uncommon: ['bonsai', 'lavender', 'sunflower'],
+  rare: ['midnight_rose', 'desert_cactus'],
+  mythical: ['golden_oak', 'ethereal_sakura'],
+};
+
+/**
+ * Recommended habit frequency for each plant species.
+ */
+export const RECOMMENDED_SPECIES_FREQUENCIES: Record<PlantSpecies, HabitFrequency> = {
+  pothos: 'weekly',
+  spider_plant: 'weekly',
+  bonsai: 'daily',
+  lavender: 'daily',
+  sunflower: 'daily',
+  midnight_rose: 'twice_daily',
+  desert_cactus: 'monthly',
+  golden_oak: 'yearly',
+  ethereal_sakura: 'flexible',
+  maranta_leuconeura: 'weekly',
+  alocasia_tiny_dancer: 'weekly',
+  string_of_pearls: 'weekly',
+  begonia_maculata: 'weekly',
+  phalaenopsis_scarlett_jubilee: 'daily',
+  waratah: 'daily',
+  poinsettia: 'daily',
 };
 
 /**
@@ -104,7 +127,7 @@ export function getDifficultyTier(input: DifficultyCalculationInput): Difficulty
 /**
  * Returns the list of possible species for a given difficulty tier.
  */
-export function getSpeciesForTier(tier: DifficultyTier): string[] {
+export function getSpeciesForTier(tier: DifficultyTier): PlantSpecies[] {
   const species = TIER_SPECIES[tier];
   if (!species) {
     throw new Error(`Precondition failed: invalid difficulty tier '${tier}'`);
@@ -116,7 +139,7 @@ export function getSpeciesForTier(tier: DifficultyTier): string[] {
  * Assigns a species for a given tier. If index is provided, chooses deterministically;
  * otherwise chooses a random species from the list.
  */
-export function assignSpecies(tier: DifficultyTier, index?: number): string {
+export function assignSpecies(tier: DifficultyTier, index?: number): PlantSpecies {
   const speciesList = getSpeciesForTier(tier);
   if (index !== undefined) {
     if (!Number.isInteger(index) || index < 0) {
@@ -126,4 +149,21 @@ export function assignSpecies(tier: DifficultyTier, index?: number): string {
   }
   const randomIndex = Math.floor(Math.random() * speciesList.length);
   return speciesList[randomIndex];
+}
+
+/**
+ * Retrieves the natural/recommended habit frequency for a given species.
+ *
+ * Preconditions:
+ * - species must be a valid PlantSpecies
+ *
+ * Postcondition:
+ * - Returns a valid HabitFrequency
+ */
+export function getRecommendedFrequencyForSpecies(species: PlantSpecies): HabitFrequency {
+  const frequency = RECOMMENDED_SPECIES_FREQUENCIES[species];
+  if (!frequency) {
+    throw new Error(`Precondition failed: invalid species '${species}'`);
+  }
+  return frequency;
 }
