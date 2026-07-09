@@ -28,6 +28,16 @@ interface AuthContextType {
   logout: () => void;
   isMockMode: boolean;
   updateCurrentUser: (updated: Profile) => void;
+  pinCode: string | null;
+  biometricsEnabled: boolean;
+  isAppLocked: boolean;
+  setPinCode: (pin: string | null) => void;
+  setBiometricsEnabled: (enabled: boolean) => void;
+  unlockApp: (pin?: string, bypassBiometrics?: boolean) => boolean;
+  lockApp: () => void;
+  loginWithProvider: (provider: 'google' | 'apple' | 'facebook') => Promise<Profile>;
+  sendOtp: (email: string) => Promise<string>;
+  verifyOtp: (email: string, code: string, expectedCode: string) => Promise<Profile>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -41,6 +51,11 @@ export const useAuth = () => {
 export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Lock and security states
+  const [pinCode, _setPinCode] = useState<string | null>(null);
+  const [biometricsEnabled, _setBiometricsEnabled] = useState<boolean>(false);
+  const [isAppLocked, setIsAppLocked] = useState<boolean>(false);
 
   // Setup services (Supabase vs Mock)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -74,6 +89,20 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
+  // Sync security preferences when currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      const pin = localStorage.getItem(`sprout_pin_${currentUser.id}`);
+      const bio = localStorage.getItem(`sprout_biometrics_${currentUser.id}`) === 'true';
+      _setPinCode(pin);
+      _setBiometricsEnabled(bio);
+    } else {
+      _setPinCode(null);
+      _setBiometricsEnabled(false);
+      setIsAppLocked(false);
+    }
+  }, [currentUser]);
+
   useEffect(() => {
     // Retrieve current user and theme from localStorage
     if (typeof window !== 'undefined') {
@@ -82,6 +111,11 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const profile = JSON.parse(stored);
           setCurrentUser(profile);
+          const pin = localStorage.getItem(`sprout_pin_${profile.id}`);
+          const bio = localStorage.getItem(`sprout_biometrics_${profile.id}`) === 'true';
+          if (pin || bio) {
+            setIsAppLocked(true);
+          }
         } catch {
           // ignore
         }
@@ -117,12 +151,22 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
     
     setCurrentUser(profile);
     localStorage.setItem('sprout_current_user', JSON.stringify(profile));
+
+    const pin = localStorage.getItem(`sprout_pin_${profile.id}`);
+    const bio = localStorage.getItem(`sprout_biometrics_${profile.id}`) === 'true';
+    if (pin || bio) {
+      setIsAppLocked(true);
+    }
+
     return profile;
   };
 
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('sprout_current_user');
+    _setPinCode(null);
+    _setBiometricsEnabled(false);
+    setIsAppLocked(false);
   };
 
   const updateCurrentUser = (updated: Profile) => {
@@ -130,6 +174,132 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
     if (typeof window !== 'undefined') {
       localStorage.setItem('sprout_current_user', JSON.stringify(updated));
     }
+  };
+
+  const setPinCode = (pin: string | null) => {
+    if (!currentUser) return;
+    if (pin) {
+      localStorage.setItem(`sprout_pin_${currentUser.id}`, pin);
+      _setPinCode(pin);
+    } else {
+      localStorage.removeItem(`sprout_pin_${currentUser.id}`);
+      _setPinCode(null);
+    }
+  };
+
+  const setBiometricsEnabled = (enabled: boolean) => {
+    if (!currentUser) return;
+    localStorage.setItem(`sprout_biometrics_${currentUser.id}`, String(enabled));
+    _setBiometricsEnabled(enabled);
+  };
+
+  const unlockApp = (pin?: string, bypassBiometrics?: boolean): boolean => {
+    if (!currentUser) return false;
+
+    const savedPin = localStorage.getItem(`sprout_pin_${currentUser.id}`);
+    const savedBio = localStorage.getItem(`sprout_biometrics_${currentUser.id}`) === 'true';
+
+    if (savedPin && pin === savedPin) {
+      setIsAppLocked(false);
+      return true;
+    }
+
+    if (savedBio && bypassBiometrics) {
+      setIsAppLocked(false);
+      return true;
+    }
+
+    if (!savedPin && !savedBio) {
+      setIsAppLocked(false);
+      return true;
+    }
+
+    return false;
+  };
+
+  const lockApp = () => {
+    if (currentUser) {
+      const savedPin = localStorage.getItem(`sprout_pin_${currentUser.id}`);
+      const savedBio = localStorage.getItem(`sprout_biometrics_${currentUser.id}`) === 'true';
+      if (savedPin || savedBio) {
+        setIsAppLocked(true);
+      }
+    }
+  };
+
+  const loginWithProvider = async (provider: 'google' | 'apple' | 'facebook'): Promise<Profile> => {
+    const username = `${provider}_user`;
+    const displayName = `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`;
+
+    let profile: Profile | null = null;
+    if (isMockMode) {
+      profile = await services.profile.getProfileByUsername(username);
+      if (!profile) {
+        profile = await services.profile.createProfile(username, displayName);
+      }
+    } else {
+      profile = await services.profile.getProfileByUsername(username);
+    }
+
+    if (!profile) {
+      throw new Error(`Social login failed for ${provider}`);
+    }
+
+    setCurrentUser(profile);
+    localStorage.setItem('sprout_current_user', JSON.stringify(profile));
+
+    const pin = localStorage.getItem(`sprout_pin_${profile.id}`);
+    const bio = localStorage.getItem(`sprout_biometrics_${profile.id}`) === 'true';
+    if (pin || bio) {
+      setIsAppLocked(true);
+    }
+
+    return profile;
+  };
+
+  const sendOtp = async (email: string): Promise<string> => {
+    if (!email || !email.includes('@')) {
+      throw new Error('Precondition failed: Please enter a valid email address');
+    }
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    return code;
+  };
+
+  const verifyOtp = async (email: string, code: string, expectedCode: string): Promise<Profile> => {
+    if (!email || !email.includes('@')) {
+      throw new Error('Precondition failed: Invalid email address');
+    }
+    if (code !== expectedCode) {
+      throw new Error('Invalid verification code');
+    }
+
+    const username = email.split('@')[0] || 'otp_user';
+    const displayName = username.charAt(0).toUpperCase() + username.slice(1);
+
+    let profile: Profile | null = null;
+    if (isMockMode) {
+      profile = await services.profile.getProfileByUsername(username);
+      if (!profile) {
+        profile = await services.profile.createProfile(username, displayName);
+      }
+    } else {
+      profile = await services.profile.getProfileByUsername(username);
+    }
+
+    if (!profile) {
+      throw new Error(`Profile not found for username: ${username}`);
+    }
+
+    setCurrentUser(profile);
+    localStorage.setItem('sprout_current_user', JSON.stringify(profile));
+
+    const pin = localStorage.getItem(`sprout_pin_${profile.id}`);
+    const bio = localStorage.getItem(`sprout_biometrics_${profile.id}`) === 'true';
+    if (pin || bio) {
+      setIsAppLocked(true);
+    }
+
+    return profile;
   };
 
   if (loading) {
@@ -149,7 +319,23 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, isMockMode, updateCurrentUser }}>
+    <AuthContext.Provider value={{
+      currentUser,
+      login,
+      logout,
+      isMockMode,
+      updateCurrentUser,
+      pinCode,
+      biometricsEnabled,
+      isAppLocked,
+      setPinCode,
+      setBiometricsEnabled,
+      unlockApp,
+      lockApp,
+      loginWithProvider,
+      sendOtp,
+      verifyOtp
+    }}>
       <ProfileServiceContext.Provider value={services.profile}>
         <HabitServiceContext.Provider value={services.habit}>
           <FriendshipServiceContext.Provider value={services.friendship}>

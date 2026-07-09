@@ -1,9 +1,20 @@
-﻿// @vitest-environment happy-dom
+// @vitest-environment happy-dom
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import React, { act, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
+
+vi.mock('../components/common/AppProviders', () => ({
+  useAuth: () => ({
+    currentUser: { id: '11111111-1111-1111-1111-111111111111', username: 'bob' },
+    login: vi.fn(),
+    logout: vi.fn(),
+    isMockMode: true,
+    updateCurrentUser: vi.fn(),
+  }),
+}));
+
 import FriendForestPage from '../app/forest/[username]/page';
 import * as useFriendForestHookModule from '../hooks/useFriendForest';
 import { useWitherNudge } from '../hooks/useWitherNudge';

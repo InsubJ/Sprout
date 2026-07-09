@@ -16,13 +16,15 @@ import BegoniaMaculataPlant from "./BegoniaMaculataPlant";
 import PhalaenopsisOrchidPlant from "./PhalaenopsisOrchidPlant";
 import WaratahPlant from "./WaratahPlant";
 import PoinsettiaPlant from "./PoinsettiaPlant";
+import JasonPlant from "./JasonPlant";
+import RemyPlant from "./RemyPlant";
+import BlossomPlant from "./BlossomPlant";
 
 /**
  * plantRegistry
  *
  * Open/Closed: adding a new species means adding one entry here and
  * writing its component — Plant.tsx's dispatch logic never changes.
- * The 9 tiered species plus 7 additional named species are registered.
  */
 export const plantRegistry: Partial<Record<PlantSpecies, ComponentType<PlantProps>>> = {
   pothos: PothosPlant,
@@ -41,4 +43,7 @@ export const plantRegistry: Partial<Record<PlantSpecies, ComponentType<PlantProp
   phalaenopsis_scarlett_jubilee: PhalaenopsisOrchidPlant,
   waratah: WaratahPlant,
   poinsettia: PoinsettiaPlant,
+  jason: JasonPlant,
+  remy: RemyPlant,
+  blossom: BlossomPlant,
 };

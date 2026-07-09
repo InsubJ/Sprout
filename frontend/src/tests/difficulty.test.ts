@@ -7,8 +7,7 @@ import {
   getDifficultyTier,
   getSpeciesForTier,
   assignSpecies,
-  RECOMMENDED_SPECIES_FREQUENCIES,
-  getRecommendedFrequencyForSpecies
+  getTierForSpecies
 } from '../utils/difficulty';
 import { PlantSpecies } from '../types/plant';
 import { DifficultyTier, HabitFrequency } from '../types/habit';
@@ -123,10 +122,10 @@ describe('Difficulty Utility (difficulty.ts)', () => {
 
   describe('Species Mapping', () => {
     it('should return correct species list for each tier', () => {
-      expect(getSpeciesForTier('common')).toEqual(['pothos', 'spider_plant', 'poinsettia']);
-      expect(getSpeciesForTier('uncommon')).toEqual(['bonsai', 'lavender', 'sunflower', 'maranta_leuconeura', 'alocasia_tiny_dancer']);
-      expect(getSpeciesForTier('rare')).toEqual(['midnight_rose', 'desert_cactus', 'string_of_pearls', 'begonia_maculata', 'phalaenopsis_scarlett_jubilee']);
-      expect(getSpeciesForTier('mythical')).toEqual(['golden_oak', 'ethereal_sakura', 'waratah']);
+      expect(getSpeciesForTier('common')).toEqual(['pothos', 'spider_plant', 'poinsettia', 'jason', 'bonsai', 'maranta_leuconeura', 'lavender']);
+      expect(getSpeciesForTier('uncommon')).toEqual(['sunflower', 'alocasia_tiny_dancer', 'remy', 'waratah', 'phalaenopsis_scarlett_jubilee']);
+      expect(getSpeciesForTier('rare')).toEqual(['midnight_rose', 'desert_cactus', 'string_of_pearls', 'begonia_maculata']);
+      expect(getSpeciesForTier('mythical')).toEqual(['golden_oak', 'ethereal_sakura', 'blossom']);
     });
 
     it('should throw error for invalid tier in getSpeciesForTier', () => {
@@ -136,13 +135,17 @@ describe('Difficulty Utility (difficulty.ts)', () => {
     it('should assign species deterministically when index is provided', () => {
       expect(assignSpecies('common', 0)).toBe('pothos');
       expect(assignSpecies('common', 1)).toBe('spider_plant');
-      expect(assignSpecies('common', 2)).toBe('poinsettia'); // wrap around
-      expect(assignSpecies('common', 3)).toBe('pothos');
+      expect(assignSpecies('common', 2)).toBe('poinsettia');
+      expect(assignSpecies('common', 3)).toBe('jason');
+      expect(assignSpecies('common', 4)).toBe('bonsai');
+      expect(assignSpecies('common', 5)).toBe('maranta_leuconeura');
+      expect(assignSpecies('common', 6)).toBe('lavender');
+      expect(assignSpecies('common', 7)).toBe('pothos'); // wrap around
     });
 
     it('should assign a valid species from the list when index is not provided', () => {
       const species = assignSpecies('rare');
-      expect(['midnight_rose', 'desert_cactus', 'string_of_pearls', 'begonia_maculata', 'phalaenopsis_scarlett_jubilee']).toContain(species);
+      expect(['midnight_rose', 'desert_cactus', 'string_of_pearls', 'begonia_maculata']).toContain(species);
     });
 
     it('should throw error if index is negative or not integer (Precondition)', () => {
@@ -151,30 +154,18 @@ describe('Difficulty Utility (difficulty.ts)', () => {
     });
   });
 
-  describe('Species Frequency Mapping', () => {
-    it('should map species to natural/recommended frequencies in RECOMMENDED_SPECIES_FREQUENCIES', () => {
-      expect(RECOMMENDED_SPECIES_FREQUENCIES['pothos']).toBe('weekly');
-      expect(RECOMMENDED_SPECIES_FREQUENCIES['spider_plant']).toBe('weekly');
-      expect(RECOMMENDED_SPECIES_FREQUENCIES['bonsai']).toBe('daily');
-      expect(RECOMMENDED_SPECIES_FREQUENCIES['lavender']).toBe('daily');
-      expect(RECOMMENDED_SPECIES_FREQUENCIES['sunflower']).toBe('daily');
-      expect(RECOMMENDED_SPECIES_FREQUENCIES['midnight_rose']).toBe('twice_daily');
-      expect(RECOMMENDED_SPECIES_FREQUENCIES['desert_cactus']).toBe('monthly');
-      expect(RECOMMENDED_SPECIES_FREQUENCIES['golden_oak']).toBe('yearly');
-      expect(RECOMMENDED_SPECIES_FREQUENCIES['ethereal_sakura']).toBe('flexible');
+  describe('getTierForSpecies', () => {
+    it('should correctly resolve difficulty tier for species', () => {
+      expect(getTierForSpecies('pothos')).toBe('common');
+      expect(getTierForSpecies('bonsai')).toBe('common');
+      expect(getTierForSpecies('midnight_rose')).toBe('rare');
+      expect(getTierForSpecies('golden_oak')).toBe('mythical');
+      expect(getTierForSpecies('jason')).toBe('common');
     });
 
-    it('should retrieve correct frequency via getRecommendedFrequencyForSpecies helper', () => {
-      expect(getRecommendedFrequencyForSpecies('pothos')).toBe('weekly');
-      expect(getRecommendedFrequencyForSpecies('bonsai')).toBe('daily');
-      expect(getRecommendedFrequencyForSpecies('midnight_rose')).toBe('twice_daily');
-      expect(getRecommendedFrequencyForSpecies('desert_cactus')).toBe('monthly');
-      expect(getRecommendedFrequencyForSpecies('golden_oak')).toBe('yearly');
-      expect(getRecommendedFrequencyForSpecies('ethereal_sakura')).toBe('flexible');
-    });
-
-    it('should throw error for invalid species in getRecommendedFrequencyForSpecies', () => {
-      expect(() => getRecommendedFrequencyForSpecies('invalid_species' as PlantSpecies)).toThrow('Precondition failed');
+    it('should throw error if species is empty or not registered (Precondition)', () => {
+      expect(() => getTierForSpecies('' as any)).toThrow('Precondition failed');
+      expect(() => getTierForSpecies('unknown_species' as any)).toThrow('Precondition failed');
     });
   });
 });

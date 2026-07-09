@@ -2,12 +2,12 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--bg-card);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border-subtle);
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 8px 32px 0 rgba(27, 59, 43, 0.06);
+  box-shadow: 0 8px 32px 0 var(--shadow-card-lg);
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
@@ -24,7 +24,7 @@
 .label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   opacity: 0.9;
   letter-spacing: -0.01em;
 }
@@ -35,8 +35,8 @@
   padding: 0.75rem 1rem;
   border-radius: 8px;
   border: 1px solid rgba(45, 90, 39, 0.2);
-  background: rgba(250, 247, 242, 0.8);
-  color: var(--color-evergreen);
+  background: var(--bg-nav);
+  color: var(--text-primary);
   font-family: var(--font-family);
   font-size: 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
@@ -46,9 +46,9 @@
 .input:focus,
 .textarea:focus,
 .select:focus {
-  border-color: var(--color-forest-green);
+  border-color: var(--text-accent);
   box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.15);
-  background: #ffffff;
+  background: var(--bg-input-focus);
   outline: none;
 }
 
@@ -111,7 +111,7 @@
 .subHeading {
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--color-forest-green);
+  color: var(--text-accent);
   letter-spacing: -0.01em;
 }
 
@@ -136,15 +136,15 @@
 }
 
 .submitButton {
-  background: var(--color-forest-green);
-  border: 1px solid var(--color-forest-green);
-  color: var(--color-sand);
+  background: var(--text-accent);
+  border: 1px solid var(--border-focus);
+  color: var(--bg-primary);
   box-shadow: 0 4px 12px rgba(45, 90, 39, 0.15);
 }
 
 .submitButton:hover:not(:disabled) {
-  background: var(--color-evergreen);
-  border-color: var(--color-evergreen);
+  background: var(--text-primary);
+  border-color: var(--text-primary);
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(27, 59, 43, 0.2);
 }
@@ -164,13 +164,13 @@
 .cancelButton {
   background: transparent;
   border: 1px solid rgba(45, 90, 39, 0.25);
-  color: var(--color-evergreen);
+  color: var(--text-primary);
 }
 
 .cancelButton:hover:not(:disabled) {
   background: var(--color-sage);
-  border-color: var(--color-forest-green);
-  color: var(--color-forest-green);
+  border-color: var(--text-accent);
+  color: var(--text-accent);
 }
 
 .cancelButton:disabled {
@@ -218,7 +218,7 @@
 .checkboxLabel {
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -229,7 +229,7 @@
   width: 16px;
   height: 16px;
   cursor: pointer;
-  accent-color: var(--color-forest-green);
+  accent-color: var(--text-accent);
 }
 
 .friendsChecklist {
@@ -242,7 +242,7 @@
 
 .checklistLabel {
   font-size: 0.85rem;
-  color: #5c7062;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
@@ -258,5 +258,5 @@
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
 }

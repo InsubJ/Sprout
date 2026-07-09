@@ -1,4 +1,4 @@
-/* DemoPage.module.css */
+/* LabPage.module.css */
 
 .container {
   max-width: 1200px;
@@ -10,14 +10,14 @@
 .title {
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   text-align: center;
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
   font-size: 1.1rem;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   opacity: 0.8;
   text-align: center;
   margin-bottom: 3rem;
@@ -28,13 +28,13 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.5rem;
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--bg-card);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border-subtle);
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 8px 32px 0 rgba(27, 59, 43, 0.05);
+  box-shadow: 0 8px 32px 0 var(--shadow-card-lg);
 }
 
 .controlGroup {
@@ -47,7 +47,7 @@
 .controlLabel {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
 }
 
 .slider {
@@ -55,9 +55,13 @@
   width: 100%;
   height: 6px;
   border-radius: 5px;
-  background: rgba(27, 59, 43, 0.1);
+  background: rgba(45, 90, 39, 0.15);
   outline: none;
   transition: opacity .2s;
+}
+
+:global(.dark) .slider {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .slider::-webkit-slider-thumb {
@@ -66,7 +70,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--color-forest-green);
+  background: var(--text-accent);
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
@@ -81,9 +85,9 @@
   padding: 0.5rem;
   font-size: 0.85rem;
   font-weight: 500;
-  border: 1px solid rgba(27, 59, 43, 0.15);
-  background: white;
-  color: var(--color-evergreen);
+  border: 1px solid var(--border-input);
+  background: var(--bg-input);
+  color: var(--text-primary);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -95,8 +99,8 @@
 
 .activeHealthy {
   background: rgba(45, 90, 39, 0.15);
-  color: var(--color-forest-green);
-  border-color: var(--color-forest-green);
+  color: var(--text-accent);
+  border-color: var(--text-accent);
   font-weight: 600;
 }
 
@@ -120,7 +124,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   cursor: pointer;
   font-weight: 600;
 }
@@ -128,7 +132,7 @@
 .checkbox {
   width: 16px;
   height: 16px;
-  accent-color: var(--color-forest-green);
+  accent-color: var(--text-accent);
   cursor: pointer;
 }
 
@@ -160,7 +164,7 @@
 .sortLabel {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   white-space: nowrap;
 }
 
@@ -170,10 +174,10 @@
   font-family: inherit;
   font-weight: 600;
   border-radius: 50px;
-  border: 1px solid rgba(45, 90, 39, 0.2);
-  background: rgba(255, 255, 255, 0.75) url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232d5a27' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;
+  border: 2px solid rgba(45, 90, 39, 0.4);
+  background: var(--bg-input) url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232d5a27' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;
   background-size: 16px;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   outline: none;
   cursor: pointer;
   appearance: none;
@@ -182,9 +186,9 @@
 }
 
 .sortSelect:focus {
-  border-color: var(--color-forest-green);
+  border-color: var(--text-accent);
   box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.12);
-  background-color: #ffffff;
+  background-color: var(--bg-input-focus);
 }
 
 .searchIcon {
@@ -198,9 +202,9 @@
   width: 100%;
   padding: 0.75rem 1rem 0.75rem 2.5rem;
   border-radius: 50px;
-  border: 1px solid rgba(45, 90, 39, 0.2);
-  background: rgba(255, 255, 255, 0.7);
-  color: var(--color-evergreen);
+  border: 2px solid rgba(45, 90, 39, 0.4);
+  background: var(--bg-input);
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 0.95rem;
   outline: none;
@@ -208,9 +212,9 @@
 }
 
 .searchInput:focus {
-  border-color: var(--color-forest-green);
+  border-color: var(--text-accent);
   box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.12);
-  background: #ffffff;
+  background: var(--bg-input-focus);
 }
 
 /* Plants Grid */
@@ -222,12 +226,12 @@
 }
 
 .plantCard {
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--bg-card);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border-subtle);
   border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 0 8px 32px 0 rgba(27, 59, 43, 0.03);
+  box-shadow: 0 8px 32px 0 var(--shadow-card-lg);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
@@ -247,7 +251,7 @@
 
 .lockedCard:hover {
   transform: none;
-  box-shadow: 0 8px 32px 0 rgba(27, 59, 43, 0.03);
+  box-shadow: 0 8px 32px 0 var(--shadow-card-lg);
 }
 
 .lockIcon {
@@ -266,7 +270,7 @@
 .plantName {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -281,7 +285,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 200px;
+  height: 230px;
   width: 100%;
   margin-bottom: 1rem;
 }
@@ -291,9 +295,9 @@
   justify-content: space-between;
   width: 100%;
   font-size: 0.8rem;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   opacity: 0.7;
-  border-top: 1px solid rgba(27, 59, 43, 0.06);
+  border-top: 1px solid var(--border-divider);
   padding-top: 0.8rem;
 }
 
@@ -307,8 +311,8 @@
 }
 
 .pageBtn {
-  background: var(--color-forest-green);
-  color: var(--color-sand);
+  background: var(--text-accent);
+  color: var(--bg-primary);
   border: none;
   padding: 0.5rem 1.25rem;
   border-radius: 50px;
@@ -319,7 +323,7 @@
 }
 
 .pageBtn:hover:not(:disabled) {
-  background: var(--color-evergreen);
+  background: var(--text-primary);
   transform: translateY(-1px);
 }
 
@@ -331,5 +335,102 @@
 
 .pageInfo {
   font-size: 0.9rem;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
+}
+
+/* Mobile Drawer Styles */
+.mobileDrawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  max-width: 85vw;
+  height: 100vh;
+  background-color: var(--bg-modal);
+  border-left: 1px solid var(--border-subtle);
+  box-shadow: -4px 0 24px var(--shadow-card-lg);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+
+.mobileDrawerOpen {
+  transform: translateX(0);
+}
+
+.mobileDrawer .controlPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.toggleBtn {
+  position: fixed;
+  top: 50px;
+  right: 0;
+  z-index: 900;
+  background-color: var(--text-accent);
+  color: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-right: none;
+  border-radius: 12px 0 0 12px;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: -4px 4px 16px var(--shadow-card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  writing-mode: sideways-lr;
+}
+
+.toggleBtn:hover {
+  background-color: var(--text-primary);
+  transform: translateX(-4px);
+}
+
+.drawerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-divider);
+  padding-bottom: 0.75rem;
+}
+
+.drawerTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 4px;
 }

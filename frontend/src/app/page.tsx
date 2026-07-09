@@ -14,10 +14,38 @@ import { getDifficultyTier, assignSpecies } from '../utils/difficulty';
 import styles from './Dashboard.module.css';
 
 export default function HomePage() {
-  const { currentUser, login, isMockMode } = useAuth();
+  // Login toggles & inputs
+  const [loginMethod, setLoginMethod] = useState<'username' | 'otp'>('username');
   const [usernameInput, setUsernameInput] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [emailInput, setEmailInput] = useState('');
+  const [otpInput, setOtpInput] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [generatedOtp, setGeneratedOtp] = useState('');
+  const [otpNotification, setOtpNotification] = useState<string | null>(null);
+
+  // Lock screen inputs & simulation states
+  const {
+    currentUser,
+    login,
+    logout,
+    isMockMode,
+    isAppLocked,
+    unlockApp,
+    pinCode,
+    biometricsEnabled,
+    loginWithProvider,
+    sendOtp,
+    verifyOtp
+  } = useAuth();
   
+  const [pinInput, setPinInput] = useState('');
+  const [unlockError, setUnlockError] = useState<string | null>(null);
+  
+  const [showBioScanner, setShowBioScanner] = useState(false);
+  const [bioScanning, setBioScanning] = useState(false);
+  const [bioSuccess, setBioSuccess] = useState(false);
+
   // Dashboard states
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +60,51 @@ export default function HomePage() {
     currentUser?.id || '11111111-1111-1111-1111-111111111111'
   );
 
+  // Automatically trigger biometrics lock verification on mount if set
+  useEffect(() => {
+    if (currentUser && isAppLocked && biometricsEnabled) {
+      handleBiometricTrigger();
+    }
+  }, [currentUser, isAppLocked, biometricsEnabled]);
+
+  const handleBiometricTrigger = () => {
+    setShowBioScanner(true);
+    setBioScanning(true);
+    setBioSuccess(false);
+    setUnlockError(null);
+
+    // Simulate scanning delay
+    setTimeout(() => {
+      setBioScanning(false);
+      setBioSuccess(true);
+      setTimeout(() => {
+        const ok = unlockApp(undefined, true);
+        if (ok) {
+          setShowBioScanner(false);
+        } else {
+          setUnlockError('Simulated biometric authentication failed.');
+          setBioSuccess(false);
+        }
+      }, 600);
+    }, 1200);
+  };
+
+  const handlePinUnlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    setUnlockError(null);
+    if (pinInput.length !== 4) {
+      setUnlockError('PIN code must be exactly 4 digits');
+      return;
+    }
+    const ok = unlockApp(pinInput);
+    if (ok) {
+      setPinInput('');
+    } else {
+      setUnlockError('Invalid PIN code. Please try again.');
+      setPinInput('');
+    }
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
@@ -43,6 +116,47 @@ export default function HomePage() {
       await login(usernameInput.trim());
     } catch (err: any) {
       setLoginError(err.message || 'Login failed');
+    }
+  };
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    if (!emailInput.trim() || !emailInput.includes('@')) {
+      setLoginError('Please enter a valid email address');
+      return;
+    }
+    try {
+      const code = await sendOtp(emailInput.trim());
+      setGeneratedOtp(code);
+      setOtpSent(true);
+      setOtpNotification(code);
+    } catch (err: any) {
+      setLoginError(err.message || 'Failed to send verification code');
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    if (!otpInput.trim()) {
+      setLoginError('Please enter the 6-digit verification code');
+      return;
+    }
+    try {
+      await verifyOtp(emailInput.trim(), otpInput.trim(), generatedOtp);
+      setOtpNotification(null);
+    } catch (err: any) {
+      setLoginError(err.message || 'Verification failed');
+    }
+  };
+
+  const handleSocialLogin = async (provider: 'google' | 'apple' | 'facebook') => {
+    setLoginError(null);
+    try {
+      await loginWithProvider(provider);
+    } catch (err: any) {
+      setLoginError(err.message || `Login with ${provider} failed`);
     }
   };
 
@@ -138,10 +252,110 @@ export default function HomePage() {
   // Filter in-progress active habits
   const activeHabits = habits.filter((h) => h.status !== 'completed');
 
+  // LOCK SCREEN OVERLAY
+  if (currentUser && isAppLocked) {
+    return (
+      <div className={styles.lockContainer} data-testid="lock-screen">
+        <div className={styles.lockCard}>
+          <div className={styles.lockLogo}>🔒</div>
+          <h1 className={styles.lockTitle}>Sprout Locked</h1>
+          <p className={styles.lockSubtitle}>
+            Please authenticate using your configured lock parameters to access your virtual habits canopy.
+          </p>
+
+          {unlockError && <div className={styles.lockError} data-testid="lock-error">{unlockError}</div>}
+
+          {pinCode && (
+            <form onSubmit={handlePinUnlock} className={styles.lockForm} data-testid="lock-pin-form">
+              <div className={styles.inputGroup} style={{ alignItems: 'center' }}>
+                <input
+                  id="lockPin"
+                  type="password"
+                  maxLength={4}
+                  value={pinInput}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    setPinInput(val);
+                  }}
+                  className={styles.pinInput}
+                  placeholder="••••"
+                  required
+                  data-testid="lock-pin-input"
+                  autoFocus
+                />
+              </div>
+              <button type="submit" className={styles.loginSubmitBtn} style={{ marginTop: '0.5rem' }}>
+                Unlock Canopy
+              </button>
+            </form>
+          )}
+
+          <div className={styles.lockActionRow}>
+            {biometricsEnabled && (
+              <button
+                type="button"
+                onClick={handleBiometricTrigger}
+                className={styles.bioTriggerBtn}
+                data-testid="bio-trigger-btn"
+              >
+                🧬 Scan Biometrics
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => logout()}
+              className={styles.lockLogoutBtn}
+              data-testid="lock-logout-btn"
+            >
+              🚪 Sign Out
+            </button>
+          </div>
+        </div>
+
+        {/* Biometric Scanning Simulator Screen */}
+        {showBioScanner && (
+          <div className={styles.bioOverlay} data-testid="bio-scanner-modal">
+            <div className={styles.bioDialog}>
+              <div className={styles.bioIndicator}>
+                {bioScanning ? (
+                  <span className={styles.bioScanAnim}>🧬</span>
+                ) : bioSuccess ? (
+                  <span className={styles.bioSuccessCheck}>✔️</span>
+                ) : (
+                  <span>❌</span>
+                )}
+              </div>
+              <h3>
+                {bioScanning ? 'Authenticating...' : bioSuccess ? 'Success!' : 'Verification Failed'}
+              </h3>
+              <p className={styles.bioText}>
+                {bioScanning ? 'Contacting biometric hardware layer...' : bioSuccess ? 'Lock validation confirmed.' : 'Failed.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowBioScanner(false)}
+                className={styles.bioCancelBtn}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // LOGIN SCREEN
   if (!currentUser) {
     return (
       <div className={styles.loginContainer}>
+        {otpNotification && (
+          <div className={styles.otpToast} data-testid="otp-notification">
+            <span>✉️ Verification code: <strong>{otpNotification}</strong></span>
+            <button onClick={() => setOtpNotification(null)} className={styles.otpToastClose}>&times;</button>
+          </div>
+        )}
+
         <div className={styles.loginCard}>
           <div className={styles.loginLogo}>🌱</div>
           <h1 className={styles.loginTitle}>Welcome to Sprout</h1>
@@ -149,26 +363,137 @@ export default function HomePage() {
             Cultivate your habits, grow a beautiful virtual forest, and connect with your friends.
           </p>
 
-          <form onSubmit={handleLoginSubmit} className={styles.loginForm}>
-            <div className={styles.inputGroup}>
-              <label htmlFor="username" className={styles.inputLabel}>
-                Enter Username to Log In
-              </label>
-              <input
-                id="username"
-                type="text"
-                value={usernameInput}
-                onChange={(e) => setUsernameInput(e.target.value)}
-                placeholder="e.g. admin, alice, bob, charlie"
-                className={styles.loginInput}
-              />
-              {loginError && <span className={styles.errorText}>{loginError}</span>}
-            </div>
-
-            <button type="submit" className={styles.loginSubmitBtn}>
-              Enter Forest
+          <div className={styles.tabsRow}>
+            <button
+              type="button"
+              onClick={() => {
+                setLoginMethod('username');
+                setLoginError(null);
+              }}
+              className={`${styles.tabBtn} ${loginMethod === 'username' ? styles.activeTabBtn : ''}`}
+            >
+              Username Sign In
             </button>
-          </form>
+            <button
+              type="button"
+              onClick={() => {
+                setLoginMethod('otp');
+                setLoginError(null);
+                setOtpSent(false);
+              }}
+              className={`${styles.tabBtn} ${loginMethod === 'otp' ? styles.activeTabBtn : ''}`}
+            >
+              Email OTP
+            </button>
+          </div>
+
+          {loginMethod === 'username' ? (
+            <form onSubmit={handleLoginSubmit} className={styles.loginForm}>
+              <div className={styles.inputGroup}>
+                <label htmlFor="username" className={styles.inputLabel}>
+                  Enter Username to Log In
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value)}
+                  placeholder="e.g. admin, alice, bob"
+                  className={styles.loginInput}
+                />
+                {loginError && <span className={styles.errorText}>{loginError}</span>}
+              </div>
+
+              <button type="submit" className={styles.loginSubmitBtn}>
+                Enter Forest
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={otpSent ? handleVerifyOtp : handleSendOtp} className={styles.loginForm}>
+              {!otpSent ? (
+                <div className={styles.inputGroup}>
+                  <label htmlFor="email" className={styles.inputLabel}>
+                    Enter Email Address
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    placeholder="e.g. alice@sprout.com"
+                    className={styles.loginInput}
+                    required
+                  />
+                  {loginError && <span className={styles.errorText}>{loginError}</span>}
+                </div>
+              ) : (
+                <div className={styles.inputGroup}>
+                  <label htmlFor="otpCode" className={styles.inputLabel}>
+                    Verification Code sent to {emailInput}
+                  </label>
+                  <input
+                    id="otpCode"
+                    type="text"
+                    maxLength={6}
+                    value={otpInput}
+                    onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                    placeholder="6-digit code"
+                    className={styles.loginInput}
+                    required
+                  />
+                  {loginError && <span className={styles.errorText}>{loginError}</span>}
+                </div>
+              )}
+
+              <button type="submit" className={styles.loginSubmitBtn}>
+                {otpSent ? 'Confirm & Sign In' : 'Send One-Time Code'}
+              </button>
+
+              {otpSent && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtpSent(false);
+                    setOtpInput('');
+                  }}
+                  className={styles.resendBtn}
+                >
+                  Change Email
+                </button>
+              )}
+            </form>
+          )}
+
+          {/* Social Auth Buttons */}
+          <div className={styles.socialGroup}>
+            <p className={styles.socialTitle}>Or continue with social provider:</p>
+            <div className={styles.socialButtons}>
+              <button
+                type="button"
+                onClick={() => handleSocialLogin('google')}
+                className={`${styles.socialBtn} ${styles.googleBtn}`}
+                data-testid="google-login-btn"
+              >
+                Google
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSocialLogin('apple')}
+                className={`${styles.socialBtn} ${styles.appleBtn}`}
+                data-testid="apple-login-btn"
+              >
+                Apple
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSocialLogin('facebook')}
+                className={`${styles.socialBtn} ${styles.facebookBtn}`}
+                data-testid="facebook-login-btn"
+              >
+                Facebook
+              </button>
+            </div>
+          </div>
 
           <div className={styles.demoAccounts}>
             <p className={styles.demoLabel}>Or choose a pre-populated profile:</p>

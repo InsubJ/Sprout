@@ -26,7 +26,10 @@ export type PlantSpecies =
   | "begonia_maculata"
   | "phalaenopsis_scarlett_jubilee"
   | "waratah"
-  | "poinsettia";
+  | "poinsettia"
+  | "jason"
+  | "remy"
+  | "blossom";
 
 export type FinalVariant = "flawless" | "steady" | "scarred";
 

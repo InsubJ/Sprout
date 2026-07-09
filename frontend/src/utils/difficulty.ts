@@ -18,33 +18,13 @@ export const FREQUENCY_MULTIPLIERS: Record<HabitFrequency, number> = {
  * Species mapping for each difficulty tier.
  */
 export const TIER_SPECIES: Record<DifficultyTier, PlantSpecies[]> = {
-  common: ['pothos', 'spider_plant', 'poinsettia'],
-  uncommon: ['bonsai', 'lavender', 'sunflower', 'maranta_leuconeura', 'alocasia_tiny_dancer'],
-  rare: ['midnight_rose', 'desert_cactus', 'string_of_pearls', 'begonia_maculata', 'phalaenopsis_scarlett_jubilee'],
-  mythical: ['golden_oak', 'ethereal_sakura', 'waratah'],
+  common: ['pothos', 'spider_plant', 'jason', 'bonsai', 'maranta_leuconeura', 'lavender'],
+  uncommon: ['sunflower', 'alocasia_tiny_dancer', 'remy', 'waratah', 'phalaenopsis_scarlett_jubilee'],
+  rare: ['midnight_rose', 'desert_cactus', 'string_of_pearls', 'begonia_maculata', 'poinsettia'],
+  mythical: ['golden_oak', 'ethereal_sakura', 'blossom'],
 };
 
-/**
- * Recommended habit frequency for each plant species.
- */
-export const RECOMMENDED_SPECIES_FREQUENCIES: Record<PlantSpecies, HabitFrequency> = {
-  pothos: 'weekly',
-  spider_plant: 'weekly',
-  bonsai: 'daily',
-  lavender: 'daily',
-  sunflower: 'daily',
-  midnight_rose: 'twice_daily',
-  desert_cactus: 'monthly',
-  golden_oak: 'yearly',
-  ethereal_sakura: 'flexible',
-  maranta_leuconeura: 'weekly',
-  alocasia_tiny_dancer: 'weekly',
-  string_of_pearls: 'weekly',
-  begonia_maculata: 'weekly',
-  phalaenopsis_scarlett_jubilee: 'daily',
-  waratah: 'daily',
-  poinsettia: 'daily',
-};
+
 
 /**
  * Input contract for difficulty calculation.
@@ -152,18 +132,22 @@ export function assignSpecies(tier: DifficultyTier, index?: number): PlantSpecie
 }
 
 /**
- * Retrieves the natural/recommended habit frequency for a given species.
+ * Resolves the DifficultyTier of a given PlantSpecies.
  *
  * Preconditions:
  * - species must be a valid PlantSpecies
  *
  * Postcondition:
- * - Returns a valid HabitFrequency
+ * - Returns one of the valid DifficultyTier values
  */
-export function getRecommendedFrequencyForSpecies(species: PlantSpecies): HabitFrequency {
-  const frequency = RECOMMENDED_SPECIES_FREQUENCIES[species];
-  if (!frequency) {
-    throw new Error(`Precondition failed: invalid species '${species}'`);
+export function getTierForSpecies(species: PlantSpecies): DifficultyTier {
+  if (!species) {
+    throw new Error('Precondition failed: species is required');
   }
-  return frequency;
+  for (const [tier, list] of Object.entries(TIER_SPECIES)) {
+    if (list.includes(species)) {
+      return tier as DifficultyTier;
+    }
+  }
+  throw new Error(`Precondition failed: species '${species}' is not registered under any tier`);
 }

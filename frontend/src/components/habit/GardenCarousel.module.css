@@ -44,8 +44,8 @@
   padding: 0.65rem 1rem 0.65rem 2.5rem;
   border-radius: 50px;
   border: 1px solid rgba(45, 90, 39, 0.2);
-  background: rgba(255, 255, 255, 0.7);
-  color: var(--color-evergreen);
+  background: var(--bg-input);
+  color: var(--text-primary);
   font-family: var(--font-outfit), sans-serif;
   font-size: 0.95rem;
   outline: none;
@@ -53,9 +53,9 @@
 }
 
 .searchInput:focus {
-  border-color: var(--color-forest-green);
+  border-color: var(--text-accent);
   box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.12);
-  background: #ffffff;
+  background: var(--bg-input-focus);
 }
 
 .filterChips {
@@ -67,9 +67,9 @@
 }
 
 .filterChip {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--bg-card-solid);
   border: 1px solid rgba(45, 90, 39, 0.15);
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   padding: 0.45rem 1.1rem;
   border-radius: 50px;
   font-size: 0.85rem;
@@ -80,14 +80,14 @@
 }
 
 .filterChip:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: var(--color-forest-green);
+  background: var(--bg-modal);
+  border-color: var(--text-accent);
 }
 
 .activeFilter {
-  background: var(--color-forest-green) !important;
-  color: var(--color-sand) !important;
-  border-color: var(--color-forest-green) !important;
+  background: var(--text-accent) !important;
+  color: var(--bg-primary) !important;
+  border-color: var(--text-accent) !important;
   box-shadow: 0 4px 8px rgba(45, 90, 39, 0.15);
 }
 
@@ -98,7 +98,7 @@
   align-items: center;
   text-align: center;
   padding: 60px 20px;
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--bg-card);
   border-radius: 20px;
   border: 1px dashed rgba(45, 90, 39, 0.15);
 }

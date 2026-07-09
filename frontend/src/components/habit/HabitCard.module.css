@@ -1,10 +1,10 @@
 .card {
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--bg-card-solid);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border-subtle);
   border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 8px 32px 0 rgba(27, 59, 43, 0.04);
+  box-shadow: 0 8px 32px 0 var(--shadow-card-lg);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -17,7 +17,7 @@
 
 .card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 40px 0 rgba(27, 59, 43, 0.1);
+  box-shadow: 0 12px 40px 0 var(--shadow-card);
 }
 
 /* Card Header */
@@ -37,7 +37,7 @@
 .name {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   line-height: 1.2;
   letter-spacing: -0.01em;
 }
@@ -53,7 +53,7 @@
   font-weight: 600;
   padding: 0.15rem 0.6rem;
   background: rgba(45, 90, 39, 0.08);
-  color: var(--color-forest-green);
+  color: var(--text-accent);
   border-radius: 50px;
 }
 
@@ -103,7 +103,7 @@
 
 .statusHealthy {
   background: rgba(45, 90, 39, 0.12);
-  color: var(--color-forest-green);
+  color: var(--text-accent);
   border: 1px solid rgba(45, 90, 39, 0.15);
 }
 
@@ -131,14 +131,19 @@
   border: 1px solid rgba(45, 90, 39, 0.05);
 }
 
+:global(.dark) .plantDetails {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
 .plantLabel {
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   opacity: 0.7;
 }
 
 .plantValue {
   font-weight: 600;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
 }
 
 /* Consistency Indicators */
@@ -151,7 +156,7 @@
 .consistencyLabel {
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   opacity: 0.8;
   letter-spacing: -0.01em;
 }
@@ -198,18 +203,18 @@
 
 .progressLabel {
   font-weight: 700;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   opacity: 0.8;
 }
 
 .progressText {
   font-weight: 700;
-  color: var(--color-forest-green);
+  color: var(--text-accent);
 }
 
 .progressBarBg {
   height: 8px;
-  background: rgba(27, 59, 43, 0.06);
+  background: var(--bg-hover);
   border-radius: 4px;
   overflow: hidden;
   position: relative;
@@ -229,7 +234,7 @@
   align-items: center;
   margin-top: auto;
   padding-top: 0.5rem;
-  border-top: 1px dashed rgba(27, 59, 43, 0.08);
+  border-top: 1px dashed var(--border-divider);
 }
 
 .streakContainer {
@@ -246,11 +251,11 @@
 
 .streakCount {
   font-weight: 800;
-  color: var(--color-evergreen);
+  color: var(--text-primary);
 }
 
 .streakText {
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   opacity: 0.7;
   font-size: 0.8rem;
 }
@@ -260,9 +265,9 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.45rem 1rem;
-  background: var(--color-forest-green);
-  color: var(--color-sand);
-  border: 1px solid var(--color-forest-green);
+  background: var(--text-accent);
+  color: var(--bg-primary);
+  border: 1px solid var(--text-accent);
   border-radius: 12px;
   font-size: 0.85rem;
   font-weight: 700;
@@ -365,10 +370,10 @@
   justify-content: center;
   align-items: center;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--bg-card);
   border-radius: 12px;
   border: 1px dashed rgba(45, 90, 39, 0.1);
-  min-height: 180px;
+  min-height: 200px;
   position: relative;
 }
 
@@ -393,7 +398,7 @@
 
 .wateringCanBtn {
   position: static !important;
-  background: var(--color-forest-green);
+  background: var(--text-accent);
   color: var(--color-sand);
   border: none;
   border-radius: 50%;
@@ -476,9 +481,9 @@
   position: absolute;
   bottom: 12px;
   left: 12px;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--bg-nav);
   backdrop-filter: blur(4px);
-  color: var(--color-evergreen);
+  color: var(--text-primary);
   border: 1px solid rgba(45, 90, 39, 0.15);
   border-radius: 50%;
   width: 42px;
@@ -494,8 +499,8 @@
 }
 
 .bookBtn:hover {
-  background: #ffffff;
-  border-color: var(--color-evergreen);
+  background: var(--bg-input-focus);
+  border-color: var(--text-primary);
   transform: scale(1.12);
   box-shadow: 0 6px 14px rgba(45, 90, 39, 0.15);
 }

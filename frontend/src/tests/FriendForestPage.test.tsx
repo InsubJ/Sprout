@@ -4,6 +4,17 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import React, { act } from 'react';
 import { createRoot } from 'react-dom/client';
+
+vi.mock('../components/common/AppProviders', () => ({
+  useAuth: () => ({
+    currentUser: { id: '11111111-1111-1111-1111-111111111111', username: 'bob' },
+    login: vi.fn(),
+    logout: vi.fn(),
+    isMockMode: true,
+    updateCurrentUser: vi.fn(),
+  }),
+}));
+
 import FriendForestPage from '../app/forest/[username]/page';
 import * as useFriendForestHookModule from '../hooks/useFriendForest';
 import { Profile } from '../types/profile';
@@ -211,13 +222,13 @@ describe('FriendForestPage Component & Hook', () => {
         searchParams: { currentUserId },
       });
 
-      // Connection status should show connected
+      // Connection status badge should be hidden when connected
       const badge = document.querySelector('[data-testid="connection-status"]');
-      expect(badge?.textContent).toBe('🟢 Connected');
+      expect(badge).toBeNull();
 
-      // Header display name & username
-      expect(document.querySelector('[data-testid="profile-display-name"]')?.textContent).toBe('Alice Cooper');
-      expect(document.querySelector('[data-testid="profile-username"]')?.textContent).toBe('@alice');
+      // Header display name formatted as username's Forest, tag hidden
+      expect(document.querySelector('[data-testid="profile-display-name"]')?.textContent).toBe("alice's Forest");
+      expect(document.querySelector('[data-testid="profile-username"]')).toBeNull();
 
       // Stats checking
       expect(document.querySelector('[data-testid="stat-total-habits"]')?.textContent).toBe('1');

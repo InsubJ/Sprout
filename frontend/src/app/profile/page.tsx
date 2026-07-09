@@ -8,7 +8,15 @@ import { ProfileServiceContext } from '../../services/ProfileServiceContext';
 import styles from './ProfilePage.module.css';
 
 export default function ProfilePage() {
-  const { currentUser, updateCurrentUser, logout } = useAuth();
+  const {
+    currentUser,
+    updateCurrentUser,
+    logout,
+    pinCode,
+    biometricsEnabled,
+    setPinCode,
+    setBiometricsEnabled
+  } = useAuth();
   const profileService = useContext(ProfileServiceContext);
   const router = useRouter();
 
@@ -16,6 +24,11 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [darkMode, setDarkMode] = useState(false);
+
+  // Security Lock state options
+  const [pinEnabled, setPinEnabled] = useState(false);
+  const [pinValue, setPinValue] = useState('');
+  const [biometricsInput, setBiometricsInput] = useState(false);
   
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -30,10 +43,14 @@ export default function ProfilePage() {
       
       const theme = localStorage.getItem('sprout_theme');
       setDarkMode(theme === 'dark');
+
+      setPinEnabled(!!pinCode);
+      setPinValue(pinCode || '');
+      setBiometricsInput(biometricsEnabled);
     } else {
       router.push('/');
     }
-  }, [currentUser, router]);
+  }, [currentUser, router, pinCode, biometricsEnabled]);
 
   const handleThemeToggle = (checked: boolean) => {
     setDarkMode(checked);
@@ -57,6 +74,11 @@ export default function ProfilePage() {
       return;
     }
 
+    if (pinEnabled && (pinValue.length !== 4 || isNaN(Number(pinValue)))) {
+      setError('PIN code must be exactly 4 digits.');
+      return;
+    }
+
     setSaving(true);
     setSuccess(null);
     setError(null);
@@ -76,7 +98,16 @@ export default function ProfilePage() {
       });
 
       updateCurrentUser(updatedProfile);
-      setSuccess('Profile updated successfully!');
+
+      // Save security keys to localstorage via context
+      if (pinEnabled) {
+        setPinCode(pinValue);
+      } else {
+        setPinCode(null);
+      }
+      setBiometricsEnabled(biometricsInput);
+
+      setSuccess('Profile and security settings updated successfully!');
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Failed to update profile.');
@@ -163,6 +194,59 @@ export default function ProfilePage() {
                 data-testid="dark-mode-checkbox"
               />
               Enable Dark Mode
+            </label>
+          </div>
+
+          <hr className={styles.divider} />
+          
+          <h3 className={styles.securityTitle}>🔒 Security & Convenience</h3>
+
+          <div className={styles.checkboxGroup}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={pinEnabled}
+                onChange={(e) => {
+                  setPinEnabled(e.target.checked);
+                  if (!e.target.checked) setPinValue('');
+                }}
+                className={styles.checkbox}
+                data-testid="pin-lock-checkbox"
+              />
+              Enable PIN Security Lock
+            </label>
+          </div>
+
+          {pinEnabled && (
+            <div className={styles.inputGroup} data-testid="pin-input-group">
+              <label htmlFor="pinValue" className={styles.label}>Set 4-Digit PIN</label>
+              <input
+                id="pinValue"
+                type="password"
+                maxLength={4}
+                value={pinValue}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, ''); // digits only
+                  setPinValue(val);
+                }}
+                className={styles.input}
+                placeholder="e.g. 1234"
+                required
+                data-testid="pin-input"
+              />
+            </div>
+          )}
+
+          <div className={styles.checkboxGroup}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={biometricsInput}
+                onChange={(e) => setBiometricsInput(e.target.checked)}
+                className={styles.checkbox}
+                data-testid="biometrics-checkbox"
+              />
+              Enable Biometric Lock (Simulated TouchID/FaceID)
             </label>
           </div>
 

@@ -9,6 +9,8 @@ export const metadata: Metadata = {
 import { AppProviders } from '../components/common/AppProviders';
 import { Navigation } from '../components/common/Navigation';
 
+import Footer from '../components/common/Footer';
+
 export default function RootLayout({
   children,
 }: {
@@ -24,17 +26,8 @@ export default function RootLayout({
       <body>
         <AppProviders>
           <Navigation />
-          <main style={{ paddingBottom: '80px' }}>{children}</main>
-          
-          <footer style={{
-            background: 'var(--color-evergreen)',
-            color: 'var(--color-sand)',
-            padding: '2rem 2rem 6.5rem 2rem',
-            textAlign: 'center',
-            fontSize: '0.875rem'
-          }}>
-            <p>&copy; {new Date().getFullYear()} Sprout. All rights reserved. Cultivate consistency, grow together.</p>
-          </footer>
+          <main className="layout-main">{children}</main>
+          <Footer />
         </AppProviders>
       </body>
     </html>

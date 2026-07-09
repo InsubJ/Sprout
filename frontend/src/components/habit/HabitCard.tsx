@@ -4,6 +4,7 @@ import styles from './HabitCard.module.css';
 import { PlantRenderer } from './PlantRenderer';
 import { WaterConfirmModal } from './WaterConfirmModal';
 import { ReflectionBookModal } from './ReflectionBookModal';
+import { formatPlantType } from '../../utils/plantFormatting';
 
 export interface HabitCardProps {
   name: string;
@@ -241,7 +242,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
           targetWaterings={targetWaterings}
           witherCount={witherCount}
           status={status}
-          size={160}
+          size={185}
         />
         {status !== 'completed' && onWater && (
           <div
@@ -319,7 +320,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       <div className={styles.plantDetails}>
         <span className={styles.plantLabel}>Plant Specimen:</span>
         <span className={styles.plantValue} data-testid="plant-type">
-          {plantType}
+          {formatPlantType(plantType)}
         </span>
       </div>
 

@@ -4,6 +4,7 @@ import { LogServiceContext } from '../../services/LogServiceContext';
 import { useAuth } from '../common/AppProviders';
 import { HabitLog } from '../../types/habitLog';
 import styles from './ReflectionBookModal.module.css';
+import { formatPlantType } from '../../utils/plantFormatting';
 
 interface FeedbackComment {
   id: string;
@@ -209,7 +210,7 @@ export const ReflectionBookModal: React.FC<ReflectionBookModalProps> = ({
         <section className={styles.metaSection}>
           <div className={styles.plantBadge}>
             <span className={styles.plantBadgeIcon}>🌿</span>
-            <span className={styles.plantBadgeText}>{plantType}</span>
+            <span className={styles.plantBadgeText}>{formatPlantType(plantType)}</span>
           </div>
           {description && (
             <div className={styles.descriptionBox}>
@@ -335,7 +336,7 @@ export const ReflectionBookModal: React.FC<ReflectionBookModalProps> = ({
                         <input
                           name="commentInput"
                           type="text"
-                          placeholder="Add an encouraging comment..."
+                          placeholder="Add a comment..."
                           className={styles.commentInput}
                           required
                         />
