@@ -19,7 +19,7 @@ export interface FriendForestPageProps {
   customNudgeService?: NudgeService;
 }
 
-export default function FriendForestPage({
+function FriendForestPage({
   params,
   searchParams,
   customNudgeService,
@@ -269,3 +269,6 @@ export default function FriendForestPage({
     </div>
   );
 }
+
+export default FriendForestPage as any;
+
