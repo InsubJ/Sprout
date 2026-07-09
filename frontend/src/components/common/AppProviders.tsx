@@ -38,6 +38,7 @@ interface AuthContextType {
   loginWithProvider: (provider: 'google' | 'apple' | 'facebook') => Promise<Profile>;
   sendOtp: (email: string) => Promise<string>;
   verifyOtp: (email: string, code: string, expectedCode: string) => Promise<Profile>;
+  googleClientId: string;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -51,6 +52,7 @@ export const useAuth = () => {
 export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const googleClientId = '656845214540-uk2ppbnpi1sj080tqsl12t3slbdl4nu6.apps.googleusercontent.com';
 
   // Lock and security states
   const [pinCode, _setPinCode] = useState<string | null>(null);
@@ -132,6 +134,23 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
   }, []);
+
+  // Dynamically load Google Identity Services client script
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !document.getElementById('google-gsi-client') && process.env.NODE_ENV !== 'test') {
+      try {
+        const script = document.createElement('script');
+        script.id = 'google-gsi-client';
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        document.body.appendChild(script);
+      } catch (e) {
+        console.error('Failed to append Google GSI script:', e);
+      }
+    }
+  }, []);
+
 
   const login = async (username: string): Promise<Profile> => {
     let profile: Profile | null = null;
@@ -228,6 +247,75 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithProvider = async (provider: 'google' | 'apple' | 'facebook'): Promise<Profile> => {
+    const activeClientId = googleClientId || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (provider === 'google' && typeof window !== 'undefined' && (window as any).google && activeClientId) {
+      return new Promise<Profile>((resolve, reject) => {
+        try {
+          const client = (window as any).google.accounts.oauth2.initTokenClient({
+            client_id: activeClientId,
+            scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+            callback: async (tokenResponse: any) => {
+              if (tokenResponse.error_description || tokenResponse.error) {
+                reject(new Error(tokenResponse.error_description || tokenResponse.error));
+                return;
+              }
+              try {
+                const res = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${tokenResponse.access_token}`);
+                if (!res.ok) {
+                  reject(new Error('Failed to fetch user info from Google'));
+                  return;
+                }
+                const userData = await res.json();
+                
+                // Extract profile data
+                const email = userData.email;
+                const name = userData.name || userData.given_name || 'Google User';
+                const username = email ? email.split('@')[0] : `google_${userData.sub}`;
+                
+                // Now, log in or create the profile
+                let profile: Profile | null = null;
+                if (isMockMode) {
+                  profile = await services.profile.getProfileByUsername(username);
+                  if (!profile) {
+                    profile = await services.profile.createProfile(username, name);
+                  }
+                } else {
+                  profile = await services.profile.getProfileByUsername(username);
+                }
+
+                if (!profile) {
+                  reject(new Error(`Profile login/creation failed for ${username}`));
+                  return;
+                }
+
+                let finalProfile: Profile = profile;
+                if (userData.picture) {
+                  finalProfile.avatar_url = userData.picture;
+                  finalProfile = await services.profile.updateProfile(finalProfile);
+                }
+
+                setCurrentUser(finalProfile);
+                localStorage.setItem('sprout_current_user', JSON.stringify(finalProfile));
+
+                const pin = localStorage.getItem(`sprout_pin_${finalProfile.id}`);
+                const bio = localStorage.getItem(`sprout_biometrics_${finalProfile.id}`) === 'true';
+                if (pin || bio) {
+                  setIsAppLocked(true);
+                }
+
+                resolve(finalProfile);
+              } catch (err) {
+                reject(err);
+              }
+            },
+          });
+          client.requestAccessToken();
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+
     const username = `${provider}_user`;
     const displayName = `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`;
 
@@ -334,7 +422,8 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
       lockApp,
       loginWithProvider,
       sendOtp,
-      verifyOtp
+      verifyOtp,
+      googleClientId
     }}>
       <ProfileServiceContext.Provider value={services.profile}>
         <HabitServiceContext.Provider value={services.habit}>

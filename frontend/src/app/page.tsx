@@ -9,6 +9,7 @@ import { Modal } from '../components/common/Modal';
 import { HabitForm, HabitFormData } from '../components/habit/HabitForm';
 import { LogServiceContext } from '../services/LogServiceContext';
 import { HabitServiceContext } from '../services/HabitServiceContext';
+import { ProfileServiceContext } from '../services/ProfileServiceContext';
 import { ReflectionService } from '../services/reflectionService';
 import { getDifficultyTier, assignSpecies } from '../utils/difficulty';
 import styles from './Dashboard.module.css';
@@ -36,12 +37,31 @@ export default function HomePage() {
     biometricsEnabled,
     loginWithProvider,
     sendOtp,
-    verifyOtp
+    verifyOtp,
+    googleClientId
   } = useAuth();
-  
+
   const [pinInput, setPinInput] = useState('');
   const [unlockError, setUnlockError] = useState<string | null>(null);
-  
+  const [googleSdkReady, setGoogleSdkReady] = useState(false);
+
+  // Check if Google SDK script is ready on window object
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if ((window as any).google) {
+        setGoogleSdkReady(true);
+      } else {
+        const interval = setInterval(() => {
+          if ((window as any).google) {
+            setGoogleSdkReady(true);
+            clearInterval(interval);
+          }
+        }, 500);
+        return () => clearInterval(interval);
+      }
+    }
+  }, []);
+
   const [showBioScanner, setShowBioScanner] = useState(false);
   const [bioScanning, setBioScanning] = useState(false);
   const [bioSuccess, setBioSuccess] = useState(false);
@@ -54,6 +74,81 @@ export default function HomePage() {
   // Custom contexts for watering
   const logService = useContext(LogServiceContext);
   const habitService = useContext(HabitServiceContext);
+  const profileService = useContext(ProfileServiceContext);
+
+  // Load official Google Sign-In button programmatically when client ID is loaded
+  useEffect(() => {
+    if (typeof window !== 'undefined' && googleSdkReady && googleClientId) {
+      try {
+        const handleCredential = async (response: any) => {
+          if (response.credential) {
+            setLoginError(null);
+            try {
+              // Decode JWT payload safely supporting unicode
+              const base64Url = response.credential.split('.')[1];
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const jsonPayload = decodeURIComponent(
+                atob(base64)
+                  .split('')
+                  .map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                  })
+                  .join('')
+              );
+              const payload = JSON.parse(jsonPayload);
+              const email = payload.email;
+              const name = payload.name || payload.given_name || 'Google User';
+              const username = email ? email.split('@')[0] : `google_${payload.sub}`;
+
+              // Handle login/creation
+              if (profileService) {
+                let profile = await profileService.getProfileByUsername(username);
+                if (!profile) {
+                  if (isMockMode) {
+                    profile = await (profileService as any).createProfile(username, name);
+                  }
+                }
+                if (profile && payload.picture) {
+                  profile.avatar_url = payload.picture;
+                  await profileService.updateProfile(profile);
+                }
+              }
+
+              await login(username);
+            } catch (err: any) {
+              setLoginError(err.message || 'Google Sign-In failed');
+            }
+          }
+        };
+
+        // Expose globally on window so the HTML data-callback can locate it if needed
+        (window as any).handleGoogleCredentialResponse = handleCredential;
+
+        (window as any).google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleCredential,
+          use_fedcm_for_prompt: true, // Support FedCM API
+        });
+
+        const container = document.getElementById('google-signin-btn-container');
+        if (container) {
+          (window as any).google.accounts.id.renderButton(container, {
+            theme: 'outline',
+            size: 'medium',
+            text: 'continue_with',
+            shape: 'pill',
+          });
+        }
+      } catch (e) {
+        console.error('Failed to initialize Google branded sign-in button:', e);
+      }
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete (window as any).handleGoogleCredentialResponse;
+      }
+    };
+  }, [googleClientId, googleSdkReady, isMockMode, login, profileService]);
 
   // Hook for user's habits (only runs if currentUser is not null)
   const { habits, fetchHabits, addHabit, loading, error } = useHabits(
@@ -363,135 +458,47 @@ export default function HomePage() {
             Cultivate your habits, grow a beautiful virtual forest, and connect with your friends.
           </p>
 
-          <div className={styles.tabsRow}>
-            <button
-              type="button"
-              onClick={() => {
-                setLoginMethod('username');
-                setLoginError(null);
-              }}
-              className={`${styles.tabBtn} ${loginMethod === 'username' ? styles.activeTabBtn : ''}`}
-            >
-              Username Sign In
+          <form onSubmit={handleLoginSubmit} className={styles.loginForm}>
+            <div className={styles.inputGroup}>
+              <label htmlFor="username" className={styles.inputLabel}>
+                Enter Username to Log In
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                placeholder="e.g. admin, alice, bob"
+                className={styles.loginInput}
+              />
+              {loginError && <span className={styles.errorText}>{loginError}</span>}
+            </div>
+
+            <button type="submit" className={styles.loginSubmitBtn}>
+              Enter Forest
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                setLoginMethod('otp');
-                setLoginError(null);
-                setOtpSent(false);
-              }}
-              className={`${styles.tabBtn} ${loginMethod === 'otp' ? styles.activeTabBtn : ''}`}
-            >
-              Email OTP
-            </button>
-          </div>
-
-          {loginMethod === 'username' ? (
-            <form onSubmit={handleLoginSubmit} className={styles.loginForm}>
-              <div className={styles.inputGroup}>
-                <label htmlFor="username" className={styles.inputLabel}>
-                  Enter Username to Log In
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  value={usernameInput}
-                  onChange={(e) => setUsernameInput(e.target.value)}
-                  placeholder="e.g. admin, alice, bob"
-                  className={styles.loginInput}
-                />
-                {loginError && <span className={styles.errorText}>{loginError}</span>}
-              </div>
-
-              <button type="submit" className={styles.loginSubmitBtn}>
-                Enter Forest
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={otpSent ? handleVerifyOtp : handleSendOtp} className={styles.loginForm}>
-              {!otpSent ? (
-                <div className={styles.inputGroup}>
-                  <label htmlFor="email" className={styles.inputLabel}>
-                    Enter Email Address
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder="e.g. alice@sprout.com"
-                    className={styles.loginInput}
-                    required
-                  />
-                  {loginError && <span className={styles.errorText}>{loginError}</span>}
-                </div>
-              ) : (
-                <div className={styles.inputGroup}>
-                  <label htmlFor="otpCode" className={styles.inputLabel}>
-                    Verification Code sent to {emailInput}
-                  </label>
-                  <input
-                    id="otpCode"
-                    type="text"
-                    maxLength={6}
-                    value={otpInput}
-                    onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
-                    placeholder="6-digit code"
-                    className={styles.loginInput}
-                    required
-                  />
-                  {loginError && <span className={styles.errorText}>{loginError}</span>}
-                </div>
-              )}
-
-              <button type="submit" className={styles.loginSubmitBtn}>
-                {otpSent ? 'Confirm & Sign In' : 'Send One-Time Code'}
-              </button>
-
-              {otpSent && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOtpSent(false);
-                    setOtpInput('');
-                  }}
-                  className={styles.resendBtn}
-                >
-                  Change Email
-                </button>
-              )}
-            </form>
-          )}
+          </form>
 
           {/* Social Auth Buttons */}
           <div className={styles.socialGroup}>
             <p className={styles.socialTitle}>Or continue with social provider:</p>
             <div className={styles.socialButtons}>
-              <button
-                type="button"
-                onClick={() => handleSocialLogin('google')}
-                className={`${styles.socialBtn} ${styles.googleBtn}`}
-                data-testid="google-login-btn"
-              >
-                Google
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSocialLogin('apple')}
-                className={`${styles.socialBtn} ${styles.appleBtn}`}
-                data-testid="apple-login-btn"
-              >
-                Apple
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSocialLogin('facebook')}
-                className={`${styles.socialBtn} ${styles.facebookBtn}`}
-                data-testid="facebook-login-btn"
-              >
-                Facebook
-              </button>
+              {googleClientId && googleSdkReady ? (
+                <div 
+                  id="google-signin-btn-container" 
+                  data-testid="google-login-btn"
+                  className={styles.googleGsiContainer}
+                ></div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleSocialLogin('google')}
+                  className={`${styles.socialBtn} ${styles.googleBtn}`}
+                  data-testid="google-login-btn"
+                >
+                  Google
+                </button>
+              )}
             </div>
           </div>
 
