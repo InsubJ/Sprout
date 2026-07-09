@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import { HabitFrequency, HabitStatus, DifficultyTier } from '../../types/habit';
 import styles from './HabitCard.module.css';
+import { PlantRenderer } from './PlantRenderer';
 
 export interface HabitCardProps {
   name: string;
@@ -13,6 +14,7 @@ export interface HabitCardProps {
   consecutiveMisses?: number;
   plantType?: string;
   difficultyTier?: DifficultyTier;
+  witherCount?: number;
   onWater?: () => void;
   onNudge?: () => void;
   isNudged?: boolean;
@@ -46,6 +48,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   consecutiveMisses = 0,
   plantType = 'Seedling',
   difficultyTier = 'common',
+  witherCount = 0,
   onWater,
   onNudge,
   isNudged = false,
@@ -66,6 +69,9 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   }
   if (consecutiveMisses < 0) {
     throw new Error('Consecutive misses cannot be negative');
+  }
+  if (witherCount < 0) {
+    throw new Error('Wither count cannot be negative');
   }
 
   // Calculate progress
@@ -143,6 +149,17 @@ export const HabitCard: React.FC<HabitCardProps> = ({
           </div>
         </div>
         {renderStatusBadge()}
+      </div>
+
+      <div className={styles.plantVisualContainer} data-testid="plant-visual-container">
+        <PlantRenderer
+          plantType={plantType}
+          currentWaterings={currentWaterings}
+          targetWaterings={targetWaterings}
+          witherCount={witherCount}
+          status={status}
+          size={160}
+        />
       </div>
 
       <div className={styles.plantDetails}>
@@ -223,3 +240,4 @@ export const HabitCard: React.FC<HabitCardProps> = ({
     </div>
   );
 };
+

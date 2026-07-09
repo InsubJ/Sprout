@@ -62,6 +62,11 @@ describe('HabitCard Component', () => {
     expect(plantType?.textContent).toBe('Pothos');
     expect(progressText?.textContent).toBe('15 / 30 (50%)');
     expect(streak?.textContent).toContain('5');
+
+    const plantVisualContainer = document.querySelector('[data-testid="plant-visual-container"]');
+    const plantRenderer = document.querySelector('[data-testid="plant-renderer"]');
+    expect(plantVisualContainer).toBeTruthy();
+    expect(plantRenderer).toBeTruthy();
   });
 
   it('renders the correct status badge depending on status prop', () => {
@@ -280,3 +285,4 @@ describe('HabitCard Component', () => {
     });
   });
 });
+

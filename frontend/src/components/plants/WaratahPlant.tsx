@@ -1,14 +1,14 @@
-import React from "react";
+﻿import React from "react";
 import { PlantProps } from "../../types/plant";
 import { usePlantGrowth } from "../../hooks/usePlantGrowth";
-import { computeRadialBloom } from "../../utils/radialBloomGeometry";
+import { computeRadialBloom } from "../../utils/plantGeometry/radialBloomGeometry";
 import GroundShadow from "./shared/GroundShadow";
 import PlantPot from "./shared/PlantPot";
 import FlawlessAura from "./shared/FlawlessAura";
 import ScarredAccents from "./shared/ScarredAccents";
 
 /**
- * WaratahPlant — Telopea (Waratah). Render-only; reuses
+ * WaratahPlant â€” Telopea (Waratah). Render-only; reuses
  * computeRadialBloom with a woody stem, fewer/longer pointed bracts,
  * and a domed crimson flower head instead of sunflower's flat petals.
  *

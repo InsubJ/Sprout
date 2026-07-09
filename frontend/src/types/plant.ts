@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Domain types for Sprout's plant rendering system.
  * Mirrors the relevant columns on the `habits` table.
  *
@@ -19,7 +19,14 @@ export type PlantSpecies =
   | "midnight_rose"
   | "desert_cactus"
   | "golden_oak"
-  | "ethereal_sakura";
+  | "ethereal_sakura"
+  | "maranta_leuconeura"
+  | "alocasia_tiny_dancer"
+  | "string_of_pearls"
+  | "begonia_maculata"
+  | "phalaenopsis_scarlett_jubilee"
+  | "waratah"
+  | "poinsettia";
 
 export type FinalVariant = "flawless" | "steady" | "scarred";
 
@@ -28,7 +35,7 @@ export interface PlantProps {
   currentWaterings: number;
   /** habit.target_waterings. Precondition: > 0. */
   targetWaterings: number;
-  /** habit.wither_count — total times withered during growth. Precondition: >= 0. */
+  /** habit.wither_count â€” total times withered during growth. Precondition: >= 0. */
   witherCount: number;
   /** habit.status */
   status: HabitStatus;
@@ -44,3 +51,5 @@ export interface GrowthState {
   finalVariant: FinalVariant;
   asymmetry: number;
 }
+
+
