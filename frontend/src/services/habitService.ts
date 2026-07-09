@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Habit, CreateHabitInput, UpdateHabitInput } from '../types/habit';
 import { validateCreateHabitInput, validateUpdateHabitInput, ValidationError } from '../utils/habitValidation';
+import { ReflectionService } from './reflectionService';
 
 const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
@@ -176,6 +177,53 @@ export class HabitService {
     }
 
     return data as Habit;
+  }
+
+  /**
+   * Checks if a habit has reached its target waterings. If so, triggers completion by generating a poetic summary,
+   * updating status to completed, saving the summary, and setting completed_at timestamp.
+   * @param habitId The UUID of the habit.
+   * @param logs The check-in logs for consistency calculation.
+   * @param reflectionService The ReflectionService instance.
+   * @returns A promise that resolves to the updated Habit if completed, or the current Habit if not.
+   */
+  async checkAndCompleteHabit(
+    habitId: string,
+    logs: any[],
+    reflectionService: ReflectionService
+  ): Promise<Habit> {
+    if (!isValidUuid(habitId)) {
+      throw new HabitValidationError('Habit ID must be a valid UUID');
+    }
+
+    const habit = await this.getHabitById(habitId);
+
+    if (habit.current_waterings >= habit.target_waterings) {
+      if (habit.status === 'completed' && habit.poetic_summary) {
+        return habit;
+      }
+
+      // Generate summary
+      const completedAt = habit.completed_at ? new Date(habit.completed_at) : new Date();
+      const createdAt = new Date(habit.created_at);
+      const durationMs = completedAt.getTime() - createdAt.getTime();
+      const durationDays = Math.max(1, Math.ceil(durationMs / (1000 * 60 * 60 * 24)));
+
+      const reflection = reflectionService.generateReflection({
+        durationDays,
+        witheredCount: habit.wither_count,
+        consistencyLogs: logs,
+        plantType: habit.plant_type
+      });
+
+      return this.updateHabit(habitId, {
+        status: 'completed',
+        poetic_summary: reflection.summary,
+        completed_at: completedAt.toISOString()
+      });
+    }
+
+    return habit;
   }
 
   /**

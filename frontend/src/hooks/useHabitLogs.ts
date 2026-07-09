@@ -2,6 +2,9 @@
 import { HabitLog } from '../types/habitLog';
 import { LogService } from '../services/logService';
 import { LogServiceContext } from '../services/LogServiceContext';
+import { HabitServiceContext } from '../services/HabitServiceContext';
+import { HabitService } from '../services/habitService';
+import { ReflectionService } from '../services/reflectionService';
 
 const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 function isValidUuid(id: string): boolean {
@@ -28,10 +31,17 @@ export interface UseHabitLogsResult {
 export function useHabitLogs(
   habitId: string,
   userId: string,
-  customService?: LogService
+  customService?: LogService,
+  customHabitService?: HabitService,
+  customReflectionService?: ReflectionService
 ): UseHabitLogsResult {
   const contextService = useContext(LogServiceContext);
   const service = customService || contextService;
+
+  const contextHabitService = useContext(HabitServiceContext);
+  const habitService = customHabitService || contextHabitService;
+
+  const reflectionService = customReflectionService || new ReflectionService();
 
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -104,6 +114,12 @@ export function useHabitLogs(
       const created = await service.createLog({ habit_id: habitId, user_id: userId });
       // Invariant: prepend new check-in to preserve order (newest first)
       setLogs(prev => [created, ...prev]);
+
+      if (habitService) {
+        const allLogs = await service.getLogsByHabitId(habitId);
+        await habitService.checkAndCompleteHabit(habitId, allLogs, reflectionService);
+      }
+
       return created;
     } catch (err: any) {
       const errMsg = err instanceof Error ? err.message : String(err);
