@@ -123,10 +123,10 @@ describe('Difficulty Utility (difficulty.ts)', () => {
 
   describe('Species Mapping', () => {
     it('should return correct species list for each tier', () => {
-      expect(getSpeciesForTier('common')).toEqual(['pothos', 'spider_plant']);
-      expect(getSpeciesForTier('uncommon')).toEqual(['bonsai', 'lavender', 'sunflower']);
-      expect(getSpeciesForTier('rare')).toEqual(['midnight_rose', 'desert_cactus']);
-      expect(getSpeciesForTier('mythical')).toEqual(['golden_oak', 'ethereal_sakura']);
+      expect(getSpeciesForTier('common')).toEqual(['pothos', 'spider_plant', 'poinsettia']);
+      expect(getSpeciesForTier('uncommon')).toEqual(['bonsai', 'lavender', 'sunflower', 'maranta_leuconeura', 'alocasia_tiny_dancer']);
+      expect(getSpeciesForTier('rare')).toEqual(['midnight_rose', 'desert_cactus', 'string_of_pearls', 'begonia_maculata', 'phalaenopsis_scarlett_jubilee']);
+      expect(getSpeciesForTier('mythical')).toEqual(['golden_oak', 'ethereal_sakura', 'waratah']);
     });
 
     it('should throw error for invalid tier in getSpeciesForTier', () => {
@@ -136,13 +136,13 @@ describe('Difficulty Utility (difficulty.ts)', () => {
     it('should assign species deterministically when index is provided', () => {
       expect(assignSpecies('common', 0)).toBe('pothos');
       expect(assignSpecies('common', 1)).toBe('spider_plant');
-      expect(assignSpecies('common', 2)).toBe('pothos'); // wrap around
-      expect(assignSpecies('common', 3)).toBe('spider_plant');
+      expect(assignSpecies('common', 2)).toBe('poinsettia'); // wrap around
+      expect(assignSpecies('common', 3)).toBe('pothos');
     });
 
     it('should assign a valid species from the list when index is not provided', () => {
       const species = assignSpecies('rare');
-      expect(['midnight_rose', 'desert_cactus']).toContain(species);
+      expect(['midnight_rose', 'desert_cactus', 'string_of_pearls', 'begonia_maculata', 'phalaenopsis_scarlett_jubilee']).toContain(species);
     });
 
     it('should throw error if index is negative or not integer (Precondition)', () => {

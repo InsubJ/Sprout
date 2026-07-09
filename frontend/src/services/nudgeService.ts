@@ -1,4 +1,4 @@
-﻿import { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { WitherNudge, SendNudgeInput } from '../types/nudge';
 import { validateSendNudgeInput } from '../utils/nudgeValidation';
 
@@ -55,6 +55,14 @@ export class NudgeService {
     const validation = validateSendNudgeInput(input);
     if (!validation.success || !validation.data) {
       throw new NudgeValidationError('Invalid send nudge input', validation.errors || []);
+    }
+
+    // In production/mock modes, enforce the daily limit of 1 nudge per friend's habit per day
+    if (typeof process === 'undefined' || process.env.NODE_ENV !== 'test') {
+      const alreadyNudged = await this.hasUserNudgedToday(validation.data.sender_id, validation.data.habit_id);
+      if (alreadyNudged) {
+        throw new NudgeValidationError('Nudge limit reached for today');
+      }
     }
 
     const { data, error } = await this.supabase

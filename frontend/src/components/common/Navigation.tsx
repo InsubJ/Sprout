@@ -2,15 +2,21 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from './AppProviders';
 import styles from './Navigation.module.css';
 
 export const Navigation: React.FC = () => {
   const { currentUser, logout, isMockMode } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
 
   if (!currentUser) return null;
+
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  };
 
   const sanctuaryLink = `/sanctuary/${currentUser.username}`;
   
@@ -18,7 +24,7 @@ export const Navigation: React.FC = () => {
     { label: 'Forest', href: '/', icon: '🌿' },
     { label: 'Sanctuary', href: sanctuaryLink, icon: '🌳' },
     { label: 'Friends', href: '/friends', icon: '👥' },
-    { label: 'Demo', href: '/demo', icon: '🧪' },
+    { label: 'Lab', href: '/demo', icon: '🧪' },
   ];
 
   return (
@@ -45,10 +51,10 @@ export const Navigation: React.FC = () => {
           </ul>
         </nav>
         <div className={styles.userSection}>
-          <span className={styles.welcomeText}>
-            Hello, <strong>{currentUser.display_name || currentUser.username}</strong>
-          </span>
-          <button onClick={logout} className={styles.logoutBtn}>
+          <Link href="/profile" className={styles.profileLinkBtn} title="View and Edit Profile Settings">
+            Hello, <strong>{currentUser.display_name || currentUser.username}</strong> 👤
+          </Link>
+          <button onClick={handleLogout} className={styles.logoutBtn}>
             Logout
           </button>
         </div>
@@ -65,10 +71,10 @@ export const Navigation: React.FC = () => {
             </Link>
           );
         })}
-        <button onClick={logout} className={styles.tabItemButton}>
-          <span className={styles.tabIcon}>🚪</span>
-          <span className={styles.tabLabel}>Logout</span>
-        </button>
+        <Link href="/profile" className={`${styles.tabItem} ${pathname === '/profile' ? styles.activeTab : ''}`}>
+          <span className={styles.tabIcon}>👤</span>
+          <span className={styles.tabLabel}>Profile</span>
+        </Link>
       </nav>
     </>
   );

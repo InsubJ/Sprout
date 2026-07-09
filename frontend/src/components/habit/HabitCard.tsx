@@ -172,6 +172,49 @@ export const HabitCard: React.FC<HabitCardProps> = ({
     );
   };
 
+  // Check daily watering limits
+  const getWateringsToday = (): number => {
+    if (!habitId) return 0;
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return 0;
+    try {
+      const stored = localStorage.getItem('sprout_logs');
+      if (!stored) return 0;
+      const logs = JSON.parse(stored);
+      const today = new Date();
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+      const todayEnd = todayStart + 24 * 60 * 60 * 1000;
+      
+      const todaysLogs = logs.filter((l: any) => {
+        const time = new Date(l.created_at).getTime();
+        return l.habit_id === habitId && time >= todayStart && time < todayEnd;
+      });
+      return todaysLogs.length;
+    } catch {
+      return 0;
+    }
+  };
+
+  const wateringsToday = getWateringsToday();
+  const maxPerDay = frequency === 'twice_daily' ? 2 : 1;
+  const isLimitReached = wateringsToday >= maxPerDay;
+
+  const [showWateringTooltip, setShowWateringTooltip] = useState(false);
+  const [tooltipTimeoutId, setTooltipTimeoutId] = useState<any>(null);
+
+  const handleWaterTap = (e: React.MouseEvent) => {
+    if (isLimitReached) {
+      e.stopPropagation();
+      setShowWateringTooltip(true);
+      if (tooltipTimeoutId) {
+        clearTimeout(tooltipTimeoutId);
+      }
+      const timeout = setTimeout(() => {
+        setShowWateringTooltip(false);
+      }, 3000);
+      setTooltipTimeoutId(timeout);
+    }
+  };
+
   return (
     <div className={styles.card} data-testid="habit-card">
       <div className={styles.header}>
@@ -201,35 +244,61 @@ export const HabitCard: React.FC<HabitCardProps> = ({
           size={160}
         />
         {status !== 'completed' && onWater && (
-          <button
-            type="button"
-            className={styles.wateringCanBtn}
-            onClick={() => {
-              if (onWaterWithDetails) {
-                setIsWaterOpen(true);
-              } else {
-                onWater();
+          <div
+            className={styles.wateringCanWrapper}
+            onMouseEnter={() => {
+              if (isLimitReached) {
+                setShowWateringTooltip(true);
               }
             }}
-            data-testid="water-button"
-            aria-label="Water plant"
-            title="Water plant"
+            onMouseLeave={() => {
+              setShowWateringTooltip(false);
+            }}
+            onClick={handleWaterTap}
           >
-            <svg
-              className={styles.wateringCanIcon}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <button
+              type="button"
+              className={styles.wateringCanBtn}
+              onClick={(e) => {
+                if (isLimitReached) {
+                  e.stopPropagation();
+                  return;
+                }
+                if (onWaterWithDetails) {
+                  setIsWaterOpen(true);
+                } else {
+                  onWater();
+                }
+              }}
+              disabled={isLimitReached}
+              data-testid="water-button"
+              aria-label="Water plant"
             >
-              <path d="M3 11a4 4 0 0 0 4 4h7a4 4 0 0 0 4-4v-3H3v3z" />
-              <path d="M8 8a3 3 0 0 0-3-3H4a2 2 0 0 0-2 2v2" />
-              <path d="M18 10l4-2v4l-4-2" />
-              <path d="M9 8h4" />
-            </svg>
-          </button>
+              <svg
+                className={styles.wateringCanIcon}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {/* Body */}
+                <path d="M7 12h8v5a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3v-5z" />
+                <path d="M7 12V9a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3" />
+                {/* Spout & Rose */}
+                <path d="M15 16l5-4" />
+                <path d="M19 10l2.5 2.5" />
+                {/* Handle */}
+                <path d="M7 14a4 4 0 0 1-4-4v0a4 4 0 0 1 4-4h1" />
+              </svg>
+            </button>
+            {showWateringTooltip && (
+              <div className={styles.wateringTooltip} data-testid="watering-tooltip">
+                daily watering limit reached
+              </div>
+            )}
+          </div>
         )}
 
         {/* Book Button */}
@@ -290,6 +359,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
             disabled={isNudged || nudgeLoading}
             data-testid="nudge-button"
             aria-label={isNudged ? "Already nudged today" : "Nudge friend"}
+            title={isNudged ? "Already nudged today (Limit: 1 per day)" : "Nudge friend to water this habit (Limit: 1 per day)"}
           >
             {isNudged ? 'Nudged' : 'Nudge'}
           </button>

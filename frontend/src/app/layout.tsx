@@ -29,7 +29,7 @@ export default function RootLayout({
           <footer style={{
             background: 'var(--color-evergreen)',
             color: 'var(--color-sand)',
-            padding: '2rem',
+            padding: '2rem 2rem 6.5rem 2rem',
             textAlign: 'center',
             fontSize: '0.875rem'
           }}>

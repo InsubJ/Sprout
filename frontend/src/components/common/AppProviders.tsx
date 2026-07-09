@@ -27,6 +27,7 @@ interface AuthContextType {
   login: (username: string) => Promise<Profile>;
   logout: () => void;
   isMockMode: boolean;
+  updateCurrentUser: (updated: Profile) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -74,7 +75,7 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
-    // Retrieve current user from localStorage
+    // Retrieve current user and theme from localStorage
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('sprout_current_user');
       if (stored) {
@@ -85,6 +86,15 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
           // ignore
         }
       }
+
+      // Initialize theme setting
+      const theme = localStorage.getItem('sprout_theme');
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+
       setLoading(false);
     }
   }, []);
@@ -115,6 +125,13 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('sprout_current_user');
   };
 
+  const updateCurrentUser = (updated: Profile) => {
+    setCurrentUser(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sprout_current_user', JSON.stringify(updated));
+    }
+  };
+
   if (loading) {
     return (
       <div style={{
@@ -132,7 +149,7 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, isMockMode }}>
+    <AuthContext.Provider value={{ currentUser, login, logout, isMockMode, updateCurrentUser }}>
       <ProfileServiceContext.Provider value={services.profile}>
         <HabitServiceContext.Provider value={services.habit}>
           <FriendshipServiceContext.Provider value={services.friendship}>

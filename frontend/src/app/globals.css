@@ -15,8 +15,34 @@
   --accent-pink: var(--color-pink);
   --accent-amber: var(--color-amber);
 
+  /* Card and Form tokens */
+  --bg-card: rgba(255, 255, 255, 0.55);
+  --border-card: rgba(255, 255, 255, 0.6);
+  --bg-input: rgba(255, 255, 255, 0.75);
+
   /* Fonts */
   --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.dark {
+  --color-sage: #1e293b;
+  --color-sand: #0f172a;
+  --color-evergreen: #f8fafc;
+  --color-forest-green: #4ade80;
+  --color-pink: #f472b6;
+  --color-amber: #fbbf24;
+
+  --bg-primary: var(--color-sand);
+  --bg-secondary: var(--color-sage);
+  --bg-dark: #020617;
+  --text-primary: var(--color-evergreen);
+  --text-secondary: var(--color-forest-green);
+  --accent-pink: var(--color-pink);
+  --accent-amber: var(--color-amber);
+
+  --bg-card: rgba(30, 41, 59, 0.65);
+  --border-card: rgba(255, 255, 255, 0.08);
+  --bg-input: rgba(15, 23, 42, 0.8);
 }
 
 /* Reset styles */
@@ -37,4 +63,182 @@ body {
 
 main {
   flex: 1;
+}
+
+/* Global Component Dark Mode Overrides */
+.dark [class*="card"],
+.dark [class*="container"] {
+  background-color: rgba(30, 41, 59, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+/* Ensure all text inside dark containers is bright and readable */
+.dark [class*="card"] h1,
+.dark [class*="card"] h2,
+.dark [class*="card"] h3,
+.dark [class*="card"] h4,
+.dark [class*="card"] p,
+.dark [class*="card"] span,
+.dark [class*="container"] h1,
+.dark [class*="container"] h2,
+.dark [class*="container"] h3,
+.dark [class*="container"] p,
+.dark [class*="container"] span {
+  color: #f8fafc !important;
+}
+
+/* Muted / smaller text should be a clear bright grey for excellent contrast */
+.dark [class*="subtitle"],
+.dark [class*="username"],
+.dark [class*="emptyState"],
+.dark [class*="plantLabel"],
+.dark [class*="streakText"],
+.dark [class*="progressLabel"],
+.dark [class*="demoLabel"],
+.dark [class*="dangerDesc"] {
+  color: #cbd5e1 !important;
+  opacity: 0.95 !important;
+}
+
+/* Login screen demo chips */
+.dark [class*="demoChip"] {
+  background-color: rgba(15, 23, 42, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+}
+
+.dark [class*="demoChip"]:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark [class*="item"] {
+  background-color: rgba(15, 23, 42, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  color: #f8fafc !important;
+}
+
+.dark [class*="item"]:hover {
+  background-color: rgba(30, 41, 59, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark [class*="input"],
+.dark [class*="selectInput"] {
+  background-color: rgba(15, 23, 42, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+}
+
+.dark [class*="input"]:focus,
+.dark [class*="selectInput"]:focus {
+  border-color: #4ade80 !important;
+  background-color: rgba(15, 23, 42, 0.9) !important;
+}
+
+/* Modals & Dialogs */
+.dark [class*="modal"],
+.dark [class*="dialog"],
+.dark [class*="modalContent"],
+.dark [class*="content"] {
+  background-color: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+
+.dark [class*="commentItem"] {
+  background-color: rgba(15, 23, 42, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark [class*="commentInput"] {
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+
+/* App Header & Navigation */
+.dark [class*="desktopHeader"] {
+  background-color: rgba(15, 23, 42, 0.9) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark [class*="mobileTabBar"] {
+  background-color: rgba(15, 23, 42, 0.9) !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark [class*="tabItem"] {
+  color: #94a3b8 !important;
+}
+
+.dark [class*="activeTab"] {
+  color: #4ade80 !important;
+}
+
+/* Habit Card Specifics */
+.dark [class*="plantVisualContainer"] {
+  background-color: rgba(15, 23, 42, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark [class*="plantDetails"] {
+  background-color: rgba(15, 23, 42, 0.4) !important;
+  color: #94a3b8 !important;
+}
+
+.dark [class*="progressBarBg"] {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark [class*="divider"] {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Stats Card / Dashboards */
+.dark [class*="statsContainer"],
+.dark [class*="statsCard"] {
+  background-color: rgba(30, 41, 59, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+/* Lab (Demo) Specifics */
+.dark [class*="controlPanel"] {
+  background-color: rgba(30, 41, 59, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark [class*="statusBtn"] {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #94a3b8 !important;
+}
+
+.dark [class*="statusBtn"]:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark [class*="activeHealthy"] {
+  background-color: rgba(74, 222, 128, 0.15) !important;
+  color: #4ade80 !important;
+  border-color: #4ade80 !important;
+}
+
+.dark [class*="activeWithered"] {
+  background-color: rgba(248, 113, 113, 0.15) !important;
+  color: #f87171 !important;
+  border-color: #f87171 !important;
+}
+
+.dark [class*="activeCompleted"] {
+  background-color: rgba(244, 114, 182, 0.15) !important;
+  color: #f472b6 !important;
+  border-color: #f472b6 !important;
+}
+
+.dark footer {
+  background-color: #020617 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }

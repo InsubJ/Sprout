@@ -51,17 +51,17 @@
 .frequencyBadge {
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.15rem 0.5rem;
+  padding: 0.15rem 0.6rem;
   background: rgba(45, 90, 39, 0.08);
   color: var(--color-forest-green);
-  border-radius: 12px;
+  border-radius: 50px;
 }
 
 .tierBadge {
   font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.15rem 0.5rem;
-  border-radius: 12px;
+  padding: 0.15rem 0.6rem;
+  border-radius: 50px;
   text-transform: capitalize;
 }
 
@@ -372,10 +372,27 @@
   position: relative;
 }
 
-.wateringCanBtn {
+.plantVisualContainer svg {
+  shape-rendering: geometricPrecision;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+.wateringCanWrapper {
   position: absolute;
   bottom: 12px;
   right: 12px;
+  display: inline-block;
+  z-index: 20;
+}
+
+/* Cursor change on wrapper when limits are reached */
+.wateringCanWrapper:has(button:disabled) {
+  cursor: not-allowed;
+}
+
+.wateringCanBtn {
+  position: static !important;
   background: var(--color-forest-green);
   color: var(--color-sand);
   border: none;
@@ -388,27 +405,71 @@
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(45, 90, 39, 0.25);
   transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  z-index: 10;
 }
 
-.wateringCanBtn:hover {
+.wateringCanBtn:disabled {
+  background: #d1d5db !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0.65;
+  pointer-events: none; /* Allows mouse events to hit the parent wrapper */
+}
+
+.wateringCanBtn:hover:not(:disabled) {
   background: var(--color-evergreen);
   transform: scale(1.12);
   box-shadow: 0 6px 14px rgba(27, 59, 43, 0.35);
 }
 
-.wateringCanBtn:active {
+.wateringCanBtn:active:not(:disabled) {
   transform: scale(0.95);
 }
 
 .wateringCanIcon {
   width: 22px;
   height: 22px;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scaleX(-1); /* Flip horizontally so spout faces the plant */
 }
 
-.wateringCanBtn:hover .wateringCanIcon {
-  transform: rotate(-25deg) scale(1.05);
+.wateringCanBtn:hover:not(:disabled) .wateringCanIcon {
+  transform: scaleX(-1); /* Keep it strictly facing left without tilting */
+}
+
+/* Tooltip styles */
+.wateringTooltip {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(33, 33, 33, 0.95);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: tooltipFadeIn 0.15s ease-out;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.wateringTooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(33, 33, 33, 0.95) transparent transparent transparent;
+}
+
+@keyframes tooltipFadeIn {
+  from { opacity: 0; transform: translate(-50%, 4px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
 }
 
 .bookBtn {

@@ -94,4 +94,35 @@ export class ProfileService {
 
     return data as Profile | null;
   }
+
+  /**
+   * Updates an existing user profile's details.
+   * Preconditions:
+   * - profile must contain a valid id, non-empty username.
+   */
+  async updateProfile(profile: Profile): Promise<Profile> {
+    if (!profile.id || !isValidUuid(profile.id)) {
+      throw new Error('Precondition failed: Profile ID must be a valid UUID');
+    }
+    if (!profile.username || profile.username.trim() === '') {
+      throw new Error('Precondition failed: Username is required');
+    }
+
+    const { data, error } = await this.supabase
+      .from('profiles')
+      .update({
+        username: profile.username.trim(),
+        display_name: profile.display_name?.trim() || null,
+        avatar_url: profile.avatar_url?.trim() || null,
+      })
+      .eq('id', profile.id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update profile: ${error.message}`);
+    }
+
+    return data as Profile;
+  }
 }

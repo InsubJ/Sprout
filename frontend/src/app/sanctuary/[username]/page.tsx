@@ -79,10 +79,6 @@ export default function SanctuaryPage({
 
   return (
     <div className={styles.container} data-testid="sanctuary-page">
-      <Link href="/" className={styles.backLink}>
-        <span>←</span> Back to Dashboard
-      </Link>
-
       {friendProfile && (
         <>
           {/* Profile Header */}

@@ -50,9 +50,9 @@ export default function EtherealSakuraPlant({
   const sparkles = computeGlimmerSparkles(growthPercent, topY);
   const petals = computeFloatingPetals(growthPercent, topY);
 
-  const trunkColor = isWithered ? "#9C9086" : "#D9CFC4";
-  const blossomColor = isWithered ? "#C9B8B0" : "#F7C9E0";
-  const blossomColorLight = isWithered ? "#DACCC4" : "#FBDCEA";
+  const trunkColor = isWithered ? "#786E65" : "#A69282";
+  const blossomColor = isWithered ? "#9C867F" : "#FF5E97";
+  const blossomColorLight = isWithered ? "#BDAB9A" : "#FFB3D1";
   const showCrown = growthPercent >= 15;
   const showAura = isCompleted && finalVariant === "flawless";
   const showScars = isCompleted && finalVariant === "scarred";

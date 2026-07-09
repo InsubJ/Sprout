@@ -234,32 +234,34 @@ export default function HomePage() {
       </section>
 
       {/* Carousel of active habits */}
-      {loading ? (
-        <div className={styles.loadingContainer}>
-          <div className={styles.spinner} />
-          <p>Walking into the woods...</p>
-        </div>
-      ) : error ? (
-        <div className={styles.errorContainer}>
-          <p>Error: {error}</p>
-        </div>
-      ) : activeHabits.length === 0 ? (
-        <div className={styles.emptyState}>
-          <span className={styles.emptyIcon}>🌱</span>
-          <h3>Your forest has no active trees in progress!</h3>
-          <p>Plant your very first seed or check your completed trees in the Sanctuary.</p>
-          <button onClick={() => setIsAddOpen(true)} className={styles.plantSeedBtn}>
-            Plant Seed
-          </button>
-        </div>
-      ) : (
-        <GardenCarousel
-          habits={activeHabits}
-          currentViewerId={currentUser.id}
-          onWater={handleWaterHabit}
-          onWaterWithDetails={handleWaterHabitWithDetails}
-        />
-      )}
+      <div className={styles.carouselSection}>
+        {loading ? (
+          <div className={styles.loadingContainer}>
+            <div className={styles.spinner} />
+            <p>Walking into the woods...</p>
+          </div>
+        ) : error ? (
+          <div className={styles.errorContainer}>
+            <p>Error: {error}</p>
+          </div>
+        ) : activeHabits.length === 0 ? (
+          <div className={styles.emptyState}>
+            <span className={styles.emptyIcon}>🌱</span>
+            <h3>Your forest has no active trees in progress!</h3>
+            <p>Plant your very first seed or check your completed trees in the Sanctuary.</p>
+            <button onClick={() => setIsAddOpen(true)} className={styles.plantSeedBtn}>
+              Plant Seed
+            </button>
+          </div>
+        ) : (
+          <GardenCarousel
+            habits={activeHabits}
+            currentViewerId={currentUser.id}
+            onWater={handleWaterHabit}
+            onWaterWithDetails={handleWaterHabitWithDetails}
+          />
+        )}
+      </div>
 
       {/* Add Habit Modal */}
       <Modal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} title="Plant New Seed">

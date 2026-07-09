@@ -1,16 +1,46 @@
 import React from "react";
 import { PlantProps } from "../../types/plant";
 import { usePlantGrowth } from "../../hooks/usePlantGrowth";
-import { computeRadialBloom } from "../../utils/plantGeometry/radialBloomGeometry";
+import { computeRadialBloom, computeBloomPetals, RadialBloomPetal } from "../../utils/plantGeometry/radialBloomGeometry";
 import GroundShadow from "./shared/GroundShadow";
 import PlantPot from "./shared/PlantPot";
 import FlawlessAura from "./shared/FlawlessAura";
 import ScarredAccents from "./shared/ScarredAccents";
 
 /**
- * PoinsettiaPlant — render-only; reuses computeRadialBloom with long
- * pointed bracts fanned flat (the iconic "star" silhouette) and small
- * yellow cyathia at center instead of a solid disc.
+ * buildBractPath
+ *
+ * Pure path builder for a single star-bract: a curved, pointed leaf
+ * shape (not a thin straight-edged diamond) that bulges outward on
+ * each side before tapering to the tip. Width scales with headRadius
+ * so bracts thicken proportionally as the bloom grows.
+ *
+ * Local to this component since only poinsettia currently wants this
+ * exact bract silhouette — not yet promoted to a shared utility.
+ */
+function buildBractPath(centerX: number, centerY: number, petal: RadialBloomPetal, width: number): string {
+    const dx = petal.cx - centerX;
+    const dy = petal.cy - centerY;
+    const length = Math.hypot(dx, dy) || 1;
+    const px = -dy / length;
+    const py = dx / length;
+
+    const beltT = 0.42;
+    const beltX = centerX + dx * beltT;
+    const beltY = centerY + dy * beltT;
+    const leftX = beltX + px * width;
+    const leftY = beltY + py * width;
+    const rightX = beltX - px * width;
+    const rightY = beltY - py * width;
+
+    return `M${centerX} ${centerY} Q${leftX} ${leftY} ${petal.cx} ${petal.cy} Q${rightX} ${rightY} ${centerX} ${centerY} Z`;
+}
+
+/**
+ * PoinsettiaPlant — render-only; reuses computeRadialBloom for the main
+ * bloom cluster and computeBloomPetals for two smaller satellite
+ * clusters, so the plant reads as several bract rosettes grouped atop
+ * the stem rather than a single flower.
  *
  *   <PoinsettiaPlant
  *     currentWaterings={habit.current_waterings}
@@ -33,18 +63,15 @@ export default function PoinsettiaPlant({
         status,
     });
 
-    const { stemPath, headX, headY, headRadius, petals, leafPositions } = computeRadialBloom(
-        growthPercent,
-        {
-            heightBase: 35,
-            heightMultiplier: 1.15,
-            headRadiusBase: 6,
-            headRadiusMultiplier: 0.24,
-            petalCount: 8,
-            petalReach: 1.5,
-            leafHeightFractions: [0.3, 0.5, 0.7, 0.85],
-        }
-    );
+    const { stemPath, headX, headY, headRadius, leafPositions } = computeRadialBloom(growthPercent, {
+        heightBase: 35,
+        heightMultiplier: 1.15,
+        headRadiusBase: 6,
+        headRadiusMultiplier: 0.24,
+        petalCount: 8,
+        petalReach: 1.5,
+        leafHeightFractions: [0.3, 0.5, 0.7, 0.85],
+    });
 
     const stemColor = isWithered ? "#9C9377" : "#3F6B3F";
     const bractColor = isWithered ? "#C9A2A0" : "#C41E2C";
@@ -52,6 +79,18 @@ export default function PoinsettiaPlant({
     const leafColor = isWithered ? "#A9A98F" : "#2F5A2F";
     const showAura = isCompleted && finalVariant === "flawless";
     const showScars = isCompleted && finalVariant === "scarred";
+
+    // Three clustered bloom centers: one main head plus two smaller
+    // satellites offset to either side, like a real poinsettia's grouped
+    // bract rosettes.
+    const bloomClusters =
+        headRadius > 6
+            ? [
+                { cx: headX, cy: headY, radius: headRadius },
+                { cx: headX - headRadius * 1.5, cy: headY + headRadius * 0.55, radius: headRadius * 0.72 },
+                { cx: headX + headRadius * 1.5, cy: headY + headRadius * 0.4, radius: headRadius * 0.68 },
+            ]
+            : [];
 
     return (
         <svg
@@ -81,30 +120,29 @@ export default function PoinsettiaPlant({
                 />
             ))}
 
-            {headRadius > 6 && (
-                <g opacity={isWithered ? 0.6 : 1}>
-                    {petals.map((p, i) => (
-                        <path
-                            key={i}
-                            d={`M${headX} ${headY} 
-                  L${headX + (p.cx - headX) * 0.3} ${headY + (p.cy - headY) * 0.3 - 3}
-                  L${p.cx} ${p.cy}
-                  L${headX + (p.cx - headX) * 0.3} ${headY + (p.cy - headY) * 0.3 + 3}
-                  Z`}
-                            fill={bractColor}
-                        />
-                    ))}
-                    {[0, 1, 2, 3].map((c) => (
-                        <circle
-                            key={c}
-                            cx={headX + (c % 2 === 0 ? -1 : 1) * 3}
-                            cy={headY + (c < 2 ? -1 : 1) * 3}
-                            r="2"
-                            fill={cyathiaColor}
-                        />
-                    ))}
-                </g>
-            )}
+            {bloomClusters.map((cluster, c) => {
+                const petals = computeBloomPetals(cluster.cx, cluster.cy, cluster.radius, 8, 1.6);
+                // Bract width scales with this cluster's own radius, not just
+                // the main head, so satellites thicken proportionally too.
+                const bractWidth = cluster.radius * 0.55;
+
+                return (
+                    <g key={c} opacity={isWithered ? 0.6 : 1}>
+                        {petals.map((p, i) => (
+                            <path key={i} d={buildBractPath(cluster.cx, cluster.cy, p, bractWidth)} fill={bractColor} />
+                        ))}
+                        {[0, 1, 2, 3].map((k) => (
+                            <circle
+                                key={k}
+                                cx={cluster.cx + (k % 2 === 0 ? -1 : 1) * cluster.radius * 0.25}
+                                cy={cluster.cy + (k < 2 ? -1 : 1) * cluster.radius * 0.25}
+                                r={cluster.radius * 0.16}
+                                fill={cyathiaColor}
+                            />
+                        ))}
+                    </g>
+                );
+            })}
 
             {showScars && (
                 <ScarredAccents

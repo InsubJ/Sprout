@@ -209,6 +209,27 @@ export class MockProfileService {
     setStored('sprout_profiles', profiles);
     return newProfile;
   }
+
+  async updateProfile(profile: Profile): Promise<Profile> {
+    const profiles = getStored<Profile[]>('sprout_profiles', DEFAULT_PROFILES);
+    const index = profiles.findIndex(p => p.id === profile.id);
+    if (index === -1) throw new Error('Profile not found');
+
+    if (profiles[index].username.toLowerCase() !== profile.username.toLowerCase()) {
+      const existing = profiles.find(p => p.username.toLowerCase() === profile.username.toLowerCase());
+      if (existing) throw new Error('Username already exists');
+    }
+
+    const updated: Profile = {
+      ...profiles[index],
+      username: profile.username.trim(),
+      display_name: profile.display_name?.trim() || null,
+      avatar_url: profile.avatar_url?.trim() || null,
+    };
+    profiles[index] = updated;
+    setStored('sprout_profiles', profiles);
+    return updated;
+  }
 }
 
 export class MockHabitService {

@@ -24,6 +24,34 @@ export interface RadialBloomOptions {
 }
 
 /**
+ * computeBloomPetals
+ *
+ * Pure petal-ring placement around an arbitrary center. Extracted out of
+ * computeRadialBloom so multi-bloom species (e.g. poinsettia's cluster of
+ * several small bract rosettes) can generate additional rings without
+ * duplicating the angle-loop math.
+ *
+ * Precondition: radius >= 0, count >= 1.
+ * Postcondition: returns exactly `count` petals evenly spaced by angle.
+ */
+export function computeBloomPetals(
+    centerX: number,
+    centerY: number,
+    radius: number,
+    count: number,
+    reach: number
+): RadialBloomPetal[] {
+    return Array.from({ length: count }, (_, i) => {
+        const angleRad = (i / count) * Math.PI * 2;
+        return {
+            cx: centerX + Math.cos(angleRad) * radius * reach,
+            cy: centerY + Math.sin(angleRad) * radius * reach,
+            rotationDeg: (angleRad * 180) / Math.PI,
+        };
+    });
+}
+
+/**
  * computeRadialBloom
  *
  * Generic single-stem geometry topped with a radially-arranged bloom
@@ -65,14 +93,7 @@ export function computeRadialBloom(
         }
     });
 
-    const petals: RadialBloomPetal[] = Array.from({ length: petalCount }, (_, i) => {
-        const angleRad = (i / petalCount) * Math.PI * 2;
-        return {
-            cx: 200 + Math.cos(angleRad) * headRadius * petalReach,
-            cy: headY + Math.sin(angleRad) * headRadius * petalReach,
-            rotationDeg: (angleRad * 180) / Math.PI,
-        };
-    });
+    const petals = computeBloomPetals(200, headY, headRadius, petalCount, petalReach);
 
     return {
         stemPath: `M200 300 L200 ${headY}`,

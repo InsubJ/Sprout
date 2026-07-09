@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useFriendForest } from '../../../hooks/useFriendForest';
 import { HabitCard } from '../../../components/habit/HabitCard';
 import { GardenCarousel } from '../../../components/habit/GardenCarousel';
+import { Modal } from '../../../components/common/Modal';
 import { useWitherNudge } from '../../../hooks/useWitherNudge';
 import { NudgeService } from '../../../services/nudgeService';
 import styles from './FriendForestPage.module.css';
@@ -53,6 +54,17 @@ function FriendForestPage({
     sendNudge,
     checkNudgeStatus,
   } = useWitherNudge(currentUserId, friendProfile?.id, customNudgeService);
+
+  const [isNudgeSuccessOpen, setIsNudgeSuccessOpen] = React.useState(false);
+
+  const handleSendNudge = React.useCallback(async (habitId: string) => {
+    try {
+      await sendNudge(habitId);
+      setIsNudgeSuccessOpen(true);
+    } catch (err: any) {
+      console.error('Nudge failed:', err);
+    }
+  }, [sendNudge]);
 
   // Load nudge statuses for withered public habits
   React.useEffect(() => {
@@ -181,7 +193,7 @@ function FriendForestPage({
               </p>
             </div>
           ) : (
-            <>
+            <div className={styles.contentLayout}>
               {/* Stats / Active Progress Overview */}
               <section className={styles.statsBar} data-testid="active-progress-stats">
                 <div className={styles.statCard}>
@@ -211,7 +223,7 @@ function FriendForestPage({
               </section>
 
               {/* public trees list */}
-              <section className={styles.section} data-testid="trees-section">
+              <section className={`${styles.section} ${styles.treesSection}`} data-testid="trees-section">
                 <h2 className={styles.sectionTitle}>
                   <span>🌳</span> Active Trees
                 </h2>
@@ -225,7 +237,7 @@ function FriendForestPage({
                     <GardenCarousel
                       habits={activeHabits}
                       currentViewerId={currentUserId}
-                      onNudge={friendProfile && friendProfile.id !== currentUserId ? sendNudge : undefined}
+                      onNudge={friendProfile && friendProfile.id !== currentUserId ? handleSendNudge : undefined}
                       nudgedHabits={nudgedHabits}
                       nudgeLoading={loadingHabits}
                       isVisitor={friendProfile && friendProfile.id !== currentUserId}
@@ -235,7 +247,7 @@ function FriendForestPage({
               </section>
 
               {/* Activity Feed */}
-              <section className={styles.section} data-testid="activities-section">
+              <section className={`${styles.section} ${styles.activitySection}`} data-testid="activities-section">
                 <h2 className={styles.sectionTitle}>
                   <span>💧</span> Recent Activity
                 </h2>
@@ -265,10 +277,41 @@ function FriendForestPage({
                   </div>
                 )}
               </section>
-            </>
+            </div>
           )}
         </>
       )}
+
+      {/* Nudge Success Confirmation Modal */}
+      <Modal isOpen={isNudgeSuccessOpen} onClose={() => setIsNudgeSuccessOpen(false)} title="Nudge Sent!">
+        <div style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
+          <span style={{ fontSize: '3.5rem', display: 'block', marginBottom: '1.25rem' }}>🔔</span>
+          <h3 style={{ fontSize: '1.3rem', color: 'var(--color-evergreen)', fontWeight: 700, margin: '0 0 0.75rem 0' }}>
+            Nudge Sent Successfully!
+          </h3>
+          <p style={{ fontSize: '0.95rem', color: '#6e8274', margin: '0 0 1.75rem 0', lineHeight: 1.5 }}>
+            You have sent a water reminder nudge to @{friendProfile?.username}. They will see this notification when they check their forest.
+          </p>
+          <button
+            onClick={() => setIsNudgeSuccessOpen(false)}
+            data-testid="nudge-confirm-ok"
+            style={{
+              backgroundColor: 'var(--color-forest-green)',
+              color: 'var(--color-sand)',
+              border: 'none',
+              padding: '0.65rem 2.5rem',
+              borderRadius: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 4px 10px rgba(45, 90, 39, 0.2)',
+              fontSize: '0.9rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            Okay
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
