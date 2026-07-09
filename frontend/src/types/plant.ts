@@ -29,7 +29,8 @@ export type PlantSpecies =
   | "poinsettia"
   | "jason"
   | "remy"
-  | "blossom";
+  | "blossom"
+  | "sprig_plant";
 
 export type FinalVariant = "flawless" | "steady" | "scarred";
 

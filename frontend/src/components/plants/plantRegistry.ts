@@ -19,6 +19,7 @@ import PoinsettiaPlant from "./PoinsettiaPlant";
 import JasonPlant from "./JasonPlant";
 import RemyPlant from "./RemyPlant";
 import BlossomPlant from "./BlossomPlant";
+import SprigPlant from "./SprigPlant";
 
 /**
  * plantRegistry
@@ -46,4 +47,5 @@ export const plantRegistry: Partial<Record<PlantSpecies, ComponentType<PlantProp
   jason: JasonPlant,
   remy: RemyPlant,
   blossom: BlossomPlant,
+  sprig_plant: SprigPlant,
 };

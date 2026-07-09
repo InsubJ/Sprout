@@ -109,10 +109,34 @@
   opacity: 0.75;
 }
 
-/* Grid Layout matching Sanctuary and dashboard grids */
+/* Horizontal Scroll Row matching Sanctuary scroll rows */
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
   gap: 1.5rem;
   width: 100%;
+  padding: 0.5rem 0.25rem 1rem 0.25rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-forest-green) transparent;
+}
+
+.grid::-webkit-scrollbar {
+  height: 6px;
+}
+
+.grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.grid::-webkit-scrollbar-thumb {
+  background-color: var(--color-forest-green);
+  border-radius: 10px;
+}
+
+.grid > * {
+  flex: 0 0 300px;
+  scroll-snap-align: start;
 }
