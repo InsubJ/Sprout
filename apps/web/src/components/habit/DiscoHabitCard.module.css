@@ -1,0 +1,268 @@
+/* ─── Card shell — mirrors HabitCard.card ───────────────────────── */
+.card {
+  background: var(--bg-card-solid);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(156, 39, 176, 0.3);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(156, 39, 176, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 100%;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px 0 rgba(156, 39, 176, 0.2);
+}
+
+/* ─── Header — mirrors HabitCard.header ─────────────────────────── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.metaRow {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.frequencyBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.6rem;
+  background: rgba(156, 39, 176, 0.08);
+  color: #9c27b0;
+  border-radius: 50px;
+}
+
+.tierBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.6rem;
+  border-radius: 50px;
+  text-transform: capitalize;
+}
+
+.tierMythical {
+  background: linear-gradient(135deg, rgba(199, 125, 255, 0.2), rgba(156, 39, 176, 0.2));
+  color: #7b1fa2;
+  border: 1px solid rgba(199, 125, 255, 0.4);
+}
+
+/* ─── Status Badges — mirrors HabitCard.statusBadge ─────────────── */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 50px;
+  flex-shrink: 0;
+}
+
+.statusIcon {
+  font-size: 0.875rem;
+}
+
+.statusDancing {
+  background: rgba(199, 125, 255, 0.15);
+  color: #7b1fa2;
+  border: 1px solid rgba(199, 125, 255, 0.3);
+  animation: discoShine 1.5s infinite ease-in-out;
+}
+
+.statusSmiling {
+  background: rgba(76, 175, 80, 0.12);
+  color: #2e7d32;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.statusWithered {
+  background: rgba(139, 69, 19, 0.1);
+  color: #8B4513;
+  border: 1px solid rgba(139, 69, 19, 0.15);
+}
+
+/* ─── Plant visual — mirrors HabitCard.plantVisualContainer ─────── */
+.plantVisualContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px dashed rgba(156, 39, 176, 0.2);
+  min-height: 200px;
+  position: relative;
+}
+
+/* Water can button — mirrors HabitCard.wateringCanBtn */
+.wateringCanBtn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: #9c27b0;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(156, 39, 176, 0.35);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 20;
+}
+
+.wateringCanBtn:hover {
+  background: #7b1fa2;
+  transform: scale(1.12);
+  box-shadow: 0 6px 14px rgba(123, 31, 162, 0.45);
+}
+
+.wateringCanBtn:active {
+  transform: scale(0.95);
+}
+
+.wateringCanIcon {
+  width: 22px;
+  height: 22px;
+  transform: scaleX(-1);
+}
+
+/* ─── Plant details — mirrors HabitCard.plantDetails ────────────── */
+.plantDetails {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  background: rgba(250, 247, 242, 0.5);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(156, 39, 176, 0.07);
+}
+
+:global(.dark) .plantDetails {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.plantLabel {
+  color: var(--text-primary);
+  opacity: 0.7;
+}
+
+.plantValue {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ─── Progress — mirrors HabitCard.progressSection ──────────────── */
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.progressLabel {
+  font-weight: 700;
+  color: var(--text-primary);
+  opacity: 0.8;
+}
+
+.progressText {
+  font-weight: 700;
+  color: #9c27b0;
+}
+
+.progressBarBg {
+  height: 8px;
+  background: var(--bg-hover);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #9c27b0, #c77dff);
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.discoFill {
+  background: linear-gradient(90deg, #c77dff, #ff6b9d, #ffd93d, #6bcb77, #4d96ff, #c77dff);
+  background-size: 300%;
+  animation: rainbowSlide 2s linear infinite;
+}
+
+/* ─── Footer — mirrors HabitCard.footer ─────────────────────────── */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border-divider);
+}
+
+.lastWatered {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  opacity: 0.65;
+}
+
+/* ─── Animations ──────────────────────────────────────────────────── */
+@keyframes discoShine {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(199, 125, 255, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 10px rgba(199, 125, 255, 0.5);
+  }
+}
+
+@keyframes rainbowSlide {
+  from {
+    background-position: 0% center;
+  }
+
+  to {
+    background-position: 300% center;
+  }
+}

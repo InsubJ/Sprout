@@ -1,0 +1,720 @@
+/* Dashboard.module.css */
+
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 2rem 1rem;
+  font-family: var(--font-family);
+}
+
+.loginCard {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-card-solid);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 32px 0 var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.loginLogo {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+  animation: bounce 2s infinite ease-in-out;
+}
+
+.loginTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.loginSubtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 2rem;
+}
+
+.loginForm {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.inputLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.loginInput {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  border: 1px solid var(--border-input);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.loginInput:focus {
+  border-color: var(--border-focus);
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 3px var(--shadow-focus);
+}
+
+.errorText {
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.loginSubmitBtn {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 50px;
+  background: var(--text-accent);
+  color: var(--bg-primary);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.loginSubmitBtn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.demoAccounts {
+  width: 100%;
+  border-top: 1px solid var(--border-divider);
+  padding-top: 1.5rem;
+}
+
+.demoLabel {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.demoChips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.demoChip {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid var(--border-input);
+  border-radius: 50px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.demoChip:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-focus);
+  color: var(--text-accent);
+}
+
+/* LOGGED IN DASHBOARD Styles */
+
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+  font-family: var(--font-family);
+}
+
+.dashboardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.dashboardTitle {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+
+.dashboardSubtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.plantSeedBtn {
+  padding: 0.75rem 1.5rem;
+  background: var(--text-accent);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 12px var(--shadow-focus);
+}
+
+.plantSeedBtn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Stats Bar */
+.statsBar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.statCard {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 8px 32px 0 var(--shadow-card);
+}
+
+.statValue {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.statLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Grid layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 40vh;
+  gap: 1rem;
+  color: var(--text-primary);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-input);
+  border-left-color: var(--text-accent);
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+}
+
+.errorContainer {
+  text-align: center;
+  padding: 3rem;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--bg-card);
+  border: 2px dashed var(--border-input);
+  border-radius: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.emptyState h3 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.emptyState p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+  font-size: 0.95rem;
+}
+
+/* Animations */
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 767px) {
+  .dashboard {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dashboardHeader {
+    order: 1;
+  }
+
+  .carouselSection {
+    order: 2;
+  }
+
+  .statsBar {
+    order: 4;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .statCard {
+    padding: 0.75rem 0.25rem;
+    border-radius: 12px;
+  }
+
+  .statValue {
+    font-size: 1.3rem;
+  }
+
+  .statLabel {
+    font-size: 0.65rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dashboardTitle {
+    font-size: 1.75rem;
+  }
+
+  .plantSeedBtn {
+    order: 3;
+    width: 100%;
+  }
+
+  /* Hide header button on mobile when there are no habits (empty card has its own button) */
+  .plantSeedBtnHideMobile {
+    display: none;
+  }
+
+  /* Inline button below carousel, above stats (order: 3) */
+  .plantSeedBtnMobileInline {
+    order: 3;
+    display: block;
+    margin-top: 1rem;
+  }
+}
+
+/* Desktop: inline button is hidden (header button handles it) */
+@media (min-width: 768px) {
+  .plantSeedBtnHideMobile {
+    display: block;
+    /* visible on desktop */
+  }
+
+  .plantSeedBtnMobileInline {
+    display: none;
+  }
+}
+
+
+/* Tabs switcher row */
+.tabsRow {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-divider);
+  padding-bottom: 0.5rem;
+}
+
+.tabBtn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.tabBtn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-input);
+}
+
+.activeTabBtn {
+  color: var(--text-accent) !important;
+  background-color: rgba(45, 90, 39, 0.08) !important;
+}
+
+/* OTP Toast Notification */
+.otpToast {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(45, 90, 39, 0.9);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;
+  z-index: 10;
+}
+
+.otpToastClose {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.resendBtn {
+  background: none;
+  border: none;
+  color: var(--text-accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.75rem;
+  text-decoration: underline;
+}
+
+/* Social Buttons */
+.socialGroup {
+  width: 100%;
+  margin: 1.5rem 0;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border-divider);
+}
+
+.socialTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.socialButtons {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.socialBtn {
+  flex: 1;
+  padding: 0.6rem;
+  border: 1px solid var(--border-input);
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.socialBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.googleBtn:hover {
+  background-color: #f1f5f9;
+  color: #000;
+}
+
+.googleGsiContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 40px;
+}
+
+.appleBtn:hover {
+  background-color: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.facebookBtn:hover {
+  background-color: #1d4ed8;
+  color: #fff;
+  border-color: #1d4ed8;
+}
+
+/* Lock Screen Overlay styles */
+.lockContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  font-family: var(--font-outfit), sans-serif;
+  padding: 1rem;
+}
+
+.lockCard {
+  width: 100%;
+  max-width: 400px;
+  background: var(--bg-card-solid);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.lockLogo {
+  font-size: 3rem;
+  margin-bottom: 1.25rem;
+}
+
+.lockTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.lockSubtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1.75rem;
+}
+
+.lockError {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  width: 100%;
+}
+
+.lockForm {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.pinInput {
+  width: 150px;
+  text-align: center;
+  letter-spacing: 0.5em;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-input);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  outline: none;
+  font-family: inherit;
+}
+
+.pinInput:focus {
+  border-color: var(--border-focus);
+}
+
+.lockActionRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.bioTriggerBtn {
+  width: 100%;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 50px;
+  background-color: var(--text-accent);
+  color: var(--bg-primary);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(45, 90, 39, 0.2);
+  transition: all 0.2s ease;
+}
+
+.bioTriggerBtn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.lockLogoutBtn {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1.5px solid var(--border-input);
+  border-radius: 50px;
+  background-color: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lockLogoutBtn:hover {
+  background-color: var(--bg-input);
+}
+
+/* Biometric overlay simulator modal */
+.bioOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2100;
+}
+
+.bioDialog {
+  width: 90%;
+  max-width: 320px;
+  background-color: var(--bg-card-solid);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.bioIndicator {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: rgba(45, 90, 39, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 1.25rem;
+  color: var(--text-accent);
+}
+
+.bioScanAnim {
+  display: inline-block;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.bioSuccessCheck {
+  color: #10b981;
+}
+
+.bioText {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.bioCancelBtn {
+  background-color: transparent;
+  border: none;
+  color: #ef4444;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.85rem;
+}

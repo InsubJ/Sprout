@@ -1,0 +1,524 @@
+.card {
+  background: var(--bg-card-solid);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px 0 var(--shadow-card-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 100%;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px 0 var(--shadow-card);
+}
+
+/* Card Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.metaRow {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.frequencyBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.6rem;
+  background: rgba(45, 90, 39, 0.08);
+  color: var(--text-accent);
+  border-radius: 50px;
+}
+
+.tierBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.6rem;
+  border-radius: 50px;
+  text-transform: capitalize;
+}
+
+.tierCommon {
+  background: rgba(140, 160, 145, 0.15);
+  color: #556B2F;
+}
+
+.tierUncommon {
+  background: rgba(234, 168, 155, 0.15);
+  color: #A0522D;
+}
+
+.tierRare {
+  background: rgba(234, 168, 155, 0.3);
+  color: #C71585;
+}
+
+.tierMythical {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(234, 168, 155, 0.3));
+  color: #8B6508;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+}
+
+/* Status Badges */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 50px;
+}
+
+.statusIcon {
+  font-size: 0.875rem;
+}
+
+.statusHealthy {
+  background: rgba(45, 90, 39, 0.12);
+  color: var(--text-accent);
+  border: 1px solid rgba(45, 90, 39, 0.15);
+}
+
+.statusWithered {
+  background: rgba(139, 69, 19, 0.1);
+  color: #8B4513;
+  border: 1px solid rgba(139, 69, 19, 0.15);
+}
+
+.statusCompleted {
+  background: rgba(234, 168, 155, 0.2);
+  color: #B22222;
+  border: 1px solid rgba(234, 168, 155, 0.3);
+  animation: shine 2s infinite ease-in-out;
+}
+
+/* Plant Details */
+.plantDetails {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  background: rgba(250, 247, 242, 0.5);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(45, 90, 39, 0.05);
+}
+
+:global(.dark) .plantDetails {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.plantLabel {
+  color: var(--text-primary);
+  opacity: 0.7;
+}
+
+.plantValue {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Consistency Indicators */
+.consistencyContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.consistencyLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  opacity: 0.8;
+  letter-spacing: -0.01em;
+}
+
+.dotsRow {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.dot:hover {
+  transform: scale(1.3);
+}
+
+.dotHydrated {
+  background-color: #4A90E2;
+  box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
+}
+
+.dotDehydrated {
+  background-color: #D3D3D3;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Progress Section */
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.progressLabel {
+  font-weight: 700;
+  color: var(--text-primary);
+  opacity: 0.8;
+}
+
+.progressText {
+  font-weight: 700;
+  color: var(--text-accent);
+}
+
+.progressBarBg {
+  height: 8px;
+  background: var(--bg-hover);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-forest-green), #4CAF50);
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Footer Section */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border-divider);
+}
+
+.streakContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.875rem;
+}
+
+.streakIcon {
+  font-size: 1.1rem;
+  animation: pulse 1.5s infinite alternate;
+}
+
+.streakCount {
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.streakText {
+  color: var(--text-primary);
+  opacity: 0.7;
+  font-size: 0.8rem;
+}
+
+.waterButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 1rem;
+  background: var(--text-accent);
+  color: var(--bg-primary);
+  border: 1px solid var(--text-accent);
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(45, 90, 39, 0.12);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.waterButton:hover {
+  background: var(--color-evergreen);
+  border-color: var(--color-evergreen);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(27, 59, 43, 0.18);
+}
+
+.waterButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(27, 59, 43, 0.15);
+}
+
+.waterIcon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+  transition: transform 0.3s ease;
+}
+
+.waterButton:hover .waterIcon {
+  transform: rotate(-15deg) scale(1.1);
+}
+
+.completedMessage {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #B22222;
+  background: rgba(234, 168, 155, 0.15);
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(234, 168, 155, 0.2);
+}
+
+/* Animations */
+@keyframes shine {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(234, 168, 155, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 10px rgba(234, 168, 155, 0.5);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.15);
+  }
+}
+
+.nudgeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 1rem;
+  background: #d97706;
+  color: var(--color-sand);
+  border: 1px solid #d97706;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.12);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nudgeButton:hover:not(:disabled) {
+  background: #b45309;
+  border-color: #b45309;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(180, 83, 9, 0.18);
+}
+
+.nudgeButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.15);
+}
+
+.nudgeButton:disabled {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.plantVisualContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px dashed rgba(45, 90, 39, 0.1);
+  min-height: 200px;
+  position: relative;
+}
+
+.plantVisualContainer svg {
+  shape-rendering: geometricPrecision;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+.wateringCanWrapper {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: inline-block;
+  z-index: 20;
+}
+
+/* Cursor change on wrapper when limits are reached */
+.wateringCanWrapper:has(button:disabled) {
+  cursor: not-allowed;
+}
+
+.wateringCanBtn {
+  position: static !important;
+  background: var(--text-accent);
+  color: var(--color-sand);
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(45, 90, 39, 0.25);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.wateringCanBtn:disabled {
+  background: #d1d5db !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0.65;
+  pointer-events: none;
+  /* Allows mouse events to hit the parent wrapper */
+}
+
+.wateringCanBtn:hover:not(:disabled) {
+  background: var(--color-evergreen);
+  transform: scale(1.12);
+  box-shadow: 0 6px 14px rgba(27, 59, 43, 0.35);
+}
+
+.wateringCanBtn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.wateringCanIcon {
+  width: 22px;
+  height: 22px;
+  transform: scaleX(-1);
+  /* Flip horizontally so spout faces the plant */
+}
+
+.wateringCanBtn:hover:not(:disabled) .wateringCanIcon {
+  transform: scaleX(-1);
+  /* Keep it strictly facing left without tilting */
+}
+
+/* Tooltip styles */
+.wateringTooltip {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(33, 33, 33, 0.95);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: tooltipFadeIn 0.15s ease-out;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.wateringTooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(33, 33, 33, 0.95) transparent transparent transparent;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.bookBtn {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: var(--bg-nav);
+  backdrop-filter: blur(4px);
+  color: var(--text-primary);
+  border: 1px solid rgba(45, 90, 39, 0.15);
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 10;
+}
+
+.bookBtn:hover {
+  background: var(--bg-input-focus);
+  border-color: var(--text-primary);
+  transform: scale(1.12);
+  box-shadow: 0 6px 14px rgba(45, 90, 39, 0.15);
+}
+
+.bookBtn:active {
+  transform: scale(0.95);
+}

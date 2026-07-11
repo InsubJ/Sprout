@@ -1,0 +1,60 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.4s ease;
+}
+
+.withered {
+  filter: grayscale(0.7) brightness(0.75);
+}
+
+/* Bounce animation when dancing */
+.dancing {
+  animation: discoJump 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes discoJump {
+  from { transform: translateY(0) rotate(-3deg); }
+  to   { transform: translateY(-10px) rotate(3deg); }
+}
+
+/* Spinning rainbow light rays */
+.rays {
+  transform-origin: 60px 55px;
+  animation: spinRays 1.2s linear infinite;
+}
+
+@keyframes spinRays {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Flashing mirror tiles */
+.tile {
+  animation: flashTile 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes flashTile {
+  from { opacity: 1; }
+  to   { opacity: 0.3; }
+}
+
+/* Twinkling decorative stars */
+.star {
+  transform-origin: 22px 24px;
+  animation: twinkle 0.8s ease-in-out infinite alternate;
+}
+.star2 {
+  transform-origin: 94px 19px;
+  animation: twinkle 1.1s ease-in-out infinite alternate-reverse;
+}
+.star3 {
+  transform-origin: 13px 74px;
+  animation: twinkle 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0.4; transform: scale(0.7); }
+}
