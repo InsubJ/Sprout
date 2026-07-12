@@ -1,13 +1,41 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Sprout",
+    "description": "Water your virtual plants by completing real-life habits. Grow beautiful forests together with friends!",
+    "slug": "sprout",
+    "scheme": "sprout",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Use Face ID to unlock your Sprout forest."
+        }
+      ],
+      "expo-image",
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Sprout to attach photos to habit reflections and your profile.",
+          "cameraPermission": "Allow Sprout to capture photos for habit reflections."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#2D5A27"
+        }
+      ],
+      "expo-secure-store"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.insubj.sprout"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +45,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.ianjeon.mobile"
+      "package": "com.insubj.sprout"
     },
     "web": {
       "favicon": "./assets/favicon.png"
