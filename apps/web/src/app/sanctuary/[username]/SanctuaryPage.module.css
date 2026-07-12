@@ -22,15 +22,18 @@
 
 .profileHeader {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 1.5rem;
-  padding: 2rem;
-  border-radius: 20px;
-  background: var(--bg-card-solid);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 8px 32px 0 var(--shadow-card-lg);
-  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.profileTitleGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .avatarContainer {
@@ -65,10 +68,18 @@
 }
 
 .displayName {
-  font-size: 1.8rem;
-  color: var(--color-evergreen);
+  font-size: 2.25rem;
   font-weight: 700;
-  margin-bottom: 0.25rem;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem;
+  text-align: center;
+}
+
+.profileSubtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+  text-align: center;
 }
 
 .username {
@@ -196,7 +207,7 @@
   border-radius: 10px;
 }
 
-.grid > * {
+.grid>* {
   flex: 0 0 300px;
   scroll-snap-align: start;
 }
@@ -252,8 +263,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .warningBox {
@@ -381,13 +397,32 @@
 }
 
 @media (max-width: 767px) {
+  .container {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .profileHeader {
+    margin-bottom: 2.5rem;
+  }
+
+  .displayName {
+    font-size: 1.75rem;
+  }
+
+  .profileSubtitle {
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
   .contentLayout {
     display: flex;
     flex-direction: column;
   }
+
   .treesSection {
     order: 1;
   }
+
   .statsBar {
     order: 2;
     grid-template-columns: repeat(4, 1fr);
@@ -395,19 +430,23 @@
     margin-top: 1.5rem;
     margin-bottom: 1.5rem;
   }
+
   .statCard {
     padding: 0.75rem 0.25rem;
     border-radius: 12px;
   }
+
   .statValue {
     font-size: 1.3rem;
   }
+
   .statLabel {
     font-size: 0.65rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
   .activitySection {
     order: 3;
   }
@@ -418,6 +457,9 @@
   border: 1.5px solid var(--border-subtle);
   border-radius: 12px;
   padding: 0.75rem 1.25rem;
+  position: sticky;
+  top: 10px;
+  z-index: 10;
   margin-bottom: 1.5rem;
   font-size: 0.9rem;
   font-weight: 700;
@@ -430,8 +472,15 @@
 }
 
 @keyframes slideDown {
-  from { transform: translateY(-10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Mobile tab label responsiveness */
@@ -443,12 +492,74 @@
   .tabDesktop {
     display: none;
   }
+
   .tabMobile {
     display: inline;
     font-size: clamp(0.7rem, 3vw, 0.9rem);
   }
+
   .pageTab {
     font-size: clamp(0.7rem, 3vw, 0.9rem);
     padding: 0.4rem 0.75rem;
+  }
+}
+
+
+/* Friend Sanctuary active/completed plant filter */
+.plantViewTabs {
+  display: flex;
+  width: min(100%, 420px);
+  gap: 0.5rem;
+  margin: 0 auto 1.5rem;
+  padding: 0.3rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--bg-card-solid);
+}
+
+.plantViewTab {
+  flex: 1;
+  min-width: 0;
+  padding: 0.65rem 0.85rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.plantViewTab:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.plantViewTab:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: 2px;
+}
+
+.activePlantViewTab,
+.activePlantViewTab:hover {
+  background: var(--text-accent);
+  color: var(--bg-primary);
+  box-shadow: 0 3px 10px var(--shadow-focus);
+}
+
+@media (max-width: 480px) {
+  .plantViewTabs {
+    width: 100%;
+  }
+
+  .plantViewTab {
+    padding-inline: 0.5rem;
+    font-size: 0.78rem;
   }
 }

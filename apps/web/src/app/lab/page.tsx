@@ -8,9 +8,16 @@ import { PlantSpecies, HabitStatus, DifficultyTier } from '../../types/plant';
 import { Habit } from '../../types/habit';
 import BonsaiPlant from '../../components/plants/BonsaiPlant';
 import { getTierForSpecies } from '../../utils/difficulty';
+import { FormDropdown } from '../../components/common/FormDropdown';
 import styles from './LabPage.module.css';
 
 type SortOption = 'alphabetical' | 'rarity' | 'newest';
+
+const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
+  { value: 'alphabetical', label: 'A-Z Name' },
+  { value: 'rarity', label: 'Rarity (Mythical to Common)' },
+  { value: 'newest', label: 'Newest Discovered' },
+];
 
 const TIER_COLORS: Record<DifficultyTier, string> = {
   common: '#689F38',
@@ -253,16 +260,15 @@ export default function LabPage() {
 
         <div className={styles.sortGroup}>
           <label htmlFor="sortBy" className={styles.sortLabel}>Sort by:</label>
-          <select
-            id="sortBy"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className={styles.sortSelect}
-          >
-            <option value="alphabetical">A-Z Name</option>
-            <option value="rarity">Rarity (Mythical to Common)</option>
-            <option value="newest">Newest Discovered</option>
-          </select>
+          <div className={styles.sortDropdown}>
+            <FormDropdown
+              id="sortBy"
+              value={sortBy}
+              options={SORT_OPTIONS}
+              onChange={setSortBy}
+              ariaLabel="Sort plants"
+            />
+          </div>
         </div>
       </section>
 

@@ -51,11 +51,11 @@ export default function PothosPlant({
       aria-label={`Pothos at ${Math.round(growthPercent)}% growth${isWithered ? ", withered" : isCompleted ? `, completed (${finalVariant})` : ""
         }`}
     >
+      {showAura && <FlawlessAura />}
       <GroundShadow />
       <PlantStool />
 
       <g transform="translate(0, -100)">
-        {showAura && <FlawlessAura />}
         <PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F" />
 
         {vines.map((vine, i) => (

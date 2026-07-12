@@ -8,5 +8,23 @@
   ],
   "engines": {
     "node": ">=18.0.0"
+  },
+  "scripts": {
+    "web": "npm run dev --workspace apps/web",
+    "mobile": "npm run start --workspace apps/mobile",
+    "ios": "npm run ios --workspace apps/mobile",
+    "android": "npm run android --workspace apps/mobile",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build:web": "npm run build --workspace apps/web",
+    "validate:mobile": "npm exec --workspace apps/mobile expo config -- --type public --json"
+  },
+  "devDependencies": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@supabase/server": "^1.3.0"
   }
 }

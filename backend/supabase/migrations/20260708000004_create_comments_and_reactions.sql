@@ -1,4 +1,4 @@
-﻿-- Create log_comments table
+-- Create log_comments table
 CREATE TABLE IF NOT EXISTS public.log_comments (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     log_id UUID REFERENCES public.habit_logs(id) ON DELETE CASCADE NOT NULL,

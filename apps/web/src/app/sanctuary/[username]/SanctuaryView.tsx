@@ -3,7 +3,7 @@
 import React from 'react';
 import { useAuth } from '../../../components/common/AppProviders';
 import { useFriendForest } from '../../../hooks/useFriendForest';
-import { HabitCard } from '../../../components/habit/HabitCard';
+import { GardenCarousel } from '../../../components/habit/GardenCarousel';
 import { Modal } from '../../../components/common/Modal';
 import { useWitherNudge } from '../../../hooks/useWitherNudge';
 import { NudgeService } from '../../../services/nudgeService';
@@ -54,6 +54,7 @@ export function Sanctuary({
   } = useWitherNudge(currentUserId, friendProfile?.id, customNudgeService);
 
   const [isNudgeSuccessOpen, setIsNudgeSuccessOpen] = React.useState(false);
+  const [plantView, setPlantView] = React.useState<'active' | 'completed'>(defaultTab);
 
   const handleSendNudge = React.useCallback(async (habitId: string) => {
     try {
@@ -96,9 +97,20 @@ export function Sanctuary({
     );
   }
 
-  // Only show completed habits — active ones live in the Forest (Dashboard)
-  const completedHabits = publicHabits.filter((h) => h.status === 'completed');
+  const activeHabits = publicHabits.filter((habit) => habit.status !== 'completed');
+  const completedHabits = publicHabits.filter((habit) => habit.status === 'completed');
   const isOwnProfile = friendProfile?.id === currentUser?.id;
+
+  // A user's own Sanctuary remains a completed-tree archive.
+  // Friend view can switch between the friend's active and completed plants.
+  const visiblePlantView = isOwnProfile ? 'completed' : plantView;
+  const visibleHabits =
+    visiblePlantView === 'active' ? activeHabits : completedHabits;
+
+  const sectionTitle =
+    visiblePlantView === 'active' ? 'Active Plants' : 'Fully Grown Trees';
+
+  const sectionIcon = visiblePlantView === 'active' ? '🌿' : '🌸';
 
   return (
     <div className={styles.container} data-testid="sanctuary-page">
@@ -110,21 +122,22 @@ export function Sanctuary({
             </div>
           )}
 
-          {/* Profile Header */}
+          {/* Page title — matches the Forest dashboard title treatment */}
           <header className={styles.profileHeader} data-testid="profile-header">
-            <div className={styles.profileDetails}>
+            <div className={styles.profileTitleGroup}>
               <h1 className={styles.displayName} data-testid="profile-display-name">
                 {friendProfile.display_name || friendProfile.username}&apos;s Sanctuary
               </h1>
-              {!isOwnProfile && !isMutuallyConnected && (
-                <span
-                  className={`${styles.connectionBadge} ${styles.notConnected}`}
-                  data-testid="connection-status"
-                >
-                  🔒 Mutual Connection Required
-                </span>
-              )}
             </div>
+
+            {!isOwnProfile && !isMutuallyConnected && (
+              <span
+                className={`${styles.connectionBadge} ${styles.notConnected}`}
+                data-testid="connection-status"
+              >
+                🔒 Mutual Connection Required
+              </span>
+            )}
           </header>
 
           {/* Connection Check */}
@@ -138,45 +151,68 @@ export function Sanctuary({
             </div>
           ) : (
             <section className={styles.section}>
+              {!isOwnProfile && (
+                <div
+                  className={styles.plantViewTabs}
+                  role="tablist"
+                  aria-label="Filter sanctuary plants"
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={plantView === 'active'}
+                    className={`${styles.plantViewTab} ${plantView === 'active' ? styles.activePlantViewTab : ''
+                      }`}
+                    onClick={() => setPlantView('active')}
+                  >
+                    🌿 Active ({activeHabits.length})
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={plantView === 'completed'}
+                    className={`${styles.plantViewTab} ${plantView === 'completed' ? styles.activePlantViewTab : ''
+                      }`}
+                    onClick={() => setPlantView('completed')}
+                  >
+                    🌸 Completed ({completedHabits.length})
+                  </button>
+                </div>
+              )}
+
               <h2 className={`${styles.sectionTitle} ${styles.centeredTitle}`}>
-                <span>🌸</span> Fully Grown Trees
+                <span>{sectionIcon}</span> {sectionTitle}
               </h2>
 
-              {completedHabits.length === 0 ? (
+              {visibleHabits.length === 0 ? (
                 <div className={styles.emptyState}>
-                  <span className={styles.emptyIcon}>🪵</span>
-                  <p className={styles.emptyText}>No completed trees in this sanctuary yet.</p>
+                  <span className={styles.emptyIcon}>
+                    {visiblePlantView === 'active' ? '🌱' : '🪵'}
+                  </span>
+                  <p className={styles.emptyText}>
+                    {visiblePlantView === 'active'
+                      ? 'No active plants in this forest.'
+                      : 'No completed trees in this sanctuary yet.'}
+                  </p>
                   <p className={styles.emptySubtext}>
-                    Completed trees (fully watered habits) will be transplanted here to be admired forever.
+                    {visiblePlantView === 'active'
+                      ? 'Active habits will appear here while they are still growing.'
+                      : 'Completed trees will be transplanted here to be admired forever.'}
                   </p>
                 </div>
               ) : (
-                <div className={styles.grid} data-testid="habits-grid">
-                  {completedHabits.map((habit) => (
-                    <HabitCard
-                      key={habit.id}
-                      name={habit.name}
-                      frequency={habit.frequency}
-                      status={habit.status}
-                      currentStreak={habit.current_streak}
-                      currentWaterings={habit.current_waterings}
-                      targetWaterings={habit.target_waterings}
-                      witherThreshold={habit.wither_threshold}
-                      consecutiveMisses={habit.consecutive_misses}
-                      plantType={habit.plant_type}
-                      difficultyTier={habit.difficulty_tier}
-                      witherCount={habit.wither_count}
-                      hideName={habit.hide_name}
-                      hideDescription={habit.hide_description}
-                      shareNameFriends={habit.share_name_friends}
-                      shareDescFriends={habit.share_desc_friends}
-                      currentViewerId={currentUserId}
-                      habitId={habit.id}
-                      description={habit.description}
-                      poeticSummary={habit.poetic_summary}
-                    />
-                  ))}
-                </div>
+                <GardenCarousel
+                  habits={visibleHabits}
+                  currentViewerId={currentUserId}
+                  isVisitor
+                  showSearch
+                  showFilters={false}
+                  onNudge={
+                    visiblePlantView === 'active' && !isOwnProfile
+                      ? handleSendNudge
+                      : undefined
+                  }
+                />
               )}
             </section>
           )}

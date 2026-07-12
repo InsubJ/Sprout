@@ -7,6 +7,7 @@ export interface ModalProps {
   onClose: () => void;
   title?: string;
   children?: React.ReactNode;
+  closeOnOverlayClick?: boolean;
 }
 
 /**
@@ -19,6 +20,7 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   title,
   children,
+  closeOnOverlayClick = true,
 }): React.ReactElement | null => {
   // Preconditions validation (Design by Contract)
   if (typeof isOpen !== 'boolean') {
@@ -125,9 +127,13 @@ export const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
   if (!mounted) return null;
 
-  // Handle background overlay click to close
+  // Handle background overlay click/tap.
+  // Consumers can disable outside-click dismissal with closeOnOverlayClick={false}.
   const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
+    if (
+      closeOnOverlayClick &&
+      event.target === event.currentTarget
+    ) {
       onClose();
     }
   };

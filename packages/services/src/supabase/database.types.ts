@@ -1,0 +1,8 @@
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+type HabitRow = { id: string; user_id: string; name: string; description: string | null; plant_type: string; difficulty_tier: string; frequency: string; flexible_rules: Json | null; target_waterings: number; current_waterings: number; wither_threshold: number; consecutive_misses: number; wither_count: number; status: string; poetic_summary: string | null; is_public: boolean; current_streak: number; max_streak: number; completed_at: string | null; created_at: string; hide_name?: boolean; hide_description?: boolean; share_name_friends?: string[]; share_desc_friends?: string[] };
+type LogRow = { id: string; habit_id: string; user_id: string; note: string | null; image_url: string | null; client_operation_id: string | null; created_at: string };
+type ProfileRow = { id: string; username: string; display_name: string | null; avatar_url: string | null; created_at: string };
+type FriendshipRow = { id: string; user_id: string; friend_id: string; status: string; created_at: string };
+type NudgeRow = { id: string; sender_id: string; receiver_id: string; habit_id: string; nudged_at: string; created_at: string };
+type Table<Row> = { Row: Row; Insert: Partial<Row>; Update: Partial<Row>; Relationships: [] };
+export interface Database { public: { Tables: { profiles: Table<ProfileRow>; habits: Table<HabitRow>; habit_logs: Table<LogRow>; friendships: Table<FriendshipRow>; wither_nudges: Table<NudgeRow> }; Views: Record<string, never>; Functions: Record<string, never>; Enums: Record<string, never>; CompositeTypes: Record<string, never> } }

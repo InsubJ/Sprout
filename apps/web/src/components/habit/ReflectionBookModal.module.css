@@ -129,8 +129,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error {
@@ -360,9 +365,16 @@
   border-radius: 20px;
   border: 1px solid var(--border-input);
   background-color: var(--bg-input-focus);
+  color: var(--text-primary);
+  caret-color: var(--text-primary);
   outline: none;
   font-family: inherit;
   transition: border-color 0.2s ease;
+}
+
+.commentInput::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
 }
 
 .commentInput:focus {
@@ -425,15 +437,30 @@
   border-top-color: rgba(255, 255, 255, 0.05);
 }
 
+
+:global(.dark) .commentInput {
+  color: var(--text-primary) !important;
+  caret-color: var(--text-primary);
+  -webkit-text-fill-color: var(--text-primary);
+}
+
+:global(.dark) .commentInput::placeholder {
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted);
+  opacity: 1;
+}
+
 /* Mobile responsive comments input form */
 @media (max-width: 480px) {
   .commentForm {
     gap: 4px;
   }
+
   .commentInput {
     padding: 6px 10px;
     font-size: 0.75rem;
   }
+
   .commentSubmitBtn {
     padding: 6px 10px;
     font-size: 0.75rem;

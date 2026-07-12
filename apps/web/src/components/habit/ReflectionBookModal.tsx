@@ -43,7 +43,7 @@ export const ReflectionBookModal: React.FC<ReflectionBookModalProps> = ({
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Feedback states indexed by logId
   const [feedback, setFeedback] = useState<Record<string, FeedbackData>>({});
 
@@ -111,7 +111,7 @@ export const ReflectionBookModal: React.FC<ReflectionBookModalProps> = ({
 
     const userReactions = logFeedback.userReactions || { '👍': [], '❤️': [], '👏': [], '🌱': [] };
     const emojiUserIds = userReactions[emoji] || [];
-    
+
     let updatedUserIds: string[];
     let change = 0;
 
@@ -236,7 +236,7 @@ export const ReflectionBookModal: React.FC<ReflectionBookModalProps> = ({
         {/* Journal Entries */}
         <section className={styles.journalSection}>
           <h4 className={styles.journalTitle}>📜 Growth Journal</h4>
-          
+
           {loading ? (
             <div className={styles.loading}>
               <div className={styles.spinner}></div>
@@ -265,11 +265,11 @@ export const ReflectionBookModal: React.FC<ReflectionBookModalProps> = ({
                       <span className={styles.entryDate}>{formatDate(log.created_at)}</span>
                       <span className={styles.waterDrop}>💧 Watered</span>
                     </div>
-                    
+
                     {log.note && (
                       <p className={styles.entryNote}>&ldquo;{log.note}&rdquo;</p>
                     )}
-                    
+
                     {log.image_url && (
                       <div className={styles.entryImageWrapper}>
                         <img
@@ -320,7 +320,7 @@ export const ReflectionBookModal: React.FC<ReflectionBookModalProps> = ({
                           ))
                         )}
                       </div>
-                      
+
                       {/* Add Comment Input */}
                       <form
                         onSubmit={(e) => {
@@ -338,6 +338,11 @@ export const ReflectionBookModal: React.FC<ReflectionBookModalProps> = ({
                           type="text"
                           placeholder="Add a comment..."
                           className={styles.commentInput}
+                          style={{
+                            color: 'var(--text-primary)',
+                            WebkitTextFillColor: 'var(--text-primary)',
+                            caretColor: 'var(--text-primary)',
+                          }}
                           required
                         />
                         <button type="submit" className={styles.commentSubmitBtn}>

@@ -1,4 +1,4 @@
-﻿-- Create wither_nudges table (once per day per friend, per withered tree)
+-- Create wither_nudges table (once per day per friend, per withered tree)
 CREATE TABLE IF NOT EXISTS public.wither_nudges (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     sender_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,

@@ -1,0 +1,22 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test --workspace packages/shared
+      - run: npm test --workspace packages/services
+      - run: npm test --workspace apps/mobile
+      - run: npm run build:web
+      - run: npm run validate:mobile
+      - run: npm exec --workspace apps/mobile expo export -- --platform all --output-dir dist-ci

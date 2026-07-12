@@ -5,7 +5,6 @@ import { computeHumanoidBody } from "../../utils/plantGeometry/humanoidBodyGeome
 import {
     computeBlossomLimbs,
     computeBlossomFace,
-    computeUmbrella,
     BlossomEyeType,
 } from "../../utils/plantGeometry/blossomGeometry";
 import GroundShadow from "./shared/GroundShadow";
@@ -14,10 +13,10 @@ import FlawlessAura from "./shared/FlawlessAura";
 import ScarredAccents from "./shared/ScarredAccents";
 
 /**
- * BlossomPlant — an anthropomorphic pot plant holding a small round
- * umbrella overhead. Same PlantProps contract and usePlantGrowth-driven
- * state as every other species; her lips, wink, and umbrella tilt are
- * just another expression of growthPercent/isWithered/finalVariant.
+ * BlossomPlant — an elegant anthropomorphic flower character with
+ * long flowing hair and graceful limbs. Same PlantProps contract and
+ * usePlantGrowth-driven state as every other species; her expression,
+ * posture, and hair movement respond to growth and withering.
  *
  *   <BlossomPlant
  *     currentWaterings={habit.current_waterings}
@@ -41,19 +40,22 @@ export default function BlossomPlant({
     });
 
     const isFlawless = finalVariant === "flawless";
-    const body = computeHumanoidBody(growthPercent);
+    const body = computeHumanoidBody(growthPercent, {
+        legLengthBase: 34,
+        legLengthMultiplier: 0.72,
+        torsoHeightBase: 20,
+        torsoHeightMultiplier: 0.5,
+        headRadiusBase: 21,
+        headRadiusMultiplier: 0.16,
+    });
     const { leftLeg, rightLeg, leftArm, rightArm } = computeBlossomLimbs(body, isWithered, asymmetry);
     const { upperLipPath, lowerLipPath, leftEye, rightEye } = computeBlossomFace(isWithered, isCompleted, isFlawless);
-
-    // Umbrella handle sits between the two raised hands.
-    const handleX = (leftArm.endX + rightArm.endX) / 2;
-    const handleY = Math.min(leftArm.endY, rightArm.endY);
-    const umbrella = computeUmbrella(handleX, handleY, isWithered);
 
     const skinColor = isWithered ? "#B89AA3" : witherCount >= 2 ? "#C96B95" : "#D9739E";
     const skinHighlight = isWithered ? "#CBB4BB" : "#F0A8C6";
     const lipColor = isWithered ? "#9C7A80" : "#C41E4A";
-    const umbrellaColor = isWithered ? "#B0A392" : "#F5D97A";
+    const hairColor = isWithered ? "#775B69" : "#5B2F46";
+    const hairHighlight = isWithered ? "#927A84" : "#8E4A68";
     const showAura = isCompleted && isFlawless;
     const showScars = isCompleted && finalVariant === "scarred";
 
@@ -93,7 +95,7 @@ export default function BlossomPlant({
             height={size}
             viewBox="0 0 400 400"
             role="img"
-            aria-label={`Blossom, an anthropomorphic pot plant holding an umbrella, at ${Math.round(
+            aria-label={`Blossom, an anthropomorphic flower character with long flowing hair, at ${Math.round(
                 growthPercent
             )}% growth${isWithered ? ", withered and sad" : isCompleted ? `, completed (${finalVariant})` : ""}`}
         >
@@ -111,19 +113,58 @@ export default function BlossomPlant({
                 fill={skinColor}
             />
 
-            {/* arms, raised to meet the umbrella handle */}
+            {/* long, graceful arms */}
             <path d={leftArm.path} stroke={skinColor} strokeWidth="6" strokeLinecap="round" fill="none" />
             <path d={rightArm.path} stroke={skinColor} strokeWidth="6" strokeLinecap="round" fill="none" />
             <circle cx={leftArm.endX} cy={leftArm.endY} r="5.5" fill={skinColor} opacity={isWithered ? 0.7 : 1} />
             <circle cx={rightArm.endX} cy={rightArm.endY} r="5.5" fill={skinColor} opacity={isWithered ? 0.7 : 1} />
 
-            {/* umbrella, tilting when withered */}
-            <g transform={`rotate(${umbrella.tiltDeg} ${umbrella.handleX} ${umbrella.handleY})`}>
-                <path d={umbrella.polePath} stroke="#7A5638" strokeWidth="2.5" strokeLinecap="round" />
-                <path d={umbrella.canopyPath} fill={umbrellaColor} opacity={isWithered ? 0.7 : 1} />
-                {umbrella.spokePaths.map((p, i) => (
-                    <path key={i} d={p} stroke="#7A5638" strokeWidth="1" opacity="0.6" />
-                ))}
+            {/* long flowing hair, drawn behind the face */}
+            <g opacity={isWithered ? 0.78 : 1}>
+                <path
+                    d={`M${200 - body.headRadius * 0.9} ${headCenterY - body.headRadius * 0.55}
+                        C${200 - body.headRadius * 1.55} ${headCenterY + body.headRadius * 0.15},
+                         ${200 - body.headRadius * 1.35} ${body.shoulderY + 34},
+                         ${200 - body.headRadius * 0.85} ${body.hipY + 12}
+                        C${200 - body.headRadius * 0.5} ${body.hipY + 34},
+                         ${200 - body.headRadius * 0.2} ${body.hipY + 18},
+                         ${200 - body.headRadius * 0.35} ${headCenterY + body.headRadius * 0.8}
+                        Z`}
+                    fill={hairColor}
+                />
+                <path
+                    d={`M${200 + body.headRadius * 0.9} ${headCenterY - body.headRadius * 0.55}
+                        C${200 + body.headRadius * 1.55} ${headCenterY + body.headRadius * 0.15},
+                         ${200 + body.headRadius * 1.35} ${body.shoulderY + 34},
+                         ${200 + body.headRadius * 0.85} ${body.hipY + 12}
+                        C${200 + body.headRadius * 0.5} ${body.hipY + 34},
+                         ${200 + body.headRadius * 0.2} ${body.hipY + 18},
+                         ${200 + body.headRadius * 0.35} ${headCenterY + body.headRadius * 0.8}
+                        Z`}
+                    fill={hairColor}
+                />
+                <path
+                    d={`M${200 - body.headRadius * 0.76} ${headCenterY - body.headRadius * 0.58}
+                        C${200 - body.headRadius * 1.18} ${headCenterY + body.headRadius * 0.55},
+                         ${200 - body.headRadius * 0.92} ${body.shoulderY + 42},
+                         ${200 - body.headRadius * 0.62} ${body.hipY + 4}`}
+                    stroke={hairHighlight}
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    fill="none"
+                    opacity="0.75"
+                />
+                <path
+                    d={`M${200 + body.headRadius * 0.7} ${headCenterY - body.headRadius * 0.45}
+                        C${200 + body.headRadius * 1.12} ${headCenterY + body.headRadius * 0.62},
+                         ${200 + body.headRadius * 0.88} ${body.shoulderY + 46},
+                         ${200 + body.headRadius * 0.58} ${body.hipY + 8}`}
+                    stroke={hairHighlight}
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    fill="none"
+                    opacity="0.75"
+                />
             </g>
 
             {/* head */}
@@ -134,6 +175,25 @@ export default function BlossomPlant({
                 r={body.headRadius * 0.3}
                 fill={skinHighlight}
                 opacity="0.5"
+            />
+
+            {/* full fringe covering the forehead */}
+            <path
+                d={`M${200 - body.headRadius * 0.96} ${headCenterY - body.headRadius * 0.28}
+                    Q${200 - body.headRadius * 0.72} ${headCenterY - body.headRadius * 1.02}
+                     200 ${headCenterY - body.headRadius * 0.96}
+                    Q${200 + body.headRadius * 0.72} ${headCenterY - body.headRadius * 1.02}
+                     ${200 + body.headRadius * 0.96} ${headCenterY - body.headRadius * 0.28}
+                    Q${200 + body.headRadius * 0.72} ${headCenterY - body.headRadius * 0.18}
+                     ${200 + body.headRadius * 0.48} ${headCenterY - body.headRadius * 0.06}
+                    Q${200 + body.headRadius * 0.24} ${headCenterY - body.headRadius * 0.16}
+                     200 ${headCenterY - body.headRadius * 0.04}
+                    Q${200 - body.headRadius * 0.24} ${headCenterY - body.headRadius * 0.16}
+                     ${200 - body.headRadius * 0.48} ${headCenterY - body.headRadius * 0.06}
+                    Q${200 - body.headRadius * 0.72} ${headCenterY - body.headRadius * 0.18}
+                     ${200 - body.headRadius * 0.96} ${headCenterY - body.headRadius * 0.28}
+                    Z`}
+                fill={hairColor}
             />
 
             {/* face, positioned relative to head center */}

@@ -99,30 +99,71 @@ export default function SprigPlant({
             <path d={ears.left.path} stroke={earColor} strokeWidth="9" strokeLinecap="round" fill="none" opacity={isWithered ? 0.7 : 1} />
             <path d={ears.right.path} stroke={earColor} strokeWidth="9" strokeLinecap="round" fill="none" opacity={isWithered ? 0.7 : 1} />
 
-            {/* head + snout */}
+            {/* front-facing head + muzzle */}
             <circle cx={headCenterX} cy={headCenterY} r={body.headRadius} fill={coatColor} />
             <ellipse
-                cx={headCenterX - body.headRadius * 0.85}
-                cy={headCenterY + body.headRadius * 0.15}
-                rx={body.headRadius * 0.45}
-                ry={body.headRadius * 0.32}
-                fill={coatColor}
+                cx={headCenterX}
+                cy={headCenterY + body.headRadius * 0.28}
+                rx={body.headRadius * 0.5}
+                ry={body.headRadius * 0.34}
+                fill={coatHighlight}
+                opacity="0.9"
             />
-            <circle cx={headCenterX - body.headRadius * 1.2} cy={headCenterY + body.headRadius * 0.15} r={body.headRadius * 0.13} fill="#2F2A20" />
 
-            {/* face, positioned relative to the head center */}
+            {/* front-facing face, positioned relative to the head center */}
             <g transform={`translate(${headCenterX} ${headCenterY})`}>
                 {eyeShape === "droopy" ? (
-                    <path d="M-2 -6 Q2 -3 6 -7" stroke="#2F2A20" strokeWidth="2" strokeLinecap="round" fill="none" />
+                    <>
+                        <path
+                            d="M-11 -7 Q-7 -4 -3 -7"
+                            stroke="#2F2A20"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            fill="none"
+                        />
+                        <path
+                            d="M3 -7 Q7 -4 11 -7"
+                            stroke="#2F2A20"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            fill="none"
+                        />
+                    </>
                 ) : eyeShape === "sparkle" ? (
-                    <g>
-                        <circle cx="2" cy="-6" r="3.2" fill="#2F2A20" />
-                        <circle cx="0.8" cy="-7.2" r="1" fill="#FFFFFF" />
-                    </g>
+                    <>
+                        <g>
+                            <circle cx="-7" cy="-7" r="3.2" fill="#2F2A20" />
+                            <circle cx="-8.2" cy="-8.2" r="1" fill="#FFFFFF" />
+                        </g>
+                        <g>
+                            <circle cx="7" cy="-7" r="3.2" fill="#2F2A20" />
+                            <circle cx="5.8" cy="-8.2" r="1" fill="#FFFFFF" />
+                        </g>
+                    </>
                 ) : (
-                    <circle cx="2" cy="-6" r="2.8" fill="#2F2A20" />
+                    <>
+                        <circle cx="-7" cy="-7" r="2.8" fill="#2F2A20" />
+                        <circle cx="7" cy="-7" r="2.8" fill="#2F2A20" />
+                    </>
                 )}
-                <path d={mouthPath} stroke="#2F2A20" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+
+                <ellipse
+                    cx="0"
+                    cy="2"
+                    rx={body.headRadius * 0.14}
+                    ry={body.headRadius * 0.1}
+                    fill="#2F2A20"
+                />
+
+                <g transform="translate(0 5) scale(0.85)">
+                    <path
+                        d={mouthPath}
+                        stroke="#2F2A20"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        fill="none"
+                    />
+                </g>
             </g>
 
             {showScars && (

@@ -184,7 +184,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       const today = new Date();
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
       const todayEnd = todayStart + 24 * 60 * 60 * 1000;
-      
+
       const todaysLogs = logs.filter((l: any) => {
         const time = new Date(l.created_at).getTime();
         return l.habit_id === habitId && time >= todayStart && time < todayEnd;
@@ -284,13 +284,10 @@ export const HabitCard: React.FC<HabitCardProps> = ({
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                {/* Body */}
                 <path d="M7 12h8v5a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3v-5z" />
                 <path d="M7 12V9a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3" />
-                {/* Spout & Rose */}
                 <path d="M15 16l5-4" />
                 <path d="M19 10l2.5 2.5" />
-                {/* Handle */}
                 <path d="M7 14a4 4 0 0 1-4-4v0a4 4 0 0 1 4-4h1" />
               </svg>
             </button>

@@ -381,7 +381,7 @@
   position: relative;
 }
 
-.plantVisualContainer svg {
+.plantVisualContainer svg:not(.wateringCanIcon) {
   shape-rendering: geometricPrecision;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
@@ -402,7 +402,6 @@
 
 .wateringCanBtn {
   position: static !important;
-  background: var(--text-accent);
   color: var(--color-sand);
   border: none;
   border-radius: 50%;
@@ -441,12 +440,10 @@
   width: 22px;
   height: 22px;
   transform: scaleX(-1);
-  /* Flip horizontally so spout faces the plant */
 }
 
 .wateringCanBtn:hover:not(:disabled) .wateringCanIcon {
   transform: scaleX(-1);
-  /* Keep it strictly facing left without tilting */
 }
 
 /* Tooltip styles */

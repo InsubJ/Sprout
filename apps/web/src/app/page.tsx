@@ -478,7 +478,7 @@ export default function HomePage() {
         </div>
         <button
           onClick={() => setIsAddOpen(true)}
-          className={styles.plantSeedBtn}
+          className={`${styles.plantSeedBtn} ${styles.plantSeedBtnHideMobile}`}
         >
           🌱 Plant New Seed
         </button>
@@ -532,8 +532,17 @@ export default function HomePage() {
         )}
       </div>
 
+      {/* Mobile-only button: below carousel and above stats */}
+      <button
+        type="button"
+        onClick={() => setIsAddOpen(true)}
+        className={`${styles.plantSeedBtn} ${styles.plantSeedBtnMobileInline}`}
+      >
+        🌱 Plant New Seed
+      </button>
+
       {/* Add Habit Modal */}
-      <Modal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} title="Plant New Seed">
+      <Modal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} closeOnOverlayClick={false} title="Plant New Seed">
         <HabitForm onSubmit={handleAddHabit} onCancel={() => setIsAddOpen(false)} isSubmitting={isSubmitting} />
       </Modal>
 

@@ -58,11 +58,11 @@ export default function StringOfPearlsPlant({
             aria-label={`String of pearls at ${Math.round(growthPercent)}% growth${isWithered ? ", withered" : isCompleted ? `, completed (${finalVariant})` : ""
                 }`}
         >
+            {showAura && <FlawlessAura color="#7FBF74" />}
             <GroundShadow />
             <PlantStool />
 
             <g transform="translate(0, -100)">
-                {showAura && <FlawlessAura color="#7FBF74" />}
                 <PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F" />
 
                 {vines.map((vine, i) => (

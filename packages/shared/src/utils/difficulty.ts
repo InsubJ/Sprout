@@ -20,8 +20,8 @@ export const FREQUENCY_MULTIPLIERS: Record<HabitFrequency, number> = {
 export const TIER_SPECIES: Record<DifficultyTier, PlantSpecies[]> = {
   common: ['pothos', 'spider_plant', 'jason', 'bonsai', 'maranta_leuconeura', 'lavender'],
   uncommon: ['sunflower', 'alocasia_tiny_dancer', 'remy', 'waratah', 'phalaenopsis_scarlett_jubilee', 'sprig_plant'],
-  rare: ['midnight_rose', 'desert_cactus', 'string_of_pearls', 'begonia_maculata', 'poinsettia'],
-  mythical: ['golden_oak', 'ethereal_sakura', 'blossom'],
+  rare: ['midnight_rose', 'desert_cactus', 'string_of_pearls', 'begonia_maculata', 'poinsettia', 'blossom'],
+  mythical: ['golden_oak', 'ethereal_sakura'],
 };
 
 

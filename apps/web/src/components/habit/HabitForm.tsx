@@ -2,7 +2,17 @@ import React, { useState } from 'react';
 import { HabitFrequency, FlexibleRules } from '../../types/habit';
 import { useAuth } from '../common/AppProviders';
 import { useFriendships } from '../../hooks/useFriendships';
+import { FormDropdown } from '../common/FormDropdown';
 import styles from './HabitForm.module.css';
+
+const FREQUENCY_OPTIONS: Array<{ value: HabitFrequency; label: string }> = [
+  { value: 'twice_daily', label: 'Twice Daily' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'yearly', label: 'Yearly' },
+  { value: 'flexible', label: 'Flexible' },
+];
 
 export interface HabitFormData {
   name: string;
@@ -43,7 +53,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
   const [witherThreshold, setWitherThreshold] = useState<string>(
     initialData?.wither_threshold !== undefined ? String(initialData.wither_threshold) : '3'
   );
-  
+
   // Flexible rules state
   const [flexibleDaysRequired, setFlexibleDaysRequired] = useState<string>(
     initialData?.flexible_rules?.days_required !== undefined ? String(initialData.flexible_rules.days_required) : '3'
@@ -128,13 +138,13 @@ export const HabitForm: React.FC<HabitFormProps> = ({
     if (validateForm()) {
       const parsedWaterings = parseInt(targetWaterings, 10);
       const parsedWither = parseInt(witherThreshold, 10);
-      
+
       const flexibleRules: FlexibleRules | null =
         frequency === 'flexible'
           ? {
-              days_required: parseInt(flexibleDaysRequired, 10),
-              days_total: parseInt(flexibleDaysTotal, 10),
-            }
+            days_required: parseInt(flexibleDaysRequired, 10),
+            days_total: parseInt(flexibleDaysTotal, 10),
+          }
           : null;
 
       const formData: HabitFormData = {
@@ -193,20 +203,14 @@ export const HabitForm: React.FC<HabitFormProps> = ({
           <label htmlFor="habit-frequency" className={styles.label}>
             Frequency
           </label>
-          <select
+          <FormDropdown
             id="habit-frequency"
             value={frequency}
-            onChange={(e) => setFrequency(e.target.value as HabitFrequency)}
-            className={styles.select}
+            options={FREQUENCY_OPTIONS}
+            onChange={setFrequency}
             disabled={isSubmitting}
-          >
-            <option value="twice_daily">Twice Daily</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-            <option value="flexible">Flexible</option>
-          </select>
+            ariaLabel="Habit frequency"
+          />
         </div>
       </div>
 
@@ -297,7 +301,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
       {/* Privacy Settings Section */}
       <div className={styles.privacySection}>
         <h4 className={styles.subHeading}>Privacy & Sharing Rules</h4>
-        
+
         <div className={styles.checkboxGroup}>
           <label className={styles.checkboxLabel}>
             <input

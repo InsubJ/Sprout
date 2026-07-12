@@ -7,6 +7,10 @@ export * from './types/nudge';
 export { type PlantSpecies, type FinalVariant, type PlantProps, type GrowthState } from './types/plant';
 export * from './types/profile';
 export * from './types/reflection';
+export * from './types/syncQueue';
+export * from './schemas/habitSchema';
+export * from './schemas/profileSchema';
+export * from './schemas/logSchema';
 
 // Shared validations & utils
 export * from './utils/difficulty';
@@ -19,6 +23,10 @@ export * from './utils/mythicalGlimmer';
 export * from './utils/nudgeValidation';
 export * from './utils/plantFormatting';
 export * from './utils/reflectionValidation';
+export * from './domain/dateFormatting';
+export * from './domain/habitProgress';
+export * from './domain/habitStatus';
+export * from './domain/wateringLimits';
 
 // Re-export plant geometry helpers
 export * from './utils/plantGeometry/blossomGeometry';

@@ -150,7 +150,7 @@ export const LogEntryDialog: React.FC<LogEntryDialogProps> = ({
     }
 
     const file = files[0];
-    
+
     // File validation
     if (file.size > MAX_FILE_SIZE) {
       setError(`File size exceeds 5MB limit: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
@@ -201,7 +201,7 @@ export const LogEntryDialog: React.FC<LogEntryDialogProps> = ({
           const timestamp = Date.now();
           const safeFileName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
           const path = `${userId || 'anonymous'}/${habitId || 'unknown'}/${timestamp}_${safeFileName}`;
-          
+
           const uploadedPath = await activeStorageService.uploadPhoto(selectedFile, path);
           photoUrl = activeStorageService.getPublicUrl(uploadedPath);
         } catch (err: any) {
@@ -256,7 +256,7 @@ export const LogEntryDialog: React.FC<LogEntryDialogProps> = ({
           <label className={styles.label}>
             Add a Photo (optional)
           </label>
-          
+
           <div className={styles.photoActions}>
             <button
               type="button"
@@ -288,7 +288,7 @@ export const LogEntryDialog: React.FC<LogEntryDialogProps> = ({
             onChange={handleFileChange}
             disabled={uploading}
           />
-          
+
           {showCamera && (
             <div className={styles.cameraContainer}>
               <video

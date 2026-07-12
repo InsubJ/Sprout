@@ -1,5 +1,6 @@
 # dependencies
 node_modules
+completedPlans
 
 # local env files
 .env*.local
@@ -8,3 +9,8 @@ node_modules
 
 # typescript
 next-env.d.ts
+
+# Expo generated output
+.expo/
+dist-validation/
+apps/mobile/dist-validation/
