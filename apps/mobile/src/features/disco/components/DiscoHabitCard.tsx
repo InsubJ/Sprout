@@ -1,142 +1,228 @@
-import { useEffect, useState } from "react";
-import { Modal, StyleSheet, Text, TextInput, View } from "react-native";
-import { colors, radii, spacing } from "@sprout/design-tokens";
+import { useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { colors } from "@sprout/design-tokens";
 import { AppButton } from "../../../components/AppButton";
+import { useTheme } from "../../../providers/ThemeProvider";
+import { PlantGodGenerationFlow } from "../../customPlants/components/PlantGodGenerationFlow";
+import { useGenerationEligibility } from "../../customPlants/hooks/useGenerationEligibility";
 import { gardenCardGeometry } from "../../habits/components/gardenCardGeometry";
 import { WateringButton } from "../../habits/components/WateringButton";
-import { DiscoEnergyBar } from "./DiscoEnergyBar";
+import { useDiscoPlant } from "../hooks/useDiscoPlant";
+import { useDiscoWateringFlow } from "../hooks/useDiscoWateringFlow";
 import { DiscoPlant } from "./DiscoPlant";
 import { DiscoStatusBadge } from "./DiscoStatusBadge";
-import { useDiscoPlant } from "../hooks/useDiscoPlant";
-const labels = {
-  dancing: "Dancing!",
-  smiling: "Happy",
-  withered: "Wilting",
-} as const;
-type WateringStep = "choice" | "ad" | "donation" | "thank-you";
-export function DiscoHabitCard({ cardWidth = gardenCardGeometry.width }: { cardWidth?: number }) {
-  const { state, lastWateredAt, waterPlant } = useDiscoPlant();
-  const [modal, setModal] = useState(false);
-  const [step, setStep] = useState<WateringStep>("choice");
-  const [donationAmount, setDonationAmount] = useState("1.00");
-  const [cardHovered, setCardHovered] = useState(false);
-  const daysSince = lastWateredAt
-    ? Math.min(
-        7,
-        Math.floor(
-          (Date.now() - new Date(lastWateredAt).getTime()) / 86_400_000,
-        ),
-      )
-    : 7;
-  const energy = (7 - daysSince) / 7;
-  useEffect(() => {
-    if (modal) return;
-    const timer = setTimeout(() => { setStep("choice"); setDonationAmount("1.00"); }, 250);
-    return () => clearTimeout(timer);
-  }, [modal]);
-  const donation = Number.parseFloat(donationAmount);
-  const donationValid = Number.isFinite(donation) && donation >= 1;
-  const closeModal = () => setModal(false);
-  const completeWatering = async () => { await waterPlant(); setModal(false); };
+import { DiscoWateringSheet } from "./DiscoWateringSheet";
+import { PlantGod } from "./PlantGod";
+import { RewardProgress } from "./RewardProgress";
+const labels = { dancing: "Dancing!", smiling: "Happy", withered: "Wilting" } as const;
+export function DiscoHabitCard({
+  cardWidth = gardenCardGeometry.width,
+}: {
+  cardWidth?: number;
+}): React.JSX.Element {
+  const theme = useTheme(),
+    { state, lastWateredAt, waterPlant } = useDiscoPlant(),
+    eligibility = useGenerationEligibility();
+  const flow = useDiscoWateringFlow(waterPlant, eligibility.rewardRecorded),
+    [hovered, setHovered] = useState(false),
+    [generationCreditLocked, setGenerationCreditLocked] = useState(false),
+    plantGodMode = eligibility.plantGodActive;
+  const text = plantGodMode
+    ? theme.dark
+      ? styles.plantGodTextDark
+      : styles.plantGodTextLight
+    : theme.dark
+      ? styles.discoTextDark
+      : styles.discoTextLight;
+  const muted = plantGodMode
+    ? theme.dark
+      ? styles.plantGodMutedDark
+      : styles.plantGodMutedLight
+    : theme.dark
+      ? styles.discoMutedDark
+      : styles.discoMutedLight;
   return (
     <>
-      <View onPointerEnter={() => setCardHovered(true)} onPointerLeave={() => setCardHovered(false)} style={[styles.card, cardHovered && styles.cardHovered, { width: cardWidth, height: gardenCardGeometry.height, padding: gardenCardGeometry.padding, gap: gardenCardGeometry.gap }]}>
+      <View
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={() => setHovered(false)}
+        style={[
+          styles.card,
+          plantGodMode
+            ? theme.dark
+              ? styles.plantGodCardDark
+              : styles.plantGodCardLight
+            : theme.dark
+              ? styles.discoCardDark
+              : styles.discoCardLight,
+          hovered && styles.hovered,
+          {
+            width: cardWidth,
+            height: gardenCardGeometry.height,
+            padding: gardenCardGeometry.padding,
+            gap: 12,
+          },
+        ]}
+      >
         <View style={styles.header}>
           <View style={styles.heading}>
-            <Text style={styles.name}>🪩 Disco Plant</Text>
+            <Text style={[styles.name, text]}>
+              {plantGodMode ? "✨ Plant God" : "🪩 Disco Plant"}
+            </Text>
             <View style={styles.badges}>
-              <Text style={styles.special}>Special</Text>
-              <Text style={styles.mythical}>mythical</Text>
+              <Text
+                style={[
+                  styles.special,
+                  plantGodMode && styles.godBadge,
+                  plantGodMode && theme.dark && styles.godBadgeDark,
+                ]}
+              >
+                Special
+              </Text>
+              <Text
+                style={[
+                  styles.mythical,
+                  plantGodMode && styles.godBadge,
+                  plantGodMode && theme.dark && styles.godBadgeDark,
+                ]}
+              >
+                mythical
+              </Text>
             </View>
           </View>
-          <DiscoStatusBadge state={state} />
+          <DiscoStatusBadge state={state} dark={theme.dark} plantGod={plantGodMode} />
         </View>
         <View
-          style={[styles.scene, { height: gardenCardGeometry.sceneHeight }]}
+          style={[
+            styles.scene,
+            plantGodMode
+              ? theme.dark
+                ? styles.plantGodSceneDark
+                : styles.plantGodSceneLight
+              : theme.dark
+                ? styles.discoSceneDark
+                : styles.discoSceneLight,
+            { height: gardenCardGeometry.sceneHeight },
+          ]}
         >
-          <DiscoPlant state={state} size={160} />
-          <View style={styles.water}>
-            <WateringButton theme="disco" onPress={() => setModal(true)} />
-          </View>
+          {plantGodMode ? (
+            <PlantGod size={184} dark={theme.dark} />
+          ) : (
+            <>
+              <DiscoPlant state={state} size={160} dark={theme.dark} />
+              <View style={styles.water}>
+                <WateringButton theme="disco" onPress={() => flow.setOpen(true)} />
+              </View>
+            </>
+          )}
         </View>
-        <View style={styles.specimen}>
-          <Text style={styles.muted}>Plant Specimen:</Text>
-          <Text style={styles.specimenName}>Disco Ball</Text>
+        <View
+          style={[
+            styles.specimen,
+            plantGodMode
+              ? theme.dark
+                ? styles.plantGodSpecimenDark
+                : styles.plantGodSpecimenLight
+              : theme.dark
+                ? styles.discoSpecimenDark
+                : styles.discoSpecimenLight,
+          ]}
+        >
+          <Text style={[styles.muted, muted]}>Plant Specimen:</Text>
+          <Text style={[styles.specimenName, text]}>
+            {plantGodMode ? "Celestial Creator" : "Disco Ball"}
+          </Text>
         </View>
-        <Text numberOfLines={2} style={styles.description}>
-          A mythical party plant whose energy stays bright for seven days.
+        <Text numberOfLines={2} style={[styles.description, text]}>
+          {plantGodMode
+            ? "A radiant creator is ready to shape one original plant."
+            : "A mythical party plant whose rewards grow into custom plant credits."}
         </Text>
-        <View style={styles.energySummary}>
-          <Text style={styles.energyLabel}>Disco Energy</Text>
-          <Text style={styles.energyValue}>{Math.round(energy * 100)}%</Text>
-        </View>
-        <View>
-          <View style={styles.progressHeader}>
-            <Text style={styles.energyLabel}>Seven-day energy</Text>
-            <Text style={styles.muted}>{Math.round(energy * 100)}%</Text>
+        {plantGodMode ? (
+          <View style={styles.actions}>
+            <PlantGodGenerationFlow
+              onSaved={() =>
+                void (async () => {
+                  await eligibility.refresh();
+                })()
+              }
+              onCompleted={() => void eligibility.bankCredit()}
+              onCreditLockedChange={setGenerationCreditLocked}
+              onFailed={() =>
+                void (async () => {
+                  await eligibility.refresh();
+                  await eligibility.bankCredit();
+                })()
+              }
+            />
+            {!generationCreditLocked && eligibility.balance.availableCredits > 0 ? (
+              <AppButton
+                tone="quiet"
+                label={`Bank credit (${eligibility.balance.availableCredits}/5)`}
+                onPress={() => void eligibility.bankCredit()}
+              />
+            ) : null}
           </View>
-          <DiscoEnergyBar progress={energy} dancing={state === "dancing"} />
-        </View>
+        ) : (
+          <RewardProgress balance={eligibility.balance} donationAmount={flow.donation} />
+        )}
         <View style={styles.footer}>
-          <Text style={styles.muted}>
+          <Text style={[styles.muted, muted]}>
             {lastWateredAt
               ? `Last watered ${new Date(lastWateredAt).toLocaleDateString()}`
               : "Never watered"}
           </Text>
-          <Text style={styles.footerState}>{labels[state]}</Text>
+          <Text style={[styles.footerState, text]}>
+            {plantGodMode ? "Awakened" : labels[state]}
+          </Text>
         </View>
       </View>
-      <Modal
-        transparent
-        visible={modal}
-        animationType="fade"
-        onRequestClose={closeModal}
-      >
-        <View style={styles.backdrop}>
-          <View style={styles.modal}>
-            <Text style={styles.modalIcon}>🪩</Text>
-            <Text style={styles.modalTitle}>Help the Disco Plant dance</Text>
-            <Text style={styles.modalCopy}>
-              Its energy stays bright for seven days and dances for the first 24
-              hours.
-            </Text>
-            {step === "choice" ? <><AppButton tone="disco" label="Watch an ad" onPress={() => setStep("ad")} /><AppButton tone="quiet" label="Donate" onPress={() => setStep("donation")} /><AppButton tone="quiet" label="Not now" onPress={closeModal} /></> : null}
-            {step === "ad" ? <><Text style={styles.countdown}>Your ad will play here.</Text><AppButton tone="disco" label="I’ve finished watching" onPress={() => setStep("thank-you")} /></> : null}
-            {step === "donation" ? <><Text style={styles.fieldLabel}>Donation amount (minimum $1)</Text><TextInput accessibilityLabel="Donation amount" keyboardType="decimal-pad" value={donationAmount} onChangeText={value => setDonationAmount(value.replace(/[^0-9.]/g, ""))} style={styles.amountInput} /><AppButton tone="disco" label={donationValid ? `Donate $${donation.toFixed(2)}` : "Enter at least $1.00"} disabled={!donationValid} onPress={() => setStep("thank-you")} /></> : null}
-            {step === "thank-you" ? <><Text style={styles.thankYou}>Thank you for supporting Sprout!</Text><Text style={styles.modalCopy}>Your Disco Plant is ready to dance.</Text><AppButton tone="disco" label="Water now" onPress={() => void completeWatering()} /></> : null}
-          </View>
-        </View>
-      </Modal>
+      {!plantGodMode ? (
+        <DiscoWateringSheet
+          flow={flow}
+          bankedCredits={eligibility.balance.availableCredits}
+          onUseBankedCredit={() => void eligibility.activatePlantGod()}
+        />
+      ) : null}
     </>
   );
 }
 const styles = StyleSheet.create({
-  card: {
+  card: { borderRadius: 20, borderWidth: 1, shadowRadius: 16, elevation: 4, overflow: "hidden" },
+  discoCardDark: {
     backgroundColor: "#241A3D",
-    borderRadius: 20,
-    borderWidth: 1,
     borderColor: "rgba(156,39,176,.3)",
     shadowColor: "#9C27B0",
     shadowOpacity: 0.16,
-    shadowRadius: 16,
-    elevation: 4,
-    overflow: "hidden",
   },
-  cardHovered: { transform: [{ translateY: -6 }], shadowOpacity: 0.28, shadowRadius: 20 },
+  discoCardLight: {
+    backgroundColor: "#F2E8FA",
+    borderColor: "#B894CC",
+    shadowColor: "#7C4D9E",
+    shadowOpacity: 0.13,
+  },
+  plantGodCardLight: {
+    backgroundColor: "#FFF1A8",
+    borderColor: "#D49A00",
+    shadowColor: "#D49A00",
+    shadowOpacity: 0.3,
+  },
+  plantGodCardDark: {
+    backgroundColor: "#392E12",
+    borderColor: "#A97B13",
+    shadowColor: "#E1B32D",
+    shadowOpacity: 0.28,
+  },
+  hovered: { transform: [{ translateY: -6 }], shadowOpacity: 0.28, shadowRadius: 20 },
   header: { flexDirection: "row", alignItems: "flex-start", gap: 16 },
   heading: { flex: 1, gap: 6 },
-  name: {
-    color: colors.paper,
-    fontFamily: "Outfit_700Bold",
-    fontSize: 20,
-    lineHeight: 24,
-  },
+  name: { fontFamily: "Outfit_700Bold", fontSize: 20, lineHeight: 24 },
   badges: { flexDirection: "row", gap: 8 },
   special: {
     fontSize: 12,
     fontFamily: "Outfit_700Bold",
-    color: "#D8A7E6",
-    backgroundColor: "rgba(156,39,176,.2)",
+    color: "#6B357D",
+    backgroundColor: "rgba(156,39,176,.14)",
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 999,
@@ -145,25 +231,40 @@ const styles = StyleSheet.create({
   mythical: {
     fontSize: 12,
     fontFamily: "Outfit_700Bold",
-    color: "#E5C7FF",
-    backgroundColor: "rgba(199,125,255,.2)",
+    color: "#70418C",
+    backgroundColor: "rgba(199,125,255,.14)",
     borderWidth: 1,
-    borderColor: "rgba(199,125,255,.4)",
+    borderColor: "rgba(124,77,158,.35)",
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 999,
     overflow: "hidden",
   },
+  godBadge: {
+    color: "#5B4300",
+    backgroundColor: "rgba(245,211,77,.35)",
+    borderColor: "rgba(213,157,0,.5)",
+  },
+  godBadgeDark: {
+    color: "#FFF1A8",
+    backgroundColor: "rgba(225,179,45,.16)",
+    borderColor: "rgba(225,179,45,.45)",
+  },
   scene: {
     borderRadius: 12,
     borderWidth: 1,
-    borderStyle: "dashed",
-    borderColor: "rgba(156,39,176,.35)",
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
+  },
+  discoSceneDark: {
+    borderStyle: "dashed",
+    borderColor: "rgba(156,39,176,.35)",
     backgroundColor: "#1B1230",
   },
+  discoSceneLight: { borderStyle: "dashed", borderColor: "#B894CC", backgroundColor: "#FFF9FF" },
+  plantGodSceneLight: { borderColor: "#D6A700", backgroundColor: "#FFF8D6" },
+  plantGodSceneDark: { borderColor: "#9B761B", backgroundColor: "#1E1A0D" },
   water: { position: "absolute", right: 12, bottom: 12 },
   specimen: {
     flexDirection: "row",
@@ -172,72 +273,38 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
+  },
+  discoSpecimenDark: {
     borderColor: "rgba(255,255,255,.08)",
     backgroundColor: "rgba(15,23,42,.45)",
   },
-  specimenName: {
-    color: colors.paper,
-    fontFamily: "Outfit_700Bold",
-    fontSize: 12,
+  discoSpecimenLight: { borderColor: "#D4BFDF", backgroundColor: "rgba(255,255,255,.6)" },
+  plantGodSpecimenLight: {
+    backgroundColor: "rgba(255,255,255,.45)",
+    borderColor: "rgba(122,82,0,.24)",
   },
-  description: {
-    color: "#C8BCD8",
-    lineHeight: 20,
-    minHeight: 40,
-    fontFamily: "Outfit_400Regular",
+  plantGodSpecimenDark: {
+    backgroundColor: "rgba(255,225,112,.08)",
+    borderColor: "rgba(225,179,45,.3)",
   },
-  energySummary: {
-    minHeight: 30,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  energyLabel: {
-    color: colors.paper,
-    fontFamily: "Outfit_600SemiBold",
-    fontSize: 13,
-  },
-  energyValue: { color: "#C77DFF", fontFamily: "Outfit_700Bold" },
-  progressHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
+  specimenName: { fontFamily: "Outfit_700Bold", fontSize: 12 },
+  description: { lineHeight: 20, minHeight: 40, fontFamily: "Outfit_400Regular" },
+  actions: { gap: 8 },
   footer: {
     marginTop: "auto",
-    minHeight: 48,
+    minHeight: 34,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  footerState: { color: "#E9D4FF", fontFamily: "Outfit_700Bold" },
-  muted: { color: "#C8BCD8", fontSize: 12, fontFamily: "Outfit_400Regular" },
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,.65)",
-    justifyContent: "center",
-    padding: spacing.lg,
-  },
-  modal: {
-    backgroundColor: "#241A3D",
-    borderRadius: radii.lg,
-    padding: spacing.xl,
-    gap: spacing.md,
-  },
-  modalIcon: { fontSize: 64, textAlign: "center" },
-  modalTitle: {
-    color: colors.paper,
-    fontSize: 24,
-    fontFamily: "Outfit_700Bold",
-    textAlign: "center",
-  },
-  modalCopy: {
-    color: "#C8BCD8",
-    textAlign: "center",
-    fontFamily: "Outfit_400Regular",
-  },
-  countdown: { color: colors.paper, textAlign: "center", fontFamily: "Outfit_700Bold", fontSize: 18 },
-  fieldLabel: { color: "#E9D4FF", fontFamily: "Outfit_600SemiBold" },
-  amountInput: { minHeight: 48, borderWidth: 1, borderColor: "#8B5CF6", borderRadius: 12, backgroundColor: "#170F29", color: colors.paper, paddingHorizontal: spacing.md, fontSize: 18 },
-  thankYou: { color: colors.paper, fontFamily: "Outfit_700Bold", fontSize: 22, textAlign: "center" },
+  footerState: { fontFamily: "Outfit_700Bold" },
+  muted: { fontSize: 12, fontFamily: "Outfit_400Regular" },
+  discoTextDark: { color: colors.paper },
+  discoMutedDark: { color: "#C8BCD8" },
+  discoTextLight: { color: "#35223F" },
+  discoMutedLight: { color: "#735F7D" },
+  plantGodTextLight: { color: "#3E300C" },
+  plantGodMutedLight: { color: "#765D1A" },
+  plantGodTextDark: { color: "#FFF1A8" },
+  plantGodMutedDark: { color: "#D9C679" },
 });

@@ -47,5 +47,8 @@ export const nativePlantRegistry: Record<PlantSpecies, ComponentType<PlantProps>
 export function plantDisplayName(species: PlantSpecies): string {
   if (species === "maranta_leuconeura") return "Prayer Plant (Maranta)";
   if (species === "phalaenopsis_scarlett_jubilee") return "Orchid Scarlett Jubilee";
-  return species.split("_").map((word) => word[0].toUpperCase() + word.slice(1)).join(" ");
+  return species
+    .split("_")
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(" ");
 }

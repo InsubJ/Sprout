@@ -10,12 +10,7 @@ import { FlawlessAura } from "../shared/FlawlessAura";
 import { GroundShadow } from "../shared/GroundShadow";
 import { PlantPot } from "../shared/PlantPot";
 import { ScarredAccents } from "../shared/ScarredAccents";
-const bractPath = (
-  cx: number,
-  cy: number,
-  p: RadialBloomPetal,
-  width: number,
-) => {
+const bractPath = (cx: number, cy: number, p: RadialBloomPetal, width: number) => {
   const dx = p.cx - cx,
     dy = p.cy - cy,
     length = Math.hypot(dx, dy) || 1,
@@ -73,13 +68,7 @@ export function PoinsettiaPlant(props: PlantProps) {
       ) : null}
       <GroundShadow />
       <PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F" />
-      <Path
-        d={geometry.stemPath}
-        stroke={stem}
-        strokeWidth="5"
-        strokeLinecap="round"
-        fill="none"
-      />
+      <Path d={geometry.stemPath} stroke={stem} strokeWidth="5" strokeLinecap="round" fill="none" />
       {geometry.leafPositions.map((item, index) => (
         <Ellipse
           key={index}
@@ -93,33 +82,20 @@ export function PoinsettiaPlant(props: PlantProps) {
         />
       ))}
       {clusters.map((cluster, index) => {
-        const petals = computeBloomPetals(
-          cluster.cx,
-          cluster.cy,
-          cluster.radius,
-          8,
-          1.6,
-        );
+        const petals = computeBloomPetals(cluster.cx, cluster.cy, cluster.radius, 8, 1.6);
         return (
           <G key={index} opacity={growth.isWithered ? 0.6 : 1}>
             {petals.map((item, petalIndex) => (
               <Path
                 key={petalIndex}
-                d={bractPath(
-                  cluster.cx,
-                  cluster.cy,
-                  item,
-                  cluster.radius * 0.55,
-                )}
+                d={bractPath(cluster.cx, cluster.cy, item, cluster.radius * 0.55)}
                 fill={bract}
               />
             ))}
             {[0, 1, 2, 3].map((item) => (
               <Circle
                 key={item}
-                cx={
-                  cluster.cx + (item % 2 === 0 ? -1 : 1) * cluster.radius * 0.25
-                }
+                cx={cluster.cx + (item % 2 === 0 ? -1 : 1) * cluster.radius * 0.25}
                 cy={cluster.cy + (item < 2 ? -1 : 1) * cluster.radius * 0.25}
                 r={cluster.radius * 0.16}
                 fill={center}

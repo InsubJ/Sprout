@@ -24,9 +24,12 @@ interface AppLockValue {
 }
 const AppLockContext = createContext<AppLockValue | null>(null);
 const pinKey = "sprout_pin";
-const getStoredPin = () => Platform.OS === "web" ? AsyncStorage.getItem(pinKey) : SecureStore.getItemAsync(pinKey);
-const storePin = (pin: string) => Platform.OS === "web" ? AsyncStorage.setItem(pinKey, pin) : SecureStore.setItemAsync(pinKey, pin);
-const deletePin = () => Platform.OS === "web" ? AsyncStorage.removeItem(pinKey) : SecureStore.deleteItemAsync(pinKey);
+const getStoredPin = () =>
+  Platform.OS === "web" ? AsyncStorage.getItem(pinKey) : SecureStore.getItemAsync(pinKey);
+const storePin = (pin: string) =>
+  Platform.OS === "web" ? AsyncStorage.setItem(pinKey, pin) : SecureStore.setItemAsync(pinKey, pin);
+const deletePin = () =>
+  Platform.OS === "web" ? AsyncStorage.removeItem(pinKey) : SecureStore.deleteItemAsync(pinKey);
 export function AppLockProvider({ children }: PropsWithChildren) {
   const { user } = useAuth();
   const [locked, setLocked] = useState(false);
@@ -34,10 +37,7 @@ export function AppLockProvider({ children }: PropsWithChildren) {
   const [biometricsEnabled, setBiometricsEnabledState] = useState(false);
   const [pinEnabled, setPinEnabled] = useState(false);
   useEffect(() => {
-    Promise.all([
-      AsyncStorage.getItem("sprout_biometrics_enabled"),
-      getStoredPin(),
-    ])
+    Promise.all([AsyncStorage.getItem("sprout_biometrics_enabled"), getStoredPin()])
       .then(([enabled, pin]) => {
         const biometricActive = enabled === "true";
         setBiometricsEnabledState(biometricActive);
@@ -50,8 +50,7 @@ export function AppLockProvider({ children }: PropsWithChildren) {
     if (enabled) {
       const hardware = await LocalAuthentication.hasHardwareAsync();
       const enrolled = await LocalAuthentication.isEnrolledAsync();
-      if (!hardware || !enrolled)
-        throw new Error("No device biometrics are enrolled");
+      if (!hardware || !enrolled) throw new Error("No device biometrics are enrolled");
       const result = await LocalAuthentication.authenticateAsync({
         promptMessage: "Enable Sprout app lock",
       });
@@ -61,8 +60,7 @@ export function AppLockProvider({ children }: PropsWithChildren) {
     setBiometricsEnabledState(enabled);
   }, []);
   const setPin = useCallback(async (pin: string | null) => {
-    if (pin !== null && !/^\d{4}$/.test(pin))
-      throw new Error("PIN must be exactly four digits");
+    if (pin !== null && !/^\d{4}$/.test(pin)) throw new Error("PIN must be exactly four digits");
     if (pin) await storePin(pin);
     else await deletePin();
     setPinEnabled(Boolean(pin));

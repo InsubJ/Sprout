@@ -9,7 +9,11 @@ function cacheKey(userId: string): string {
 export async function readCachedHabits(userId: string): Promise<Habit[]> {
   const raw = await AsyncStorage.getItem(cacheKey(userId));
   if (!raw) return [];
-  try { return JSON.parse(raw) as Habit[]; } catch { return []; }
+  try {
+    return JSON.parse(raw) as Habit[];
+  } catch {
+    return [];
+  }
 }
 
 export async function writeCachedHabits(userId: string, habits: readonly Habit[]): Promise<void> {

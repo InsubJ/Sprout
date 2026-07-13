@@ -83,7 +83,7 @@ All functions and methods must explicitly define and enforce contracts to ensure
 ---
 
 ## 5. Architectural Separation of Purpose
-- **Root Level**: Clear separation between `frontend/` (Next.js client) and `backend/` (Supabase config and schema migrations).
+- **Root Level**: Clear separation between `apps/mobile/` (Expo React Native client), `packages/` (shared contracts and services), and `backend/` (Supabase config and schema migrations).
 - **Frontend Layers**:
   - `app/` files are restricted to routing and root layouts.
   - `components/` handle rendering and visual layout.

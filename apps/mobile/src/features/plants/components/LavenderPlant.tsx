@@ -1,2 +1,60 @@
-import Svg, { Circle, G, Path } from 'react-native-svg'; import { computeLavenderStalks, getGrowthState, type PlantProps } from '@sprout/shared'; import { Blossoms } from '../shared/Blossoms'; import { FlawlessAura } from '../shared/FlawlessAura'; import { GroundShadow } from '../shared/GroundShadow'; import { PlantPot } from '../shared/PlantPot'; import { ScarredAccents } from '../shared/ScarredAccents';
-export function LavenderPlant(props: PlantProps) { const { size = 260 } = props; const growth = getGrowthState(props); const stalks = computeLavenderStalks(growth.growthPercent, growth.asymmetry); const stalk = growth.isWithered ? '#A9A38F' : '#5E7D4A'; const bud = growth.isWithered ? '#B7A6C4' : '#7B5EA7'; const aura = growth.isCompleted && growth.finalVariant === 'flawless'; return <Svg width={size} height={size} viewBox="0 0 400 400" accessibilityLabel={`Lavender at ${Math.round(growth.growthPercent)}% growth`}>{aura ? <FlawlessAura color="#B79BD6" /> : null}<GroundShadow /><PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F" />{stalks.map((item, index) => <G key={index}><Path d={item.path} stroke={stalk} strokeWidth="3" strokeLinecap="round" fill="none" />{item.buds.map((position, budIndex) => <Circle key={budIndex} cx={position.x} cy={position.y} r={growth.isWithered ? 2.5 : 3.5} fill={bud} opacity={growth.isWithered ? .6 : 1} />)}</G>)}{aura ? <Blossoms color="#B79BD6" positions={[{cx:150,cy:130,r:3.5},{cx:250,cy:135,r:3.5},{cx:200,cy:110,r:3.5}]} /> : null}{growth.isCompleted && growth.finalVariant === 'scarred' ? <ScarredAccents marks={[{cx:176,cy:296,rx:6,ry:4},{cx:226,cy:298,rx:6,ry:4}]} /> : null}</Svg>; }
+import Svg, { Circle, G, Path } from "react-native-svg";
+import { computeLavenderStalks, getGrowthState, type PlantProps } from "@sprout/shared";
+import { Blossoms } from "../shared/Blossoms";
+import { FlawlessAura } from "../shared/FlawlessAura";
+import { GroundShadow } from "../shared/GroundShadow";
+import { PlantPot } from "../shared/PlantPot";
+import { ScarredAccents } from "../shared/ScarredAccents";
+export function LavenderPlant(props: PlantProps) {
+  const { size = 260 } = props;
+  const growth = getGrowthState(props);
+  const stalks = computeLavenderStalks(growth.growthPercent, growth.asymmetry);
+  const stalk = growth.isWithered ? "#A9A38F" : "#5E7D4A";
+  const bud = growth.isWithered ? "#B7A6C4" : "#7B5EA7";
+  const aura = growth.isCompleted && growth.finalVariant === "flawless";
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 400 400"
+      accessibilityLabel={`Lavender at ${Math.round(growth.growthPercent)}% growth`}
+    >
+      {aura ? <FlawlessAura color="#B79BD6" /> : null}
+      <GroundShadow />
+      <PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F" />
+      {stalks.map((item, index) => (
+        <G key={index}>
+          <Path d={item.path} stroke={stalk} strokeWidth="3" strokeLinecap="round" fill="none" />
+          {item.buds.map((position, budIndex) => (
+            <Circle
+              key={budIndex}
+              cx={position.x}
+              cy={position.y}
+              r={growth.isWithered ? 2.5 : 3.5}
+              fill={bud}
+              opacity={growth.isWithered ? 0.6 : 1}
+            />
+          ))}
+        </G>
+      ))}
+      {aura ? (
+        <Blossoms
+          color="#B79BD6"
+          positions={[
+            { cx: 150, cy: 130, r: 3.5 },
+            { cx: 250, cy: 135, r: 3.5 },
+            { cx: 200, cy: 110, r: 3.5 },
+          ]}
+        />
+      ) : null}
+      {growth.isCompleted && growth.finalVariant === "scarred" ? (
+        <ScarredAccents
+          marks={[
+            { cx: 176, cy: 296, rx: 6, ry: 4 },
+            { cx: 226, cy: 298, rx: 6, ry: 4 },
+          ]}
+        />
+      ) : null}
+    </Svg>
+  );
+}

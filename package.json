@@ -10,21 +10,17 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "web": "npm run dev --workspace apps/web",
     "mobile": "npm run start --workspace apps/mobile",
     "ios": "npm run ios --workspace apps/mobile",
     "android": "npm run android --workspace apps/mobile",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "build:web": "npm run build --workspace apps/web",
-    "validate:mobile": "npm exec --workspace apps/mobile expo config -- --type public --json"
+    "validate:mobile": "npm exec --workspace apps/mobile expo config -- --type public --json",
+    "format": "prettier --write \"apps/mobile/{app,src}/**/*.{ts,tsx}\" \"packages/{shared,services,design-tokens}/src/**/*.ts\"",
+    "format:check": "prettier --check \"apps/mobile/{app,src}/**/*.{ts,tsx}\" \"packages/{shared,services,design-tokens}/src/**/*.ts\""
   },
   "devDependencies": {
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "prettier": "^3.6.2",
     "vitest": "^4.1.10"
-  },
-  "dependencies": {
-    "@supabase/server": "^1.3.0"
   }
 }

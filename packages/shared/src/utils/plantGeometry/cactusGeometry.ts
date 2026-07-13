@@ -22,7 +22,7 @@ export function computeCactusBody(growthPercent: number): CactusBodyGeometry {
 export function computeCactusArms(
   growthPercent: number,
   asymmetry: number,
-  bodyTopY: number
+  bodyTopY: number,
 ): CactusArm[] {
   const armCount = Math.min(3, Math.floor(growthPercent / 30));
   const arms: CactusArm[] = [];

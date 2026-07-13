@@ -1,4 +1,4 @@
-import type { CreateHabitInput, Habit, UpdateHabitInput } from '@sprout/shared';
+import type { CreateHabitInput, Habit, UpdateHabitInput } from "@sprout/shared";
 export interface HabitRepository {
   getById(id: string): Promise<Habit | null>;
   getByUserId(userId: string): Promise<Habit[]>;

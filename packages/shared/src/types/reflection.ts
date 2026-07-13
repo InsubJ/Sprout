@@ -1,4 +1,4 @@
-export type ReflectionCategory = 'Flawless Bloom' | 'Steady Growth' | 'Scarred Resilience';
+export type ReflectionCategory = "Flawless Bloom" | "Steady Growth" | "Scarred Resilience";
 
 export interface ReflectionInput {
   durationDays: number;

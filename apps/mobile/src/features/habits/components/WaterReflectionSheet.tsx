@@ -1,65 +1,32 @@
-import { useEffect, useState } from "react";
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import * as ImagePicker from "expo-image-picker";
+import { useState } from "react";
+import { Alert, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { colors, spacing } from "@sprout/design-tokens";
 import type { Habit } from "@sprout/shared";
 import { AppButton } from "../../../components/AppButton";
 import { TextField } from "../../../components/TextField";
-import { useAuth } from "../../../providers/AuthProvider";
-import { useServices } from "../../../providers/ServicesProvider";
 import { prepareUploadAsset } from "../../../utils/prepareUploadAsset";
 import type { UploadAsset } from "@sprout/services";
 import { useTheme } from "../../../providers/ThemeProvider";
+import { useImageAcquisition } from "../../../hooks/useImageAcquisition";
+import { useUserMediaUpload } from "../../../hooks/useUserMediaUpload";
 interface Props {
   habit: Habit | null;
   busy: boolean;
   onClose(): void;
-  onConfirm(
-    note?: string,
-    imageUrl?: string,
-    pendingAsset?: UploadAsset,
-  ): Promise<void>;
+  onConfirm(note?: string, imageUrl?: string, pendingAsset?: UploadAsset): Promise<void>;
 }
-export function WaterReflectionSheet({
-  habit,
-  busy,
-  onClose,
-  onConfirm,
-}: Props) {
-  const { user } = useAuth();
-  const { storage, isDemo } = useServices();
+export function WaterReflectionSheet({ habit, busy, onClose, onConfirm }: Props) {
   const theme = useTheme();
   const [note, setNote] = useState("");
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const { imageUri, setImageUri, acquire, clear } = useImageAcquisition({
+    quality: 0.8,
+    recoverAndroidResult: Boolean(habit),
+  });
+  const { userId, upload } = useUserMediaUpload();
   const [submitting, setSubmitting] = useState(false);
-  useEffect(() => {
-    if (Platform.OS !== "android" || !habit) return;
-    void ImagePicker.getPendingResultAsync().then((result) => {
-      if (result && "canceled" in result && !result.canceled && result.assets[0]) setImageUri(result.assets[0].uri);
-    }).catch(() => undefined);
-  }, [habit]);
   const choose = async (camera: boolean) => {
-    const permission = camera
-      ? await ImagePicker.requestCameraPermissionsAsync()
-      : await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted)
-      throw new Error(`${camera ? "Camera" : "Photo"} permission is required`);
-    const result = camera
-      ? await ImagePicker.launchCameraAsync({ quality: 0.8 })
-      : await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ["images"],
-          quality: 0.8,
-        });
-    if (!result.canceled) setImageUri(result.assets[0].uri);
+    await acquire(camera ? "camera" : "library");
   };
   const confirm = async () => {
     if (submitting || busy) return;
@@ -67,21 +34,14 @@ export function WaterReflectionSheet({
     try {
       let imageUrl: string | undefined;
       let pendingAsset: UploadAsset | undefined;
-      if (imageUri && user) {
-        const id = `${user.id}-${habit?.id ?? "reflection"}-${Date.now()}`;
+      if (imageUri && userId) {
+        const id = `${userId}-${habit?.id ?? "reflection"}-${Date.now()}`;
         const prepared = await prepareUploadAsset(imageUri, id);
-        if (storage) {
-          try {
-            imageUrl = await storage.uploadReflection(user.id, prepared);
-          } catch {
-            pendingAsset = prepared;
-          }
-        } else if (isDemo) imageUrl = imageUri;
-        else pendingAsset = prepared;
+        ({ imageUrl, pendingAsset } = await upload(prepared));
       }
       await onConfirm(note.trim() || undefined, imageUrl, pendingAsset);
       setNote("");
-      setImageUri(null);
+      clear();
       onClose();
     } finally {
       setSubmitting(false);
@@ -91,7 +51,7 @@ export function WaterReflectionSheet({
   const close = () => {
     if (working) return;
     setNote("");
-    setImageUri(null);
+    clear();
     onClose();
   };
   return (
@@ -105,9 +65,7 @@ export function WaterReflectionSheet({
         style={[styles.root, { backgroundColor: theme.background }]}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <Text style={[styles.title, { color: theme.text }]}>
-          Water {habit?.name}
-        </Text>
+        <Text style={[styles.title, { color: theme.text }]}>Water {habit?.name}</Text>
         <Text style={[styles.subtitle, { color: theme.muted }]}>
           Optionally capture what helped today.
         </Text>
@@ -118,15 +76,9 @@ export function WaterReflectionSheet({
           multiline
           maxLength={500}
         />
+        {imageUri ? <Image source={imageUri} style={styles.preview} contentFit="cover" /> : null}
         {imageUri ? (
-          <Image source={imageUri} style={styles.preview} contentFit="cover" />
-        ) : null}
-        {imageUri ? (
-          <AppButton
-            label="Remove photo"
-            tone="quiet"
-            onPress={() => setImageUri(null)}
-          />
+          <AppButton label="Remove photo" tone="quiet" onPress={() => setImageUri(null)} />
         ) : null}
         <View style={styles.row}>
           <View style={styles.flex}>
@@ -159,29 +111,15 @@ export function WaterReflectionSheet({
           </View>
         </View>
         <AppButton
-          label={
-            working
-              ? imageUri
-                ? "Preparing reflection…"
-                : "Watering…"
-              : "Confirm watering"
-          }
+          label={working ? (imageUri ? "Preparing reflection…" : "Watering…") : "Confirm watering"}
           disabled={working}
           onPress={() =>
             void confirm().catch((cause) =>
-              Alert.alert(
-                "Watering failed",
-                cause instanceof Error ? cause.message : "Try again",
-              ),
+              Alert.alert("Watering failed", cause instanceof Error ? cause.message : "Try again"),
             )
           }
         />
-        <AppButton
-          label="Cancel"
-          tone="quiet"
-          disabled={working}
-          onPress={close}
-        />
+        <AppButton label="Cancel" tone="quiet" disabled={working} onPress={close} />
       </KeyboardAvoidingView>
     </Modal>
   );

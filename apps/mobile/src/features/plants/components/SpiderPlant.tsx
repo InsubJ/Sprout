@@ -1,2 +1,70 @@
-import Svg, { Circle, G, Line, Path } from 'react-native-svg'; import { computeSpiderLeaves, computeSpiderPups, getGrowthState, type PlantProps } from '@sprout/shared'; import { FlawlessAura } from '../shared/FlawlessAura'; import { GroundShadow } from '../shared/GroundShadow'; import { PlantPot } from '../shared/PlantPot'; import { ScarredAccents } from '../shared/ScarredAccents';
-export function SpiderPlant(props: PlantProps) { const { size = 260 } = props; const growth = getGrowthState(props); const leaves = computeSpiderLeaves(growth.growthPercent, growth.asymmetry); const pups = computeSpiderPups(growth.growthPercent); const leaf = growth.isWithered ? '#A9B991' : '#4E9648'; const pup = growth.isWithered ? '#B9C6A5' : '#6FB35F'; return <Svg width={size} height={size} viewBox="0 0 400 400" accessibilityLabel={`Spider plant at ${Math.round(growth.growthPercent)}% growth`}>{growth.isCompleted && growth.finalVariant === 'flawless' ? <FlawlessAura /> : null}<GroundShadow /><PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F" />{leaves.map((item, index) => <Path key={index} d={item.path} stroke={leaf} strokeWidth={growth.isWithered ? 4 : 6} fill="none" strokeLinecap="round" opacity={growth.isWithered ? .6 : 1} />)}{pups.map((item, index) => <G key={index}><Line x1="200" y1="280" x2={item.cx} y2={item.cy + 10} stroke={leaf} strokeWidth="2" opacity={.6} /><Circle cx={item.cx} cy={item.cy} r={growth.isWithered ? 6 : 9} fill={pup} opacity={growth.isWithered ? .6 : 1} /></G>)}{growth.isCompleted && growth.finalVariant === 'scarred' ? <ScarredAccents marks={[{ cx:178,cy:296,rx:6,ry:4 },{ cx:224,cy:298,rx:6,ry:4 }]} /> : null}</Svg>; }
+import Svg, { Circle, G, Line, Path } from "react-native-svg";
+import {
+  computeSpiderLeaves,
+  computeSpiderPups,
+  getGrowthState,
+  type PlantProps,
+} from "@sprout/shared";
+import { FlawlessAura } from "../shared/FlawlessAura";
+import { GroundShadow } from "../shared/GroundShadow";
+import { PlantPot } from "../shared/PlantPot";
+import { ScarredAccents } from "../shared/ScarredAccents";
+export function SpiderPlant(props: PlantProps) {
+  const { size = 260 } = props;
+  const growth = getGrowthState(props);
+  const leaves = computeSpiderLeaves(growth.growthPercent, growth.asymmetry);
+  const pups = computeSpiderPups(growth.growthPercent);
+  const leaf = growth.isWithered ? "#A9B991" : "#4E9648";
+  const pup = growth.isWithered ? "#B9C6A5" : "#6FB35F";
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 400 400"
+      accessibilityLabel={`Spider plant at ${Math.round(growth.growthPercent)}% growth`}
+    >
+      {growth.isCompleted && growth.finalVariant === "flawless" ? <FlawlessAura /> : null}
+      <GroundShadow />
+      <PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F" />
+      {leaves.map((item, index) => (
+        <Path
+          key={index}
+          d={item.path}
+          stroke={leaf}
+          strokeWidth={growth.isWithered ? 4 : 6}
+          fill="none"
+          strokeLinecap="round"
+          opacity={growth.isWithered ? 0.6 : 1}
+        />
+      ))}
+      {pups.map((item, index) => (
+        <G key={index}>
+          <Line
+            x1="200"
+            y1="280"
+            x2={item.cx}
+            y2={item.cy + 10}
+            stroke={leaf}
+            strokeWidth="2"
+            opacity={0.6}
+          />
+          <Circle
+            cx={item.cx}
+            cy={item.cy}
+            r={growth.isWithered ? 6 : 9}
+            fill={pup}
+            opacity={growth.isWithered ? 0.6 : 1}
+          />
+        </G>
+      ))}
+      {growth.isCompleted && growth.finalVariant === "scarred" ? (
+        <ScarredAccents
+          marks={[
+            { cx: 178, cy: 296, rx: 6, ry: 4 },
+            { cx: 224, cy: 298, rx: 6, ry: 4 },
+          ]}
+        />
+      ) : null}
+    </Svg>
+  );
+}

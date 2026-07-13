@@ -7,10 +7,8 @@ completedPlans
 .env
 .env.*
 
-# typescript
-next-env.d.ts
-
 # Expo generated output
 .expo/
 dist-validation/
 apps/mobile/dist-validation/
+apps/mobile/dist-*/

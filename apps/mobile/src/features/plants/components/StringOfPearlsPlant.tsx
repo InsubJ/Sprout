@@ -1,2 +1,69 @@
-import Svg,{Circle,G,Path}from'react-native-svg';import{computeVines,getGrowthState,type PlantProps}from'@sprout/shared';import{FlawlessAura}from'../shared/FlawlessAura';import{GroundShadow}from'../shared/GroundShadow';import{PlantPot}from'../shared/PlantPot';import{PlantStool}from'../shared/PlantStool';import{ScarredAccents}from'../shared/ScarredAccents';
-export function StringOfPearlsPlant(props:PlantProps){const{size=260}=props;const growth=getGrowthState(props);const vines=computeVines(growth.growthPercent,growth.asymmetry,{maxStrands:5,strandDensity:20,pointCount:6,lengthBase:35,lengthMultiplier:1});const strand=growth.isWithered?'#9CA37C':'#5E9A5B';const pearl=growth.isWithered?'#B0B491':'#7FBF74';const highlight=growth.isWithered?'#C9CDAE':'#A8DE9E';return <Svg width={size} height={size} viewBox="0 0 400 400" accessibilityLabel={`String of pearls at ${Math.round(growth.growthPercent)}% growth`}>{growth.isCompleted&&growth.finalVariant==='flawless'?<FlawlessAura color="#7FBF74"/>:null}<GroundShadow/><PlantStool/><G transform="translate(0 -100)"><PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F"/>{vines.map((item,index)=><G key={index}><Path d={item.path} stroke={strand} strokeWidth="1.5" fill="none" opacity={.7}/>{item.points.map((position,pointIndex)=><G key={pointIndex}><Circle cx={position.x} cy={position.y} r={growth.isWithered?4:6} fill={pearl} opacity={growth.isWithered?.6:1}/><Circle cx={position.x-1.5} cy={position.y-1.5} r="1.5" fill={highlight} opacity={.8}/></G>)}</G>)}{growth.isCompleted&&growth.finalVariant==='scarred'?<ScarredAccents marks={[{cx:176,cy:296,rx:6,ry:4},{cx:226,cy:298,rx:6,ry:4}]}/>:null}</G></Svg>}
+import Svg, { Circle, G, Path } from "react-native-svg";
+import { computeVines, getGrowthState, type PlantProps } from "@sprout/shared";
+import { FlawlessAura } from "../shared/FlawlessAura";
+import { GroundShadow } from "../shared/GroundShadow";
+import { PlantPot } from "../shared/PlantPot";
+import { PlantStool } from "../shared/PlantStool";
+import { ScarredAccents } from "../shared/ScarredAccents";
+export function StringOfPearlsPlant(props: PlantProps) {
+  const { size = 260 } = props;
+  const growth = getGrowthState(props);
+  const vines = computeVines(growth.growthPercent, growth.asymmetry, {
+    maxStrands: 5,
+    strandDensity: 20,
+    pointCount: 6,
+    lengthBase: 35,
+    lengthMultiplier: 1,
+  });
+  const strand = growth.isWithered ? "#9CA37C" : "#5E9A5B";
+  const pearl = growth.isWithered ? "#B0B491" : "#7FBF74";
+  const highlight = growth.isWithered ? "#C9CDAE" : "#A8DE9E";
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 400 400"
+      accessibilityLabel={`String of pearls at ${Math.round(growth.growthPercent)}% growth`}
+    >
+      {growth.isCompleted && growth.finalVariant === "flawless" ? (
+        <FlawlessAura color="#7FBF74" />
+      ) : null}
+      <GroundShadow />
+      <PlantStool />
+      <G transform="translate(0 -100)">
+        <PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F" />
+        {vines.map((item, index) => (
+          <G key={index}>
+            <Path d={item.path} stroke={strand} strokeWidth="1.5" fill="none" opacity={0.7} />
+            {item.points.map((position, pointIndex) => (
+              <G key={pointIndex}>
+                <Circle
+                  cx={position.x}
+                  cy={position.y}
+                  r={growth.isWithered ? 4 : 6}
+                  fill={pearl}
+                  opacity={growth.isWithered ? 0.6 : 1}
+                />
+                <Circle
+                  cx={position.x - 1.5}
+                  cy={position.y - 1.5}
+                  r="1.5"
+                  fill={highlight}
+                  opacity={0.8}
+                />
+              </G>
+            ))}
+          </G>
+        ))}
+        {growth.isCompleted && growth.finalVariant === "scarred" ? (
+          <ScarredAccents
+            marks={[
+              { cx: 176, cy: 296, rx: 6, ry: 4 },
+              { cx: 226, cy: 298, rx: 6, ry: 4 },
+            ]}
+          />
+        ) : null}
+      </G>
+    </Svg>
+  );
+}

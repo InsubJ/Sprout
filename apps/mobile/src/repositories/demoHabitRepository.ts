@@ -1,10 +1,6 @@
 import type { CreateHabitInput, Habit, UpdateHabitInput } from "@sprout/shared";
-import {
-  assignSpecies,
-  getDifficultyTier,
-  validateCreateHabitInput,
-} from "@sprout/shared";
-import type { HabitRepository } from "@sprout/services";
+import { assignSpecies, getDifficultyTier, validateCreateHabitInput } from "@sprout/shared";
+import { RepositoryError, type HabitRepository } from "@sprout/services";
 const userId = "11111111-1111-1111-1111-111111111111";
 let habits: Habit[] = [
   {
@@ -98,17 +94,17 @@ let habits: Habit[] = [
 ];
 export class DemoHabitRepository implements HabitRepository {
   async getById(id: string): Promise<Habit | null> {
-    if (!id.trim()) throw new Error("Habit ID is required");
+    if (!id.trim()) throw new RepositoryError("Habit ID is required", "validation");
     return habits.find((h) => h.id === id) ?? null;
   }
   async getByUserId(requestedUserId: string): Promise<Habit[]> {
-    if (!requestedUserId.trim()) throw new Error("User ID is required");
+    if (!requestedUserId.trim()) throw new RepositoryError("User ID is required", "validation");
     return habits.filter((h) => h.user_id === requestedUserId);
   }
   async create(input: CreateHabitInput): Promise<Habit> {
     const validation = validateCreateHabitInput(input);
     if (!validation.success)
-      throw new Error(validation.errors?.[0]?.message ?? "Invalid habit");
+      throw new RepositoryError(validation.errors?.[0]?.message ?? "Invalid habit", "validation");
     const difficulty =
       input.difficulty_tier ??
       getDifficultyTier({
@@ -143,7 +139,7 @@ export class DemoHabitRepository implements HabitRepository {
   }
   async update(id: string, input: UpdateHabitInput): Promise<Habit> {
     const existing = habits.find((h) => h.id === id);
-    if (!existing) throw new Error("Habit not found");
+    if (!existing) throw new RepositoryError("Habit not found", "not_found");
     const updated = { ...existing, ...input };
     habits = habits.map((h) => (h.id === id ? updated : h));
     return updated;

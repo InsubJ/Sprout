@@ -1,0 +1,68 @@
+import { useCallback, useEffect, useState } from "react";
+import type { Habit, Profile } from "@sprout/shared";
+import { useAuth } from "../../providers/AuthProvider";
+import { useServices } from "../../providers/ServicesProvider";
+
+export interface FriendGardenState {
+  profile: Profile | null | undefined;
+  habits: Habit[];
+  error: string | null;
+  refresh: () => Promise<void>;
+}
+
+export function useFriendGarden(friendId?: string): FriendGardenState {
+  const { user } = useAuth();
+  const { habits: habitRepository, profiles, social } = useServices();
+  const [profile, setProfile] = useState<Profile | null | undefined>();
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState(0);
+
+  const refresh = useCallback(async (): Promise<void> => {
+    setRequestId((value) => value + 1);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    if (!friendId || !user || !profiles || !social) {
+      setError("This shared garden is unavailable.");
+      setProfile(null);
+      setHabits([]);
+      return () => {
+        active = false;
+      };
+    }
+    setProfile(undefined);
+    setError(null);
+    void (async () => {
+      try {
+        const friendships = await social.getFriendships(user.id);
+        const connected = friendships.some(
+          (item) =>
+            item.status === "accepted" &&
+            ((item.user_id === user.id && item.friend_id === friendId) ||
+              (item.friend_id === user.id && item.user_id === friendId)),
+        );
+        if (!connected) throw new Error("Only connected buds can visit this garden.");
+        const [owner, friendHabits] = await Promise.all([
+          profiles.getById(friendId),
+          habitRepository.getByUserId(friendId),
+        ]);
+        if (!owner) throw new Error("This gardener is unavailable.");
+        if (!active) return;
+        setProfile(owner);
+        setHabits(friendHabits.filter((item) => item.is_public));
+      } catch (cause) {
+        if (!active) return;
+        setError(cause instanceof Error ? cause.message : "Unable to open this garden");
+        setProfile(null);
+        setHabits([]);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [friendId, habitRepository, profiles, requestId, social, user]);
+
+  return { profile, habits, error, refresh };
+}

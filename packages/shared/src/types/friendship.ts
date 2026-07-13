@@ -1,4 +1,4 @@
-﻿export type FriendshipStatus = 'pending' | 'accepted' | 'declined';
+﻿export type FriendshipStatus = "pending" | "accepted" | "declined";
 
 export interface Friendship {
   id: string;

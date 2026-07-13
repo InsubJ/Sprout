@@ -1,6 +1,6 @@
-export type DifficultyTier = 'common' | 'uncommon' | 'rare' | 'mythical';
-export type HabitFrequency = 'twice_daily' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'flexible';
-export type HabitStatus = 'healthy' | 'withered' | 'completed';
+export type DifficultyTier = "common" | "uncommon" | "rare" | "mythical";
+export type HabitFrequency = "twice_daily" | "daily" | "weekly" | "monthly" | "yearly" | "flexible";
+export type HabitStatus = "healthy" | "withered" | "completed";
 
 export interface FlexibleRules {
   days_required: number;

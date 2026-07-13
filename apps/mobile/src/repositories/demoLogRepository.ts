@@ -1,10 +1,6 @@
 import type { AsyncStorageStatic } from "@react-native-async-storage/async-storage";
-import {
-  getLocalDateKey,
-  type CreateHabitLogInput,
-  type HabitLog,
-} from "@sprout/shared";
-import type { HabitRepository, LogRepository } from "@sprout/services";
+import { getLocalDateKey, type CreateHabitLogInput, type HabitLog } from "@sprout/shared";
+import { RepositoryError, type HabitRepository, type LogRepository } from "@sprout/services";
 const key = "sprout_demo_habit_logs";
 const demoLogs: HabitLog[] = [
   {
@@ -48,35 +44,28 @@ export class DemoLogRepository implements LogRepository {
     await this.storage.setItem(key, JSON.stringify(logs));
   }
   async getById(id: string): Promise<HabitLog | null> {
-    if (!id.trim()) throw new Error("Log ID is required");
+    if (!id.trim()) throw new RepositoryError("Log ID is required", "validation");
     return (await this.read()).find((item) => item.id === id) ?? null;
   }
   async getByHabitId(habitId: string): Promise<HabitLog[]> {
-    if (!habitId.trim()) throw new Error("Habit ID is required");
+    if (!habitId.trim()) throw new RepositoryError("Habit ID is required", "validation");
     return (await this.read())
       .filter((item) => item.habit_id === habitId)
-      .sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      );
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }
   async countForHabitOnDate(habitId: string, dateKey: string): Promise<number> {
     if (!habitId.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(dateKey))
-      throw new Error("A habit ID and ISO date are required");
+      throw new RepositoryError("A habit ID and ISO date are required", "validation");
     return (await this.read()).filter(
-      (item) =>
-        item.habit_id === habitId &&
-        getLocalDateKey(new Date(item.created_at)) === dateKey,
+      (item) => item.habit_id === habitId && getLocalDateKey(new Date(item.created_at)) === dateKey,
     ).length;
   }
   async create(input: CreateHabitLogInput): Promise<HabitLog> {
     if (!input.habit_id.trim() || !input.user_id.trim())
-      throw new Error("Habit and user IDs are required");
+      throw new RepositoryError("Habit and user IDs are required", "validation");
     const logs = await this.read();
     const duplicate = input.client_operation_id
-      ? logs.find(
-          (item) => item.client_operation_id === input.client_operation_id,
-        )
+      ? logs.find((item) => item.client_operation_id === input.client_operation_id)
       : undefined;
     if (duplicate) return duplicate;
     const log: HabitLog = {
@@ -87,10 +76,7 @@ export class DemoLogRepository implements LogRepository {
     await this.write([log, ...logs]);
     const habit = await this.habits.getById(input.habit_id);
     if (habit) {
-      const waterings = Math.min(
-        habit.target_waterings,
-        habit.current_waterings + 1,
-      );
+      const waterings = Math.min(habit.target_waterings, habit.current_waterings + 1);
       await this.habits.update(habit.id, {
         current_waterings: waterings,
         current_streak: habit.current_streak + 1,

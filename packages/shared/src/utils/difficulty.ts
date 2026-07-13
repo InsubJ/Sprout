@@ -1,5 +1,5 @@
-import { DifficultyTier, HabitFrequency } from '../types/habit';
-import { PlantSpecies } from '../types/plant';
+import { DifficultyTier, HabitFrequency } from "../types/habit";
+import { PlantSpecies } from "../types/plant";
 
 /**
  * Frequency Multiplier table for plants.
@@ -18,13 +18,25 @@ export const FREQUENCY_MULTIPLIERS: Record<HabitFrequency, number> = {
  * Species mapping for each difficulty tier.
  */
 export const TIER_SPECIES: Record<DifficultyTier, PlantSpecies[]> = {
-  common: ['pothos', 'spider_plant', 'jason', 'bonsai', 'maranta_leuconeura', 'lavender'],
-  uncommon: ['sunflower', 'alocasia_tiny_dancer', 'remy', 'waratah', 'phalaenopsis_scarlett_jubilee', 'sprig_plant'],
-  rare: ['midnight_rose', 'desert_cactus', 'string_of_pearls', 'begonia_maculata', 'poinsettia', 'blossom'],
-  mythical: ['golden_oak', 'ethereal_sakura'],
+  common: ["pothos", "spider_plant", "jason", "bonsai", "maranta_leuconeura", "lavender"],
+  uncommon: [
+    "sunflower",
+    "alocasia_tiny_dancer",
+    "remy",
+    "waratah",
+    "phalaenopsis_scarlett_jubilee",
+    "sprig_plant",
+  ],
+  rare: [
+    "midnight_rose",
+    "desert_cactus",
+    "string_of_pearls",
+    "begonia_maculata",
+    "poinsettia",
+    "blossom",
+  ],
+  mythical: ["golden_oak", "ethereal_sakura"],
 };
-
-
 
 /**
  * Input contract for difficulty calculation.
@@ -51,12 +63,12 @@ export function calculateDifficultyScore(input: DifficultyCalculationInput): num
   const { frequency, wither_threshold, target_waterings } = input;
 
   // Preconditions validation
-  if (typeof wither_threshold !== 'number' || isNaN(wither_threshold) || wither_threshold <= 0) {
-    throw new Error('Precondition failed: wither_threshold must be a positive number');
+  if (typeof wither_threshold !== "number" || isNaN(wither_threshold) || wither_threshold <= 0) {
+    throw new Error("Precondition failed: wither_threshold must be a positive number");
   }
 
-  if (typeof target_waterings !== 'number' || isNaN(target_waterings) || target_waterings <= 0) {
-    throw new Error('Precondition failed: target_waterings must be a positive number');
+  if (typeof target_waterings !== "number" || isNaN(target_waterings) || target_waterings <= 0) {
+    throw new Error("Precondition failed: target_waterings must be a positive number");
   }
 
   const multiplier = FREQUENCY_MULTIPLIERS[frequency];
@@ -81,18 +93,18 @@ export function calculateDifficultyScore(input: DifficultyCalculationInput): num
  * - Returns one of the valid DifficultyTier values ('common', 'uncommon', 'rare', 'mythical')
  */
 export function mapScoreToTier(score: number): DifficultyTier {
-  if (typeof score !== 'number' || isNaN(score) || score < 0) {
-    throw new Error('Precondition failed: score must be a non-negative number');
+  if (typeof score !== "number" || isNaN(score) || score < 0) {
+    throw new Error("Precondition failed: score must be a non-negative number");
   }
 
   if (score < 1.0) {
-    return 'common';
+    return "common";
   } else if (score < 2.0) {
-    return 'uncommon';
+    return "uncommon";
   } else if (score < 4.0) {
-    return 'rare';
+    return "rare";
   } else {
-    return 'mythical';
+    return "mythical";
   }
 }
 
@@ -123,7 +135,7 @@ export function assignSpecies(tier: DifficultyTier, index?: number): PlantSpecie
   const speciesList = getSpeciesForTier(tier);
   if (index !== undefined) {
     if (!Number.isInteger(index) || index < 0) {
-      throw new Error('Precondition failed: index must be a non-negative integer');
+      throw new Error("Precondition failed: index must be a non-negative integer");
     }
     return speciesList[index % speciesList.length];
   }
@@ -142,7 +154,7 @@ export function assignSpecies(tier: DifficultyTier, index?: number): PlantSpecie
  */
 export function getTierForSpecies(species: PlantSpecies): DifficultyTier {
   if (!species) {
-    throw new Error('Precondition failed: species is required');
+    throw new Error("Precondition failed: species is required");
   }
   for (const [tier, list] of Object.entries(TIER_SPECIES)) {
     if (list.includes(species)) {

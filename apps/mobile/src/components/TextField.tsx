@@ -1,18 +1,15 @@
 import { forwardRef, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  type TextInputProps,
-} from "react-native";
+import { StyleSheet, Text, TextInput, View, type TextInputProps } from "react-native";
 import { colors, radii, spacing } from "@sprout/design-tokens";
 import { useTheme } from "../providers/ThemeProvider";
 interface Props extends TextInputProps {
   label: string;
   error?: string;
 }
-export const TextField = forwardRef<TextInput, Props>(function TextField({ label, error, ...props }, ref) {
+export const TextField = forwardRef<TextInput, Props>(function TextField(
+  { label, error, ...props },
+  ref,
+) {
   const theme = useTheme();
   const [focused, setFocused] = useState(false);
   return (
@@ -23,8 +20,14 @@ export const TextField = forwardRef<TextInput, Props>(function TextField({ label
         accessibilityLabel={label}
         placeholderTextColor={theme.muted}
         {...props}
-        onFocus={(event) => { setFocused(true); props.onFocus?.(event); }}
-        onBlur={(event) => { setFocused(false); props.onBlur?.(event); }}
+        onFocus={(event) => {
+          setFocused(true);
+          props.onFocus?.(event);
+        }}
+        onBlur={(event) => {
+          setFocused(false);
+          props.onBlur?.(event);
+        }}
         style={[
           styles.input,
           { backgroundColor: theme.surface, borderColor: theme.border, color: theme.text },

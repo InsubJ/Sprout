@@ -1,8 +1,164 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
-type HabitRow = { id: string; user_id: string; name: string; description: string | null; plant_type: string; difficulty_tier: string; frequency: string; flexible_rules: Json | null; target_waterings: number; current_waterings: number; wither_threshold: number; consecutive_misses: number; wither_count: number; status: string; poetic_summary: string | null; is_public: boolean; current_streak: number; max_streak: number; completed_at: string | null; created_at: string; hide_name?: boolean; hide_description?: boolean; share_name_friends?: string[]; share_desc_friends?: string[] };
-type LogRow = { id: string; habit_id: string; user_id: string; note: string | null; image_url: string | null; client_operation_id: string | null; created_at: string };
-type ProfileRow = { id: string; username: string; display_name: string | null; avatar_url: string | null; created_at: string };
-type FriendshipRow = { id: string; user_id: string; friend_id: string; status: string; created_at: string };
-type NudgeRow = { id: string; sender_id: string; receiver_id: string; habit_id: string; nudged_at: string; created_at: string };
+type HabitRow = {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  plant_type: string;
+  difficulty_tier: string;
+  frequency: string;
+  flexible_rules: Json | null;
+  target_waterings: number;
+  current_waterings: number;
+  wither_threshold: number;
+  consecutive_misses: number;
+  wither_count: number;
+  status: string;
+  poetic_summary: string | null;
+  is_public: boolean;
+  current_streak: number;
+  max_streak: number;
+  completed_at: string | null;
+  created_at: string;
+  hide_name?: boolean;
+  hide_description?: boolean;
+  share_name_friends?: string[];
+  share_desc_friends?: string[];
+};
+type LogRow = {
+  id: string;
+  habit_id: string;
+  user_id: string;
+  note: string | null;
+  image_url: string | null;
+  client_operation_id: string | null;
+  created_at: string;
+};
+type ProfileRow = {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+};
+type FriendshipRow = {
+  id: string;
+  user_id: string;
+  friend_id: string;
+  status: string;
+  created_at: string;
+};
+type NudgeRow = {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  habit_id: string;
+  nudged_at: string;
+  created_at: string;
+};
+type CustomPlantRow = {
+  id: string;
+  user_id: string;
+  display_name: string;
+  original_prompt: string;
+  sanitized_prompt: string;
+  description: string;
+  plant_spec: Json;
+  render_version: number;
+  rarity: string;
+  generation_job_id: string;
+  preview_image_url: string | null;
+  visibility: string;
+  created_at: string;
+  updated_at: string;
+  archived_at: string | null;
+};
+type GenerationJobRow = {
+  id: string;
+  user_id: string;
+  request_id: string;
+  status: string;
+  original_prompt: string;
+  sanitized_prompt: string;
+  suggested_name: string | null;
+  edited_name: string | null;
+  current_step: string;
+  checklist: Json;
+  provider_attempts: Json;
+  active_provider: string | null;
+  attempt_count: number;
+  failure_code: string | null;
+  failure_message: string | null;
+  generated_spec: Json | null;
+  custom_plant_id: string | null;
+  credit_reservation_id: string;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+  updated_at: string;
+};
+type GenerationCreditRow = {
+  id: string;
+  user_id: string;
+  event_type: string;
+  credit_delta: number;
+  source_event_id: string | null;
+  generation_job_id: string | null;
+  metadata: Json;
+  created_at: string;
+};
+type RewardedAdRow = {
+  id: string;
+  user_id: string;
+  provider: string;
+  provider_event_id: string;
+  ad_unit_id: string;
+  verification_status: string;
+  reward_amount: number;
+  created_at: string;
+  verified_at: string | null;
+  credited_at: string | null;
+};
+type SupportPaymentRow = {
+  id: string;
+  user_id: string;
+  stripe_checkout_session_id: string;
+  stripe_payment_intent_id: string | null;
+  stripe_customer_id: string | null;
+  amount_usd_cents: number;
+  currency: string;
+  status: string;
+  created_at: string;
+  verified_at: string | null;
+  credited_at: string | null;
+};
+type CustomPlantLogRow = {
+  id: string;
+  custom_plant_id: string;
+  user_id: string;
+  entry_type: string;
+  details: Json;
+  created_at: string;
+};
 type Table<Row> = { Row: Row; Insert: Partial<Row>; Update: Partial<Row>; Relationships: [] };
-export interface Database { public: { Tables: { profiles: Table<ProfileRow>; habits: Table<HabitRow>; habit_logs: Table<LogRow>; friendships: Table<FriendshipRow>; wither_nudges: Table<NudgeRow> }; Views: Record<string, never>; Functions: Record<string, never>; Enums: Record<string, never>; CompositeTypes: Record<string, never> } }
+export interface Database {
+  public: {
+    Tables: {
+      profiles: Table<ProfileRow>;
+      habits: Table<HabitRow>;
+      habit_logs: Table<LogRow>;
+      friendships: Table<FriendshipRow>;
+      wither_nudges: Table<NudgeRow>;
+      custom_plants: Table<CustomPlantRow>;
+      plant_generation_jobs: Table<GenerationJobRow>;
+      generation_credit_ledger: Table<GenerationCreditRow>;
+      rewarded_ad_events: Table<RewardedAdRow>;
+      support_payments: Table<SupportPaymentRow>;
+      custom_plant_log_entries: Table<CustomPlantLogRow>;
+    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
+  };
+}

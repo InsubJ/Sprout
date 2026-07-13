@@ -1,3 +1,7 @@
-import { useEffect, useState } from 'react'; import { Stack, useLocalSearchParams } from 'expo-router'; import { StyleSheet, Text, View } from 'react-native'; import type { Profile } from '@sprout/shared'; import { colors, spacing } from '@sprout/design-tokens'; import { Avatar } from '../../src/components/Avatar'; import { ScreenState } from '../../src/components/ScreenState'; import { useServices } from '../../src/providers/ServicesProvider';
-export default function ProfileDeepLink() { const { id } = useLocalSearchParams<{ id: string }>(); const { profiles } = useServices(); const [profile, setProfile] = useState<Profile | null | undefined>(); useEffect(() => { if (!profiles || !id) { setProfile(null); return; } void profiles.getById(id).then(setProfile).catch(() => setProfile(null)); }, [profiles, id]); if (profile === undefined) return <ScreenState message="Finding this gardener…" />; if (!profile) return <ScreenState message="This profile is unavailable." error />; return <View style={styles.root}><Stack.Screen options={{ headerShown: true, title: profile.display_name || profile.username }} /><Avatar uri={profile.avatar_url} label={profile.username} size={96} /><Text style={styles.title}>{profile.display_name || profile.username}</Text><Text style={styles.copy}>@{profile.username}</Text></View>; }
-const styles = StyleSheet.create({ root: { flex: 1, alignItems: 'center', backgroundColor: colors.sand, padding: spacing.xl, gap: spacing.md }, title: { color: colors.ink, fontSize: 28, fontWeight: '900' }, copy: { color: colors.muted } });
+import { useLocalSearchParams } from "expo-router";
+import { ProfileDetailScreen } from "../../src/features/profile/ProfileDetailScreen";
+
+export default function ProfileRoute(): React.JSX.Element {
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  return <ProfileDetailScreen id={id} />;
+}

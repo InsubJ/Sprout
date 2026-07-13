@@ -1,3 +1,25 @@
-import { StyleSheet, Text, View } from 'react-native'; import { colors, spacing } from '@sprout/design-tokens';
-export function EmptyState({ icon = '🌰', title, message }: { icon?: string; title: string; message: string }) { return <View style={styles.root}><Text style={styles.icon}>{icon}</Text><Text style={styles.title}>{title}</Text><Text style={styles.message}>{message}</Text></View>; }
-const styles = StyleSheet.create({ root: { alignItems: 'center', padding: spacing.xl }, icon: { fontSize: 42 }, title: { color: colors.ink, fontWeight: '800', fontSize: 18 }, message: { color: colors.muted, textAlign: 'center' } });
+import { StyleSheet, Text, View } from "react-native";
+import { colors, spacing } from "@sprout/design-tokens";
+export function EmptyState({
+  icon = "🌰",
+  title,
+  message,
+}: {
+  icon?: string;
+  title: string;
+  message: string;
+}) {
+  return (
+    <View style={styles.root}>
+      <Text style={styles.icon}>{icon}</Text>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.message}>{message}</Text>
+    </View>
+  );
+}
+const styles = StyleSheet.create({
+  root: { alignItems: "center", padding: spacing.xl },
+  icon: { fontSize: 42 },
+  title: { color: colors.ink, fontWeight: "800", fontSize: 18 },
+  message: { color: colors.muted, textAlign: "center" },
+});

@@ -6,6 +6,12 @@ import { useTheme } from "../../providers/ThemeProvider";
 import { nativePlantRegistry, plantDisplayName } from "../plants/plantRegistry";
 import { normalizePlantSpecies } from "../plants/components/PlantRenderer";
 import { gardenCardGeometry } from "../habits/components/gardenCardGeometry";
+const rarityBorder = {
+  common: "#6F9B68",
+  uncommon: "#3FA868",
+  rare: "#D34C8B",
+  mythical: "#D6A719",
+} as const;
 
 export function SanctuaryPlantCard({
   habit,
@@ -20,13 +26,12 @@ export function SanctuaryPlantCard({
 }) {
   const theme = useTheme();
   const species = normalizePlantSpecies(habit.plant_type);
-  const Plant =
-    nativePlantRegistry[species as PlantSpecies] ?? nativePlantRegistry.bonsai;
+  const Plant = nativePlantRegistry[species as PlantSpecies] ?? nativePlantRegistry.bonsai;
   return (
     <View
       style={[
         styles.card,
-        { width, backgroundColor: theme.surface, borderColor: theme.border },
+        { width, backgroundColor: theme.surface, borderColor: rarityBorder[habit.difficulty_tier] },
       ]}
     >
       <View>
@@ -35,12 +40,7 @@ export function SanctuaryPlantCard({
           {plantDisplayName(species)} · Fully grown
         </Text>
       </View>
-      <View
-        style={[
-          styles.scene,
-          { backgroundColor: theme.elevated, borderColor: theme.border },
-        ]}
-      >
+      <View style={[styles.scene, { backgroundColor: theme.elevated, borderColor: theme.border }]}>
         <Plant
           currentWaterings={habit.target_waterings}
           targetWaterings={habit.target_waterings}
@@ -50,8 +50,7 @@ export function SanctuaryPlantCard({
         />
       </View>
       <Text numberOfLines={3} style={[styles.summary, { color: theme.muted }]}>
-        {habit.poetic_summary ??
-          "A quiet record of returning, caring, and growing."}
+        {habit.poetic_summary ?? "A quiet record of returning, caring, and growing."}
       </Text>
       <View style={[styles.metrics, { backgroundColor: theme.elevated }]}>
         <Metric label="Acts of care" value={habit.target_waterings} />
@@ -59,14 +58,9 @@ export function SanctuaryPlantCard({
         <Metric label="Setbacks" value={habit.wither_count} />
       </View>
       <Text style={[styles.date, { color: theme.muted }]}>
-        Completed{" "}
-        {new Date(habit.completed_at ?? habit.created_at).toLocaleDateString()}
+        Completed {new Date(habit.completed_at ?? habit.created_at).toLocaleDateString()}
       </Text>
-      <AppButton
-        label="Open Reflection Book"
-        tone="quiet"
-        onPress={onOpenJournal}
-      />
+      <AppButton label="Open Reflection Book" tone="quiet" onPress={onOpenJournal} />
     </View>
   );
 }
@@ -84,7 +78,7 @@ function Metric({ label, value }: { label: string; value: number }) {
 const styles = StyleSheet.create({
   card: {
     height: gardenCardGeometry.height,
-    borderWidth: 1,
+    borderWidth: 2,
     borderRadius: 20,
     padding: gardenCardGeometry.padding,
     gap: spacing.md,

@@ -22,7 +22,10 @@ export function getGrowthState({
   targetWaterings,
   witherCount,
   status,
-}: Pick<PlantProps, "currentWaterings" | "targetWaterings" | "witherCount" | "status">): GrowthState {
+}: Pick<
+  PlantProps,
+  "currentWaterings" | "targetWaterings" | "witherCount" | "status"
+>): GrowthState {
   const safeCurrent = Math.max(0, currentWaterings);
   const safeTarget = Math.max(1, targetWaterings);
   const safeWithers = Math.max(0, witherCount);

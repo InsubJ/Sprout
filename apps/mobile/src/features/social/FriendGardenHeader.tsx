@@ -26,31 +26,17 @@ export function FriendGardenHeader({
         onPress={onLeave}
         style={({ pressed }) => [styles.leave, pressed && styles.pressed]}
       >
-        <Text
-          style={[
-            styles.leaveText,
-            { color: theme.dark ? "#9BCB8E" : colors.forest },
-          ]}
-        >
+        <Text style={[styles.leaveText, { color: theme.dark ? "#9BCB8E" : colors.forest }]}>
           ← Back to Buds
         </Text>
       </Pressable>
       <Text style={[styles.title, { color: theme.text }]}>{name}'s Garden</Text>
-      <Text style={{ color: theme.muted }}>
-        @{profile.username} · connected bud
-      </Text>
+      <Text style={{ color: theme.muted }}>@{profile.username} · connected bud</Text>
       <View
         accessibilityRole="tablist"
-        style={[
-          styles.tabs,
-          { backgroundColor: theme.elevated, borderColor: theme.border },
-        ]}
+        style={[styles.tabs, { backgroundColor: theme.elevated, borderColor: theme.border }]}
       >
-        <GardenOption
-          label="Forest"
-          selected={active === "forest"}
-          onPress={onOpenForest}
-        />
+        <GardenOption label="Forest" selected={active === "forest"} onPress={onOpenForest} />
         <GardenOption
           label="Sanctuary"
           selected={active === "sanctuary"}
@@ -78,12 +64,7 @@ function GardenOption({
       onPress={onPress}
       style={[styles.tab, selected && styles.tabSelected]}
     >
-      <Text
-        style={[
-          styles.tabText,
-          { color: selected ? colors.paper : theme.muted },
-        ]}
-      >
+      <Text style={[styles.tabText, { color: selected ? colors.paper : theme.muted }]}>
         {label}
       </Text>
     </Pressable>

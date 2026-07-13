@@ -32,13 +32,7 @@ export function BegoniaMaculataPlant(props: PlantProps) {
       <PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F" />
       {canes.map((item, index) => (
         <G key={index}>
-          <Path
-            d={item.path}
-            stroke={cane}
-            strokeWidth="4"
-            strokeLinecap="round"
-            fill="none"
-          />
+          <Path d={item.path} stroke={cane} strokeWidth="4" strokeLinecap="round" fill="none" />
           {item.leafAttachments.map((position, leafIndex) => (
             <G key={leafIndex}>
               <Ellipse

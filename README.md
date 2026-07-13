@@ -1,27 +1,30 @@
 # Sprout
 
-Sprout is a habit tracker represented as a growing social forest.
+Sprout is an Expo React Native habit tracker represented as a growing social forest.
 
-## Applications
+## Application
 
 - `apps/mobile` — Expo SDK 57 application for iOS, Android, and Expo web
-- `apps/web` — retained Next.js production reference during migration
-- `packages/shared` — platform-independent types, Zod schemas, and domain rules
+- `packages/shared` — platform-independent types, Zod schemas, domain rules, and plant geometry
 - `packages/services` — injected Supabase repositories and offline synchronization
 - `packages/design-tokens` — shared visual tokens
 - `packages/config` — shared TypeScript configuration
+- `backend/supabase` — database migrations, tests, and hosted Storage policies
 
 ## Commands
 
 ```sh
 npm install
 npm run mobile
-npm run web
+npm run ios
+npm run android
 npm run typecheck
+npm run test
 npm run validate:mobile
-npm run build:web
 ```
 
-The mobile app uses deterministic demo data if its Supabase environment variables are absent. See `apps/mobile/.env.example` for production configuration.
+The app uses deterministic demo data if its Supabase environment variables are absent. See `apps/mobile/.env.example` for production configuration.
 
-The Next.js app remains in place until mobile, Expo web, physical-device testing, and production cutover gates are complete.
+`Sprout-a-detailed-guide.md` is retained as a historical, platform-neutral product reference. The former Next.js implementation is no longer part of the repository or supported architecture.
+
+See [`PLANT-CREATION-GUIDE.md`](PLANT-CREATION-GUIDE.md) for the complete workflow for adding a new plant species.

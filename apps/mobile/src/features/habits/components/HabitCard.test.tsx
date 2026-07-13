@@ -1,7 +1,18 @@
 import { fireEvent, render } from "@testing-library/react-native";
 import type { Habit } from "@sprout/shared";
 import { HabitCard } from "./HabitCard";
-jest.mock("../../../providers/ThemeProvider", () => ({ useTheme: () => ({ dark: false, background: "#fff", surface: "#fff", elevated: "#eee", text: "#111", muted: "#666", border: "#ddd", setDarkMode: jest.fn() }) }));
+jest.mock("../../../providers/ThemeProvider", () => ({
+  useTheme: () => ({
+    dark: false,
+    background: "#fff",
+    surface: "#fff",
+    elevated: "#eee",
+    text: "#111",
+    muted: "#666",
+    border: "#ddd",
+    setDarkMode: jest.fn(),
+  }),
+}));
 const habit: Habit = {
   id: "habit-1",
   user_id: "user-1",
@@ -27,12 +38,7 @@ const habit: Habit = {
 describe("HabitCard", () => {
   it("renders habit status and progress", async () => {
     const view = await render(
-      <HabitCard
-        habit={habit}
-        wateringsToday={0}
-        watering={false}
-        onWater={jest.fn()}
-      />,
+      <HabitCard habit={habit} wateringsToday={0} watering={false} onWater={jest.fn()} />,
     );
     expect(view.getByText("Morning walk")).toBeTruthy();
     expect(view.getByText("4 / 10 (40%)")).toBeTruthy();
@@ -43,12 +49,7 @@ describe("HabitCard", () => {
   it("starts watering when available", async () => {
     const onWater = jest.fn();
     const view = await render(
-      <HabitCard
-        habit={habit}
-        wateringsToday={0}
-        watering={false}
-        onWater={onWater}
-      />,
+      <HabitCard habit={habit} wateringsToday={0} watering={false} onWater={onWater} />,
     );
     fireEvent.press(view.getByRole("button"));
     expect(onWater).toHaveBeenCalledTimes(1);

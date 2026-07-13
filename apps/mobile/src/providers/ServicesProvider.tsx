@@ -1,10 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  createContext,
-  useContext,
-  useMemo,
-  type PropsWithChildren,
-} from "react";
+import { createContext, useContext, useMemo, type PropsWithChildren } from "react";
 import {
   createSproutSupabaseClient,
   PersistentSyncQueue,
@@ -21,6 +16,16 @@ import {
   type ProfileRepository,
   type SocialRepository,
   type StorageRepository,
+  type CustomPlantRepository,
+  type GenerationCreditRepository,
+  type PlantGenerationRepository,
+  SupabaseCustomPlantRepository,
+  SupabaseGenerationCreditRepository,
+  SupabasePlantGenerationRepository,
+  SupabaseRewardedAdRepository,
+  SupabaseSupportPaymentRepository,
+  type RewardedAdRepository,
+  type SupportPaymentRepository,
 } from "@sprout/services";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { DemoHabitRepository } from "../repositories/demoHabitRepository";
@@ -28,6 +33,13 @@ import { DemoInteractionRepository } from "../repositories/demoInteractionReposi
 import { DemoLogRepository } from "../repositories/demoLogRepository";
 import { DemoProfileRepository } from "../repositories/demoProfileRepository";
 import { DemoSocialRepository } from "../repositories/demoSocialRepository";
+import { DemoCustomPlantRepository } from "../repositories/demoCustomPlantRepository";
+import { DemoGenerationCreditRepository } from "../repositories/demoGenerationCreditRepository";
+import { DemoPlantGenerationRepository } from "../repositories/demoPlantGenerationRepository";
+import { DemoRewardedAdRepository } from "../repositories/demoRewardedAdRepository";
+import { DemoSupportPaymentRepository } from "../repositories/demoSupportPaymentRepository";
+import { customPlantFeatureFlags } from "../config/customPlantFeatureFlags";
+import { consumeDemoGenerationCredit } from "../features/customPlants/services/demoRewardState";
 interface Services {
   client: SupabaseClient | null;
   habits: HabitRepository;
@@ -39,12 +51,19 @@ interface Services {
   queue: PersistentSyncQueue;
   sync: SyncProcessor | null;
   isDemo: boolean;
+  customPlants: CustomPlantRepository;
+  generationCredits: GenerationCreditRepository;
+  plantGeneration: PlantGenerationRepository;
+  rewardedAds: RewardedAdRepository;
+  supportPayments: SupportPaymentRepository;
 }
 const ServicesContext = createContext<Services | null>(null);
 export function ServicesProvider({ children }: PropsWithChildren) {
   const services = useMemo<Services>(() => {
     const url = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
-    const key = (process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY)?.trim();
+    const key = (
+      process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+    )?.trim();
     const queue = new PersistentSyncQueue(AsyncStorage);
     if (!url || !key) {
       const habits = new DemoHabitRepository();
@@ -60,6 +79,11 @@ export function ServicesProvider({ children }: PropsWithChildren) {
         queue,
         sync: null,
         isDemo: true,
+        customPlants: new DemoCustomPlantRepository(AsyncStorage),
+        generationCredits: new DemoGenerationCreditRepository(AsyncStorage),
+        plantGeneration: new DemoPlantGenerationRepository(AsyncStorage),
+        rewardedAds: new DemoRewardedAdRepository(AsyncStorage),
+        supportPayments: new DemoSupportPaymentRepository(AsyncStorage),
       };
     }
     const client = createSproutSupabaseClient({
@@ -70,6 +94,7 @@ export function ServicesProvider({ children }: PropsWithChildren) {
     const habits = new SupabaseHabitRepository(client);
     const logs = new SupabaseLogRepository(client);
     const storage = new SupabaseStorageRepository(client);
+    const previewCustomPlants = customPlantFeatureFlags.previewSimulationEnabled;
     return {
       client,
       habits,
@@ -81,17 +106,33 @@ export function ServicesProvider({ children }: PropsWithChildren) {
       queue,
       sync: new SyncProcessor(queue, habits, logs, storage),
       isDemo: false,
+      customPlants: new SupabaseCustomPlantRepository(client),
+      generationCredits: previewCustomPlants
+        ? new DemoGenerationCreditRepository(AsyncStorage)
+        : new SupabaseGenerationCreditRepository(client),
+      plantGeneration: new SupabasePlantGenerationRepository(client, {
+        previewMode: previewCustomPlants,
+        onPreviewSaved: async () => {
+          const { data } = await client.auth.getUser();
+          if (!data.user) throw new Error("Sign in to save a generated plant");
+          await consumeDemoGenerationCredit(AsyncStorage, data.user.id);
+        },
+      }),
+      rewardedAds: previewCustomPlants
+        ? new DemoRewardedAdRepository(AsyncStorage)
+        : new SupabaseRewardedAdRepository(client),
+      supportPayments: previewCustomPlants
+        ? new DemoSupportPaymentRepository(AsyncStorage)
+        : new SupabaseSupportPaymentRepository(client),
     };
   }, []);
-  return (
-    <ServicesContext.Provider value={services}>
-      {children}
-    </ServicesContext.Provider>
-  );
+  return <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>;
 }
 export function useServices(): Services {
   const value = useContext(ServicesContext);
-  if (!value)
-    throw new Error("useServices must be used within ServicesProvider");
+  if (!value) throw new Error("useServices must be used within ServicesProvider");
   return value;
+}
+export function useIsDemoMode(): boolean {
+  return useServices().isDemo;
 }

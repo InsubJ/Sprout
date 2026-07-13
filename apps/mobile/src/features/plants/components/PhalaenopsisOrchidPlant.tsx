@@ -1,9 +1,5 @@
 import Svg, { Circle, Ellipse, G, Path } from "react-native-svg";
-import {
-  computeOrchidSpike,
-  getGrowthState,
-  type PlantProps,
-} from "@sprout/shared";
+import { computeOrchidSpike, getGrowthState, type PlantProps } from "@sprout/shared";
 import { FlawlessAura } from "../shared/FlawlessAura";
 import { GroundShadow } from "../shared/GroundShadow";
 import { PlantPot } from "../shared/PlantPot";
@@ -47,10 +43,7 @@ export function PhalaenopsisOrchidPlant(props: PlantProps) {
         strokeLinecap="round"
       />
       {geometry.blooms.map((item, index) => (
-        <G
-          key={index}
-          transform={`rotate(${item.rotationDeg} ${item.x} ${item.y})`}
-        >
+        <G key={index} transform={`rotate(${item.rotationDeg} ${item.x} ${item.y})`}>
           <Ellipse
             cx={item.x}
             cy={item.y - 7}

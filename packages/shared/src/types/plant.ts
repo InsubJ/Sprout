@@ -55,5 +55,3 @@ export interface GrowthState {
   finalVariant: FinalVariant;
   asymmetry: number;
 }
-
-

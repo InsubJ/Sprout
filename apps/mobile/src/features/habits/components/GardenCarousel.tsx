@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import {
   FlatList,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -18,6 +19,22 @@ interface Props<Item> {
   cardHeight?: number;
 }
 
+export function carouselIndexFromOffset(
+  offset: number,
+  interval: number,
+  lastIndex: number,
+): number {
+  if (
+    !Number.isFinite(offset) ||
+    !Number.isFinite(interval) ||
+    interval <= 0 ||
+    !Number.isInteger(lastIndex) ||
+    lastIndex < 0
+  )
+    throw new Error("Carousel measurements are invalid");
+  return Math.max(0, Math.min(Math.round(offset / interval), lastIndex));
+}
+
 export function GardenCarousel<Item>({
   items,
   keyExtractor,
@@ -28,10 +45,7 @@ export function GardenCarousel<Item>({
   const listRef = useRef<FlatList<Item>>(null);
   const { width } = useWindowDimensions();
   const [focusedIndex, setFocusedIndex] = useState(0);
-  const cardWidth = Math.min(
-    gardenCardGeometry.width,
-    Math.max(240, width - spacing.md * 2),
-  );
+  const cardWidth = Math.min(gardenCardGeometry.width, Math.max(240, width - spacing.md * 2));
   const interval = cardWidth + spacing.md;
   const sidePadding = Math.max(spacing.md, (width - cardWidth) / 2);
   const lastIndex = Math.max(0, items.length - 1);
@@ -46,11 +60,15 @@ export function GardenCarousel<Item>({
     });
     setFocusedIndex(next);
   };
+  const updateFocusedIndex = (offset: number): void =>
+    setFocusedIndex(carouselIndexFromOffset(offset, interval, lastIndex));
   return (
     <View accessibilityLabel={accessibilityLabel} style={styles.root}>
       <FlatList
         ref={listRef}
         horizontal
+        nestedScrollEnabled
+        disableScrollViewPanResponder={Platform.OS === "web"}
         data={items as Item[]}
         keyExtractor={keyExtractor}
         renderItem={({ item }) => (
@@ -68,25 +86,18 @@ export function GardenCarousel<Item>({
         snapToAlignment="start"
         decelerationRate="fast"
         disableIntervalMomentum
-        initialNumToRender={2}
-        maxToRenderPerBatch={3}
-        windowSize={3}
+        initialNumToRender={Math.min(items.length, 5)}
+        maxToRenderPerBatch={5}
+        windowSize={5}
         getItemLayout={(_data, index) => ({
           length: interval,
           offset: interval * index,
           index,
         })}
-        onMomentumScrollEnd={(event) =>
-          setFocusedIndex(
-            Math.max(
-              0,
-              Math.min(
-                Math.round(event.nativeEvent.contentOffset.x / interval),
-                lastIndex,
-              ),
-            ),
-          )
-        }
+        scrollEventThrottle={16}
+        onScroll={(event) => updateFocusedIndex(event.nativeEvent.contentOffset.x)}
+        onScrollEndDrag={(event) => updateFocusedIndex(event.nativeEvent.contentOffset.x)}
+        onMomentumScrollEnd={(event) => updateFocusedIndex(event.nativeEvent.contentOffset.x)}
       />
       <View style={styles.controls}>
         <Pressable
@@ -104,9 +115,7 @@ export function GardenCarousel<Item>({
           <Text style={styles.arrowText}>←</Text>
         </Pressable>
         <Text accessibilityLiveRegion="polite" style={styles.position}>
-          {items.length
-            ? `${focusedIndex + 1} of ${items.length}`
-            : "No plants"}
+          {items.length ? `${focusedIndex + 1} of ${items.length}` : "No plants"}
         </Text>
         <Pressable
           accessibilityRole="button"

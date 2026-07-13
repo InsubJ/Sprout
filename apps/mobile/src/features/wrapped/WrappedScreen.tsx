@@ -9,5 +9,145 @@ import { useTheme } from "../../providers/ThemeProvider";
 import { nativePlantRegistry } from "../plants/plantRegistry";
 import { useNativeYearlyWrapped } from "./useNativeYearlyWrapped";
 
-export function WrappedScreen(){const router=useRouter();const theme=useTheme();const years=[new Date().getFullYear(),new Date().getFullYear()-1,new Date().getFullYear()-2];const [year,setYear]=useState(years[0]);const {data,loading,error}=useNativeYearlyWrapped(year);const completion=data.totalPlanted?data.totalCompleted/data.totalPlanted:0;const Highlight=data.highlight?nativePlantRegistry[data.highlight.plant_type as keyof typeof nativePlantRegistry]??nativePlantRegistry.bonsai:null;if(loading)return <ScreenState message="Gathering logs and counting rings…"/>;return <ScrollView style={{backgroundColor:theme.background}} contentContainerStyle={styles.content}><Pressable accessibilityRole="button" onPress={()=>router.back()}><Text style={styles.back}>← Profile</Text></Pressable><Text style={styles.badge}>🌲 SPROUT WRAPPED</Text><Text style={[styles.title,{color:theme.text}]}>Your Year in the Woods</Text><Text style={[styles.copy,{color:theme.muted}]}>The seeds you nurtured, the setbacks you survived, and the forest you grew.</Text><View style={styles.years}>{years.map(value=><Pressable key={value} accessibilityRole="button" accessibilityState={{selected:year===value}} onPress={()=>setYear(value)} style={[styles.year,year===value&&styles.yearActive]}><Text style={year===value?styles.yearActiveText:{color:theme.text}}>{value}</Text></Pressable>)}</View>{error?<Text style={styles.error}>{error}</Text>:null}{!data.totalPlanted?<View style={[styles.card,{backgroundColor:theme.surface}]}><Text style={[styles.cardTitle,{color:theme.text}]}>A clearing awaits</Text><Text style={[styles.copy,{color:theme.muted}]}>Plant a seed this year and your story will grow here.</Text></View>:<><View style={[styles.card,{backgroundColor:theme.surface}]}><Text style={styles.kicker}>THE FOREST CANOPY</Text><Text style={[styles.big,{color:theme.text}]}>{data.totalCompleted} <Text style={styles.small}>of {data.totalPlanted} matured</Text></Text><ProgressBar progress={completion}/><Text style={[styles.copy,{color:theme.muted}]}>{Math.round(completion*100)}% of your seeds became permanent monuments in Sanctuary.</Text></View><View style={[styles.card,{backgroundColor:theme.surface}]}><Text style={styles.kicker}>BIOMES EXPLORED</Text>{Object.entries(data.tierRatios).map(([tier,count])=><View key={tier} style={styles.metric}><Text style={[styles.metricName,{color:theme.text}]}>{tier}</Text><Text style={styles.metricValue}>{count}</Text></View>)}</View><View style={[styles.card,{backgroundColor:theme.surface}]}><Text style={styles.kicker}>RESILIENCE</Text><Text style={[styles.big,{color:theme.text}]}>{data.averageSetbacks}</Text><Text style={[styles.copy,{color:theme.muted}]}>average setbacks per plant · best streak {data.bestStreak} days</Text></View>{data.highlight&&Highlight?<View style={[styles.card,styles.highlight,{backgroundColor:theme.surface}]}><Text style={styles.kicker}>PLANT HIGHLIGHT</Text><Highlight currentWaterings={data.highlight.current_waterings} targetWaterings={data.highlight.target_waterings} witherCount={data.highlight.wither_count} status={data.highlight.status} size={180}/><Text style={[styles.cardTitle,{color:theme.text}]}>{data.highlight.name}</Text><Text style={[styles.copy,{color:theme.muted}]}>{data.highlight.poetic_summary??"A small promise, returned to until it took root."}</Text></View>:null}</>}<AppButton label="Share my year" onPress={()=>void Share.share({message:`My ${year} Sprout Wrapped: ${data.totalCompleted} of ${data.totalPlanted} habits fully grown, with a ${data.bestStreak}-day best streak. 🌲`})}/></ScrollView>}
-const styles=StyleSheet.create({content:{padding:spacing.lg,paddingTop:spacing.xxl,paddingBottom:spacing.xxl,gap:spacing.md},back:{color:colors.forest,fontWeight:"800"},badge:{alignSelf:"flex-start",color:colors.forest,fontWeight:"900",letterSpacing:1},title:{fontSize:38,fontWeight:"900",lineHeight:42},copy:{lineHeight:21},years:{flexDirection:"row",gap:spacing.sm},year:{paddingHorizontal:spacing.md,paddingVertical:spacing.sm,borderRadius:999,borderWidth:1,borderColor:colors.border},yearActive:{backgroundColor:colors.forest,borderColor:colors.forest},yearActiveText:{color:colors.paper,fontWeight:"800"},card:{borderRadius:radii.lg,padding:spacing.lg,gap:spacing.sm},kicker:{color:colors.forest,fontSize:11,fontWeight:"900",letterSpacing:1.2},cardTitle:{fontSize:22,fontWeight:"900"},big:{fontSize:46,fontWeight:"900"},small:{fontSize:15,fontWeight:"600"},metric:{flexDirection:"row",justifyContent:"space-between",paddingVertical:spacing.xs},metricName:{fontWeight:"700",textTransform:"capitalize"},metricValue:{color:colors.forest,fontWeight:"900"},highlight:{alignItems:"center"},error:{color:colors.danger}});
+export function WrappedScreen() {
+  const router = useRouter();
+  const theme = useTheme();
+  const years = [
+    new Date().getFullYear(),
+    new Date().getFullYear() - 1,
+    new Date().getFullYear() - 2,
+  ];
+  const [year, setYear] = useState(years[0]);
+  const { data, loading, error } = useNativeYearlyWrapped(year);
+  const completion = data.totalPlanted ? data.totalCompleted / data.totalPlanted : 0;
+  const Highlight = data.highlight
+    ? (nativePlantRegistry[data.highlight.plant_type as keyof typeof nativePlantRegistry] ??
+      nativePlantRegistry.bonsai)
+    : null;
+  if (loading) return <ScreenState message="Gathering logs and counting rings…" />;
+  return (
+    <ScrollView
+      style={{ backgroundColor: theme.background }}
+      contentContainerStyle={styles.content}
+    >
+      <Pressable accessibilityRole="button" onPress={() => router.back()}>
+        <Text style={styles.back}>← Profile</Text>
+      </Pressable>
+      <Text style={styles.badge}>🌲 SPROUT WRAPPED</Text>
+      <Text style={[styles.title, { color: theme.text }]}>Your Year in the Woods</Text>
+      <Text style={[styles.copy, { color: theme.muted }]}>
+        The seeds you nurtured, the setbacks you survived, and the forest you grew.
+      </Text>
+      <View style={styles.years}>
+        {years.map((value) => (
+          <Pressable
+            key={value}
+            accessibilityRole="button"
+            accessibilityState={{ selected: year === value }}
+            onPress={() => setYear(value)}
+            style={[styles.year, year === value && styles.yearActive]}
+          >
+            <Text style={year === value ? styles.yearActiveText : { color: theme.text }}>
+              {value}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {!data.totalPlanted ? (
+        <View style={[styles.card, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.cardTitle, { color: theme.text }]}>A clearing awaits</Text>
+          <Text style={[styles.copy, { color: theme.muted }]}>
+            Plant a seed this year and your story will grow here.
+          </Text>
+        </View>
+      ) : (
+        <>
+          <View style={[styles.card, { backgroundColor: theme.surface }]}>
+            <Text style={styles.kicker}>THE FOREST CANOPY</Text>
+            <Text style={[styles.big, { color: theme.text }]}>
+              {data.totalCompleted} <Text style={styles.small}>of {data.totalPlanted} matured</Text>
+            </Text>
+            <ProgressBar progress={completion} />
+            <Text style={[styles.copy, { color: theme.muted }]}>
+              {Math.round(completion * 100)}% of your seeds became permanent monuments in Sanctuary.
+            </Text>
+          </View>
+          <View style={[styles.card, { backgroundColor: theme.surface }]}>
+            <Text style={styles.kicker}>BIOMES EXPLORED</Text>
+            {Object.entries(data.tierRatios).map(([tier, count]) => (
+              <View key={tier} style={styles.metric}>
+                <Text style={[styles.metricName, { color: theme.text }]}>{tier}</Text>
+                <Text style={styles.metricValue}>{count}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={[styles.card, { backgroundColor: theme.surface }]}>
+            <Text style={styles.kicker}>RESILIENCE</Text>
+            <Text style={[styles.big, { color: theme.text }]}>{data.averageSetbacks}</Text>
+            <Text style={[styles.copy, { color: theme.muted }]}>
+              average setbacks per plant · best streak {data.bestStreak} days
+            </Text>
+          </View>
+          {data.highlight && Highlight ? (
+            <View style={[styles.card, styles.highlight, { backgroundColor: theme.surface }]}>
+              <Text style={styles.kicker}>PLANT HIGHLIGHT</Text>
+              <Highlight
+                currentWaterings={data.highlight.current_waterings}
+                targetWaterings={data.highlight.target_waterings}
+                witherCount={data.highlight.wither_count}
+                status={data.highlight.status}
+                size={180}
+              />
+              <Text style={[styles.cardTitle, { color: theme.text }]}>{data.highlight.name}</Text>
+              <Text style={[styles.copy, { color: theme.muted }]}>
+                {data.highlight.poetic_summary ??
+                  "A small promise, returned to until it took root."}
+              </Text>
+            </View>
+          ) : null}
+        </>
+      )}
+      <AppButton
+        label="Share my year"
+        onPress={() =>
+          void Share.share({
+            message: `My ${year} Sprout Wrapped: ${data.totalCompleted} of ${data.totalPlanted} habits fully grown, with a ${data.bestStreak}-day best streak. 🌲`,
+          })
+        }
+      />
+    </ScrollView>
+  );
+}
+const styles = StyleSheet.create({
+  content: {
+    padding: spacing.lg,
+    paddingTop: spacing.xxl,
+    paddingBottom: spacing.xxl,
+    gap: spacing.md,
+  },
+  back: { color: colors.forest, fontWeight: "800" },
+  badge: { alignSelf: "flex-start", color: colors.forest, fontWeight: "900", letterSpacing: 1 },
+  title: { fontSize: 38, fontWeight: "900", lineHeight: 42 },
+  copy: { lineHeight: 21 },
+  years: { flexDirection: "row", gap: spacing.sm },
+  year: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  yearActive: { backgroundColor: colors.forest, borderColor: colors.forest },
+  yearActiveText: { color: colors.paper, fontWeight: "800" },
+  card: { borderRadius: radii.lg, padding: spacing.lg, gap: spacing.sm },
+  kicker: { color: colors.forest, fontSize: 11, fontWeight: "900", letterSpacing: 1.2 },
+  cardTitle: { fontSize: 22, fontWeight: "900" },
+  big: { fontSize: 46, fontWeight: "900" },
+  small: { fontSize: 15, fontWeight: "600" },
+  metric: { flexDirection: "row", justifyContent: "space-between", paddingVertical: spacing.xs },
+  metricName: { fontWeight: "700", textTransform: "capitalize" },
+  metricValue: { color: colors.forest, fontWeight: "900" },
+  highlight: { alignItems: "center" },
+  error: { color: colors.danger },
+});

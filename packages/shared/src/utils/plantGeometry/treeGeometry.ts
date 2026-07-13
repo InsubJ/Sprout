@@ -29,7 +29,7 @@ export interface TreeBranchOptions {
 export function computeTreeTrunk(
   growthPercent: number,
   baseHeight = 30,
-  heightMultiplier = 0.9
+  heightMultiplier = 0.9,
 ): TreeTrunkGeometry {
   const trunkHeight = baseHeight + growthPercent * heightMultiplier;
   return { trunkHeight, topY: 300 - trunkHeight };
@@ -47,7 +47,7 @@ export function computeTreeBranches(
   growthPercent: number,
   asymmetry: number,
   topY: number,
-  options: TreeBranchOptions = {}
+  options: TreeBranchOptions = {},
 ): TreeBranch[] {
   const { maxBranches = 5, branchDensity = 20, spreadBase = 20, spreadStep = 6 } = options;
 

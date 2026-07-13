@@ -1,9 +1,5 @@
 import Svg, { Ellipse, G, Path } from "react-native-svg";
-import {
-  computeRadialLeaves,
-  getGrowthState,
-  type PlantProps,
-} from "@sprout/shared";
+import { computeRadialLeaves, getGrowthState, type PlantProps } from "@sprout/shared";
 import { FlawlessAura } from "../shared/FlawlessAura";
 import { GroundShadow } from "../shared/GroundShadow";
 import { PlantPot } from "../shared/PlantPot";
@@ -35,13 +31,7 @@ export function MarantaPlant(props: PlantProps) {
       <PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F" />
       {leaves.map((item, index) => (
         <G key={index}>
-          <Path
-            d={item.path}
-            stroke={leaf}
-            strokeWidth="2"
-            fill="none"
-            opacity={0.7}
-          />
+          <Path d={item.path} stroke={leaf} strokeWidth="2" fill="none" opacity={0.7} />
           <Ellipse
             cx={item.tipX}
             cy={item.tipY}

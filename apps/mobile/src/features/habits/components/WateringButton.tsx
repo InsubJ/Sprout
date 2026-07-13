@@ -2,6 +2,65 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { colors, radii } from "@sprout/design-tokens";
 import { WateringCanIcon } from "./WateringCanIcon";
-interface Props { theme?:"forest"|"disco"; disabled?:boolean; visuallyDisabled?:boolean; loading?:boolean; onPress():void }
-export function WateringButton({theme="forest",disabled=false,visuallyDisabled=false,loading=false,onPress}:Props){const [hovered,setHovered]=useState(false);const unavailable=disabled||visuallyDisabled;return <Pressable accessibilityRole="button" accessibilityLabel="Water plant" accessibilityState={{disabled:unavailable,busy:loading}} disabled={disabled} onHoverIn={()=>setHovered(true)} onHoverOut={()=>setHovered(false)} onPress={onPress} style={({pressed})=>[styles.button,theme==="disco"&&styles.disco,hovered&&!unavailable&&styles.hovered,pressed&&styles.pressed,unavailable&&styles.disabled]}><WateringCanIcon/>{loading?<Text style={styles.loading}>…</Text>:null}</Pressable>}
-const styles=StyleSheet.create({button:{width:48,height:48,alignItems:"center",justifyContent:"center",borderRadius:radii.pill,backgroundColor:colors.forest,shadowColor:colors.forest,shadowOpacity:.28,shadowRadius:7,elevation:4},disco:{backgroundColor:colors.purple},hovered:{backgroundColor:colors.evergreen,transform:[{scale:1.12}],shadowOpacity:.36,shadowRadius:10},pressed:{transform:[{scale:.95}],opacity:.82},disabled:{backgroundColor:"#D1D5DB",opacity:.65,shadowOpacity:0},loading:{color:colors.paper,fontFamily:"Outfit_700Bold",position:"absolute"}});
+interface Props {
+  theme?: "forest" | "disco";
+  disabled?: boolean;
+  visuallyDisabled?: boolean;
+  loading?: boolean;
+  onPress(): void;
+}
+export function WateringButton({
+  theme = "forest",
+  disabled = false,
+  visuallyDisabled = false,
+  loading = false,
+  onPress,
+}: Props) {
+  const [hovered, setHovered] = useState(false);
+  const unavailable = disabled || visuallyDisabled;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Water plant"
+      accessibilityState={{ disabled: unavailable, busy: loading }}
+      disabled={disabled}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.button,
+        theme === "disco" && styles.disco,
+        hovered && !unavailable && styles.hovered,
+        pressed && styles.pressed,
+        unavailable && styles.disabled,
+      ]}
+    >
+      <WateringCanIcon />
+      {loading ? <Text style={styles.loading}>…</Text> : null}
+    </Pressable>
+  );
+}
+const styles = StyleSheet.create({
+  button: {
+    width: 48,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radii.pill,
+    backgroundColor: colors.forest,
+    shadowColor: colors.forest,
+    shadowOpacity: 0.28,
+    shadowRadius: 7,
+    elevation: 4,
+  },
+  disco: { backgroundColor: colors.purple },
+  hovered: {
+    backgroundColor: colors.evergreen,
+    transform: [{ scale: 1.12 }],
+    shadowOpacity: 0.36,
+    shadowRadius: 10,
+  },
+  pressed: { transform: [{ scale: 0.95 }], opacity: 0.82 },
+  disabled: { backgroundColor: "#D1D5DB", opacity: 0.65, shadowOpacity: 0 },
+  loading: { color: colors.paper, fontFamily: "Outfit_700Bold", position: "absolute" },
+});

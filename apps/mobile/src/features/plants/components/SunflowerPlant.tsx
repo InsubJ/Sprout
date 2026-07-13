@@ -1,9 +1,5 @@
 import Svg, { Circle, Ellipse, G, Path } from "react-native-svg";
-import {
-  computeSunflowerStem,
-  getGrowthState,
-  type PlantProps,
-} from "@sprout/shared";
+import { computeSunflowerStem, getGrowthState, type PlantProps } from "@sprout/shared";
 import { FlawlessAura } from "../shared/FlawlessAura";
 import { GroundShadow } from "../shared/GroundShadow";
 import { PlantPot } from "../shared/PlantPot";
@@ -35,13 +31,7 @@ export function SunflowerPlant(props: PlantProps) {
       ) : null}
       <GroundShadow />
       <PlantPot color="#8B6F47" colorLight="#A9835A" colorDark="#6B4A2F" />
-      <Path
-        d={geometry.stemPath}
-        stroke={stem}
-        strokeWidth="6"
-        strokeLinecap="round"
-        fill="none"
-      />
+      <Path d={geometry.stemPath} stroke={stem} strokeWidth="6" strokeLinecap="round" fill="none" />
       {geometry.leafPositions.map((item, index) => (
         <Ellipse
           key={index}
@@ -67,12 +57,7 @@ export function SunflowerPlant(props: PlantProps) {
               transform={`rotate(${item.rotation} ${item.cx} ${item.cy})`}
             />
           ))}
-          <Circle
-            cx={geometry.headX}
-            cy={geometry.headY}
-            r={geometry.headRadius}
-            fill={disc}
-          />
+          <Circle cx={geometry.headX} cy={geometry.headY} r={geometry.headRadius} fill={disc} />
         </G>
       ) : null}
       {growth.isCompleted && growth.finalVariant === "scarred" ? (

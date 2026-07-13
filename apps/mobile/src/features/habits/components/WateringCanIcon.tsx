@@ -8,8 +8,31 @@ const paths = [
   "M7 14a4 4 0 0 1-4-4v0a4 4 0 0 1 4-4h1",
 ] as const;
 
-export function WateringCanIcon({ color = "#FFFFFF", flipped = true }: { color?: string; flipped?: boolean }) {
-  return <Svg width={22} height={22} viewBox="0 0 24 24" style={flipped ? { transform: [{ scaleX: -1 }] } : undefined}>
-    {paths.map((path) => <Path key={path} d={path} fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />)}
-  </Svg>;
+export function WateringCanIcon({
+  color = "#FFFFFF",
+  flipped = true,
+}: {
+  color?: string;
+  flipped?: boolean;
+}) {
+  return (
+    <Svg
+      width={22}
+      height={22}
+      viewBox="0 0 24 24"
+      style={flipped ? { transform: [{ scaleX: -1 }] } : undefined}
+    >
+      {paths.map((path) => (
+        <Path
+          key={path}
+          d={path}
+          fill="none"
+          stroke={color}
+          strokeWidth={2.2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ))}
+    </Svg>
+  );
 }

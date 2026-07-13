@@ -11,29 +11,42 @@ import { ThemeProvider } from "../src/providers/ThemeProvider";
 import { SyncProvider } from "../src/providers/SyncProvider";
 import { DataProvider } from "../src/providers/DataProvider";
 import { AppErrorBoundary } from "../src/components/AppErrorBoundary";
-import { Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold, Outfit_700Bold, useFonts } from "@expo-google-fonts/outfit";
+import {
+  Outfit_300Light,
+  Outfit_400Regular,
+  Outfit_500Medium,
+  Outfit_600SemiBold,
+  Outfit_700Bold,
+  useFonts,
+} from "@expo-google-fonts/outfit";
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({ Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold, Outfit_700Bold });
+  const [fontsLoaded] = useFonts({
+    Outfit_300Light,
+    Outfit_400Regular,
+    Outfit_500Medium,
+    Outfit_600SemiBold,
+    Outfit_700Bold,
+  });
   if (!fontsLoaded) return null;
   return (
     <AppErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <ThemeProvider>
-          <ServicesProvider>
-            <DataProvider>
-              <SyncProvider>
-                <AuthProvider>
-                  <AppLockProvider>
-                    <Stack screenOptions={{ headerShown: false }} />
-                    <StatusBar style="auto" />
-                  </AppLockProvider>
-                </AuthProvider>
-              </SyncProvider>
-            </DataProvider>
-          </ServicesProvider>
-        </ThemeProvider>
-      </SafeAreaProvider>
+        <SafeAreaProvider>
+          <ThemeProvider>
+            <ServicesProvider>
+              <DataProvider>
+                <SyncProvider>
+                  <AuthProvider>
+                    <AppLockProvider>
+                      <Stack screenOptions={{ headerShown: false }} />
+                      <StatusBar style="auto" />
+                    </AppLockProvider>
+                  </AuthProvider>
+                </SyncProvider>
+              </DataProvider>
+            </ServicesProvider>
+          </ThemeProvider>
+        </SafeAreaProvider>
       </GestureHandlerRootView>
     </AppErrorBoundary>
   );

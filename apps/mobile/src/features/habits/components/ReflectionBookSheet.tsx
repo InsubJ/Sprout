@@ -1,78 +1,17 @@
-import { useEffect, useState } from "react";
 import { FlatList, Modal, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
-import type { Habit, HabitLog } from "@sprout/shared";
+import type { Habit } from "@sprout/shared";
 import { radii, spacing } from "@sprout/design-tokens";
 import { AppButton } from "../../../components/AppButton";
 import { ScreenState } from "../../../components/ScreenState";
-import { useServices } from "../../../providers/ServicesProvider";
 import { useTheme } from "../../../providers/ThemeProvider";
 import { ReflectionInteractions } from "../../sanctuary/ReflectionInteractions";
 import { plantDisplayName } from "../../plants/plantRegistry";
 import { normalizePlantSpecies } from "../../plants/components/PlantRenderer";
-export function ReflectionBookSheet({
-  habit,
-  onClose,
-}: {
-  habit: Habit | null;
-  onClose(): void;
-}) {
-  const { logs } = useServices();
+import { useHabitLogs } from "../hooks/useHabitLogs";
+export function ReflectionBookSheet({ habit, onClose }: { habit: Habit | null; onClose(): void }) {
   const theme = useTheme();
-  const [entries, setEntries] = useState<HabitLog[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
-  useEffect(() => {
-    if (!habit) {
-      setEntries([]);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    if (!logs) {
-      setEntries([]);
-      setLoading(false);
-      return;
-    }
-    let timeout: ReturnType<typeof setTimeout>;
-    void Promise.race([
-      logs.getByHabitId(habit.id),
-      new Promise<never>((_resolve, reject) => {
-        timeout = setTimeout(
-          () =>
-            reject(
-              new Error(
-                "Reflection entries took too long to load. Please try again.",
-              ),
-            ),
-          10000,
-        );
-      }),
-    ])
-      .then((items) =>
-        setEntries(
-          items
-            .sort(
-              (a, b) =>
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime(),
-            ),
-        ),
-      )
-      .catch((cause) =>
-        setError(
-          cause instanceof Error
-            ? cause.message
-            : "Unable to open reflection book",
-        ),
-      )
-      .finally(() => {
-        clearTimeout(timeout);
-        setLoading(false);
-      });
-    return () => clearTimeout(timeout);
-  }, [habit, logs, reloadKey]);
+  const { entries, loading, error, retry } = useHabitLogs(habit?.id);
   return (
     <Modal
       visible={Boolean(habit)}
@@ -81,34 +20,22 @@ export function ReflectionBookSheet({
       onRequestClose={onClose}
     >
       <View style={[styles.root, { backgroundColor: theme.background }]}>
-        <Text style={[styles.eyebrow, { color: theme.muted }]}>
-          REFLECTION BOOK
-        </Text>
+        <Text style={[styles.eyebrow, { color: theme.muted }]}>REFLECTION BOOK</Text>
         <Text style={[styles.title, { color: theme.text }]}>{habit?.name}</Text>
         <Text style={[styles.species, { color: theme.muted }]}>
-          {habit
-            ? plantDisplayName(normalizePlantSpecies(habit.plant_type))
-            : ""}{" "}
-          · {habit?.difficulty_tier}
+          {habit ? plantDisplayName(normalizePlantSpecies(habit.plant_type)) : ""} ·{" "}
+          {habit?.difficulty_tier}
         </Text>
         {habit?.description ? (
-          <Text style={[styles.description, { color: theme.text }]}>
-            {habit.description}
-          </Text>
+          <Text style={[styles.description, { color: theme.text }]}>{habit.description}</Text>
         ) : null}
         {habit?.poetic_summary ? (
-          <Text style={[styles.poem, { color: theme.muted }]}>
-            {habit.poetic_summary}
-          </Text>
+          <Text style={[styles.poem, { color: theme.muted }]}>{habit.poetic_summary}</Text>
         ) : null}
         {error ? (
           <View style={styles.loadState}>
             <ScreenState message={error} error />
-            <AppButton
-              label="Retry reflections"
-              tone="quiet"
-              onPress={() => setReloadKey((value) => value + 1)}
-            />
+            <AppButton label="Retry reflections" tone="quiet" onPress={retry} />
           </View>
         ) : (
           <View style={styles.entries}>
@@ -123,7 +50,9 @@ export function ReflectionBookSheet({
             <FlatList
               data={entries}
               keyExtractor={(item) => item.id}
-              ListEmptyComponent={loading ? null : <ScreenState message="No watering check-ins yet." />}
+              ListEmptyComponent={
+                loading ? null : <ScreenState message="No watering check-ins yet." />
+              }
               renderItem={({ item }) => (
                 <View
                   style={[
@@ -141,18 +70,14 @@ export function ReflectionBookSheet({
                     </Text>
                   </View>
                   {item.image_url ? (
-                    <Image
-                      source={item.image_url}
-                      style={styles.image}
-                      contentFit="cover"
-                    />
+                    <Image source={item.image_url} style={styles.image} contentFit="cover" />
                   ) : null}
                   {item.note ? (
-                    <Text style={[styles.note, { color: theme.text }]}> 
-                      {item.note}
-                    </Text>
+                    <Text style={[styles.note, { color: theme.text }]}>{item.note}</Text>
                   ) : item.image_url ? null : (
-                    <Text style={[styles.noNote, { color: theme.muted }]}>No written reflection was captured for this watering.</Text>
+                    <Text style={[styles.noNote, { color: theme.muted }]}>
+                      No written reflection was captured for this watering.
+                    </Text>
                   )}
                   <ReflectionInteractions logId={item.id} />
                 </View>

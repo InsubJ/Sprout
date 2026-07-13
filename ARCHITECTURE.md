@@ -2,23 +2,20 @@
 
 ## Overview
 
-Sprout is an npm-workspaces monorepo containing two user interfaces backed by one Supabase project:
+Sprout is an npm-workspaces monorepo containing one Expo React Native application backed by Supabase:
 
-- `apps/mobile`: the primary Expo React Native application for iOS, Android, and web.
-- `apps/web`: the original Next.js application and behavioural reference implementation.
-- `packages/*`: framework-independent domain rules, service abstractions, Supabase adapters, and design tokens shared across applications.
+- `apps/mobile`: the supported application for iOS, Android, and Expo web.
+- `packages/*`: framework-independent domain rules, service abstractions, Supabase adapters, and design tokens shared across features and supported platforms.
 - `backend/supabase`: the PostgreSQL schema, Row Level Security policies, triggers, Storage setup, and migration history.
 
-The applications represent habits as plants. Watering a plant creates a habit log; completing a habit moves the plant into the Sanctuary; profiles, friendships, reflections, reactions, comments, and nudges provide the social layer.
+The application represents habits as plants. Watering a plant creates a habit log; completing a habit moves the plant into the Sanctuary; profiles, friendships, reflections, reactions, comments, and nudges provide the social layer.
 
 ```mermaid
 flowchart TD
     Mobile["Expo React Native app"] --> Shared["@sprout/shared"]
-    Web["Next.js web app"] --> Shared
     Mobile --> Services["@sprout/services"]
     Services --> Shared
     Services --> Supabase["Supabase Auth, Postgres and Storage"]
-    Web --> Supabase
     Mobile --> Tokens["@sprout/design-tokens"]
     Supabase --> Migrations["backend/supabase/migrations"]
 ```
@@ -33,17 +30,16 @@ flowchart TD
 | Mobile graphics | `react-native-svg`, `expo-image` | Reusable plant illustrations, animation layers, and reflection images. |
 | Mobile state | React Context and custom hooks | Authentication, services, theme, sync, app lock, and feature state. |
 | Mobile persistence | AsyncStorage and SecureStore-backed platform services | Sessions, demo data, cached habits, offline operations, preferences, and lock settings. |
-| Web | Next.js 14, React 18 | Original web application and reference behaviour. |
 | Backend | Supabase | Authentication, PostgreSQL, PostgREST Data API, Row Level Security, and object storage. |
 | Validation | TypeScript and Zod | Static contracts and runtime validation at service boundaries. |
-| Testing | Jest, React Native Testing Library, Vitest | Mobile component/repository tests and package/web tests. |
+| Testing | Jest, React Native Testing Library, Vitest | Mobile component/repository tests and shared-package tests. |
 
 ## Repository layout
 
 ```text
 Sprout/
 ├── apps/
-│   ├── mobile/
+│   └── mobile/
 │   │   ├── app/                 Expo Router route files and layouts
 │   │   └── src/
 │   │       ├── components/      Shared native presentation components
@@ -52,8 +48,6 @@ Sprout/
 │   │       ├── repositories/    Demo-mode repository implementations
 │   │       ├── services/        Native platform integrations
 │   │       └── utils/           Stateless native utilities
-│   └── web/
-│       └── src/                 Next.js routes, components, hooks and web services
 ├── packages/
 │   ├── shared/                  Domain types, schemas and pure business rules
 │   ├── services/                Repository contracts, Supabase adapters and offline sync
@@ -122,7 +116,7 @@ Important feature groups include:
 
 ### `@sprout/shared`
 
-This is the domain layer. It has no React Native or Next.js dependency. It contains:
+This is the platform-independent domain layer. It has no React Native dependency. It contains:
 
 - TypeScript models such as `Habit`, `HabitLog`, `Profile`, and `Friendship`.
 - Create/update input contracts.
@@ -255,10 +249,8 @@ From the repository root:
 
 ```powershell
 npm run mobile
-npm run web
 npm run typecheck
 npm run test
-npm run build:web
 npm run validate:mobile
 ```
 
@@ -286,4 +278,4 @@ npx supabase db push
 - New database fields require a migration and matching shared/service types.
 - Reusable plant components and geometry are the visual source of truth across Forest, Sanctuary, Lab, and social visits.
 - Avoid direct Supabase calls from screens when a repository abstraction already exists.
-- Preserve feature parity with `Sprout-a-detailed-guide.md` and the original web implementation while adapting interactions to native conventions.
+- Preserve the product behaviours documented in `Sprout-a-detailed-guide.md` while adapting interactions to native conventions.
