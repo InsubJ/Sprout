@@ -55,7 +55,7 @@ export function CollectionFilters<Value extends string>({
 }
 const styles = StyleSheet.create({
   root: {
-    marginHorizontal: spacing.lg,
+    marginHorizontal: spacing.md,
     padding: spacing.md,
     gap: spacing.md,
     borderWidth: 1,

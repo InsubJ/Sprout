@@ -1,20 +1,27 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Habit, Profile } from "@sprout/shared";
+import type { CustomPlant, Habit, Profile } from "@sprout/shared";
 import { useAuth } from "../../providers/AuthProvider";
 import { useServices } from "../../providers/ServicesProvider";
 
 export interface FriendGardenState {
   profile: Profile | null | undefined;
   habits: Habit[];
+  customPlants: CustomPlant[];
   error: string | null;
   refresh: () => Promise<void>;
 }
 
 export function useFriendGarden(friendId?: string): FriendGardenState {
   const { user } = useAuth();
-  const { habits: habitRepository, profiles, social } = useServices();
+  const {
+    habits: habitRepository,
+    profiles,
+    social,
+    customPlants: customPlantRepository,
+  } = useServices();
   const [profile, setProfile] = useState<Profile | null | undefined>();
   const [habits, setHabits] = useState<Habit[]>([]);
+  const [customPlants, setCustomPlants] = useState<CustomPlant[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [requestId, setRequestId] = useState(0);
 
@@ -28,6 +35,7 @@ export function useFriendGarden(friendId?: string): FriendGardenState {
       setError("This shared garden is unavailable.");
       setProfile(null);
       setHabits([]);
+      setCustomPlants([]);
       return () => {
         active = false;
       };
@@ -44,25 +52,28 @@ export function useFriendGarden(friendId?: string): FriendGardenState {
               (item.friend_id === user.id && item.user_id === friendId)),
         );
         if (!connected) throw new Error("Only connected buds can visit this garden.");
-        const [owner, friendHabits] = await Promise.all([
+        const [owner, friendHabits, friendCustomPlants] = await Promise.all([
           profiles.getById(friendId),
           habitRepository.getByUserId(friendId),
+          customPlantRepository.getVisibleForUser(friendId),
         ]);
         if (!owner) throw new Error("This gardener is unavailable.");
         if (!active) return;
         setProfile(owner);
         setHabits(friendHabits.filter((item) => item.is_public));
+        setCustomPlants(friendCustomPlants);
       } catch (cause) {
         if (!active) return;
         setError(cause instanceof Error ? cause.message : "Unable to open this garden");
         setProfile(null);
         setHabits([]);
+        setCustomPlants([]);
       }
     })();
     return () => {
       active = false;
     };
-  }, [friendId, habitRepository, profiles, requestId, social, user]);
+  }, [customPlantRepository, friendId, habitRepository, profiles, requestId, social, user]);
 
-  return { profile, habits, error, refresh };
+  return { profile, habits, customPlants, error, refresh };
 }

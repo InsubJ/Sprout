@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { colors, radii, spacing } from "@sprout/design-tokens";
 import { AppButton } from "../../components/AppButton";
 import { ProgressBar } from "../../components/ProgressBar";
+import { ResponsivePageContent } from "../../components/ResponsivePageContent";
 import { ScreenState } from "../../components/ScreenState";
 import { useTheme } from "../../providers/ThemeProvider";
 import { nativePlantRegistry } from "../plants/plantRegistry";
@@ -28,98 +29,103 @@ export function WrappedScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: theme.background }}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={styles.scrollContent}
     >
-      <Pressable accessibilityRole="button" onPress={() => router.back()}>
-        <Text style={styles.back}>← Profile</Text>
-      </Pressable>
-      <Text style={styles.badge}>🌲 SPROUT WRAPPED</Text>
-      <Text style={[styles.title, { color: theme.text }]}>Your Year in the Woods</Text>
-      <Text style={[styles.copy, { color: theme.muted }]}>
-        The seeds you nurtured, the setbacks you survived, and the forest you grew.
-      </Text>
-      <View style={styles.years}>
-        {years.map((value) => (
-          <Pressable
-            key={value}
-            accessibilityRole="button"
-            accessibilityState={{ selected: year === value }}
-            onPress={() => setYear(value)}
-            style={[styles.year, year === value && styles.yearActive]}
-          >
-            <Text style={year === value ? styles.yearActiveText : { color: theme.text }}>
-              {value}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      {!data.totalPlanted ? (
-        <View style={[styles.card, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>A clearing awaits</Text>
-          <Text style={[styles.copy, { color: theme.muted }]}>
-            Plant a seed this year and your story will grow here.
-          </Text>
+      <ResponsivePageContent style={styles.content}>
+        <Pressable accessibilityRole="button" onPress={() => router.back()}>
+          <Text style={styles.back}>← Profile</Text>
+        </Pressable>
+        <Text style={styles.badge}>🌲 SPROUT WRAPPED</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Your Year in the Woods</Text>
+        <Text style={[styles.copy, { color: theme.muted }]}>
+          The seeds you nurtured, the setbacks you survived, and the forest you grew.
+        </Text>
+        <View style={styles.years}>
+          {years.map((value) => (
+            <Pressable
+              key={value}
+              accessibilityRole="button"
+              accessibilityState={{ selected: year === value }}
+              onPress={() => setYear(value)}
+              style={[styles.year, year === value && styles.yearActive]}
+            >
+              <Text style={year === value ? styles.yearActiveText : { color: theme.text }}>
+                {value}
+              </Text>
+            </Pressable>
+          ))}
         </View>
-      ) : (
-        <>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {!data.totalPlanted ? (
           <View style={[styles.card, { backgroundColor: theme.surface }]}>
-            <Text style={styles.kicker}>THE FOREST CANOPY</Text>
-            <Text style={[styles.big, { color: theme.text }]}>
-              {data.totalCompleted} <Text style={styles.small}>of {data.totalPlanted} matured</Text>
-            </Text>
-            <ProgressBar progress={completion} />
+            <Text style={[styles.cardTitle, { color: theme.text }]}>A clearing awaits</Text>
             <Text style={[styles.copy, { color: theme.muted }]}>
-              {Math.round(completion * 100)}% of your seeds became permanent monuments in Sanctuary.
+              Plant a seed this year and your story will grow here.
             </Text>
           </View>
-          <View style={[styles.card, { backgroundColor: theme.surface }]}>
-            <Text style={styles.kicker}>BIOMES EXPLORED</Text>
-            {Object.entries(data.tierRatios).map(([tier, count]) => (
-              <View key={tier} style={styles.metric}>
-                <Text style={[styles.metricName, { color: theme.text }]}>{tier}</Text>
-                <Text style={styles.metricValue}>{count}</Text>
-              </View>
-            ))}
-          </View>
-          <View style={[styles.card, { backgroundColor: theme.surface }]}>
-            <Text style={styles.kicker}>RESILIENCE</Text>
-            <Text style={[styles.big, { color: theme.text }]}>{data.averageSetbacks}</Text>
-            <Text style={[styles.copy, { color: theme.muted }]}>
-              average setbacks per plant · best streak {data.bestStreak} days
-            </Text>
-          </View>
-          {data.highlight && Highlight ? (
-            <View style={[styles.card, styles.highlight, { backgroundColor: theme.surface }]}>
-              <Text style={styles.kicker}>PLANT HIGHLIGHT</Text>
-              <Highlight
-                currentWaterings={data.highlight.current_waterings}
-                targetWaterings={data.highlight.target_waterings}
-                witherCount={data.highlight.wither_count}
-                status={data.highlight.status}
-                size={180}
-              />
-              <Text style={[styles.cardTitle, { color: theme.text }]}>{data.highlight.name}</Text>
+        ) : (
+          <>
+            <View style={[styles.card, { backgroundColor: theme.surface }]}>
+              <Text style={styles.kicker}>THE FOREST CANOPY</Text>
+              <Text style={[styles.big, { color: theme.text }]}>
+                {data.totalCompleted}{" "}
+                <Text style={styles.small}>of {data.totalPlanted} matured</Text>
+              </Text>
+              <ProgressBar progress={completion} />
               <Text style={[styles.copy, { color: theme.muted }]}>
-                {data.highlight.poetic_summary ??
-                  "A small promise, returned to until it took root."}
+                {Math.round(completion * 100)}% of your seeds became permanent monuments in
+                Sanctuary.
               </Text>
             </View>
-          ) : null}
-        </>
-      )}
-      <AppButton
-        label="Share my year"
-        onPress={() =>
-          void Share.share({
-            message: `My ${year} Sprout Wrapped: ${data.totalCompleted} of ${data.totalPlanted} habits fully grown, with a ${data.bestStreak}-day best streak. 🌲`,
-          })
-        }
-      />
+            <View style={[styles.card, { backgroundColor: theme.surface }]}>
+              <Text style={styles.kicker}>BIOMES EXPLORED</Text>
+              {Object.entries(data.tierRatios).map(([tier, count]) => (
+                <View key={tier} style={styles.metric}>
+                  <Text style={[styles.metricName, { color: theme.text }]}>{tier}</Text>
+                  <Text style={styles.metricValue}>{count}</Text>
+                </View>
+              ))}
+            </View>
+            <View style={[styles.card, { backgroundColor: theme.surface }]}>
+              <Text style={styles.kicker}>RESILIENCE</Text>
+              <Text style={[styles.big, { color: theme.text }]}>{data.averageSetbacks}</Text>
+              <Text style={[styles.copy, { color: theme.muted }]}>
+                average setbacks per plant · best streak {data.bestStreak} days
+              </Text>
+            </View>
+            {data.highlight && Highlight ? (
+              <View style={[styles.card, styles.highlight, { backgroundColor: theme.surface }]}>
+                <Text style={styles.kicker}>PLANT HIGHLIGHT</Text>
+                <Highlight
+                  currentWaterings={data.highlight.current_waterings}
+                  targetWaterings={data.highlight.target_waterings}
+                  witherCount={data.highlight.wither_count}
+                  status={data.highlight.status}
+                  size={180}
+                />
+                <Text style={[styles.cardTitle, { color: theme.text }]}>{data.highlight.name}</Text>
+                <Text style={[styles.copy, { color: theme.muted }]}>
+                  {data.highlight.poetic_summary ??
+                    "A small promise, returned to until it took root."}
+                </Text>
+              </View>
+            ) : null}
+          </>
+        )}
+        <AppButton
+          label="Share my year"
+          onPress={() =>
+            void Share.share({
+              message: `My ${year} Sprout Wrapped: ${data.totalCompleted} of ${data.totalPlanted} habits fully grown, with a ${data.bestStreak}-day best streak. 🌲`,
+            })
+          }
+        />
+      </ResponsivePageContent>
     </ScrollView>
   );
 }
 const styles = StyleSheet.create({
+  scrollContent: { alignItems: "center" },
   content: {
     padding: spacing.lg,
     paddingTop: spacing.xxl,

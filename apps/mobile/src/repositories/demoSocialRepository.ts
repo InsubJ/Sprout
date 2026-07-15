@@ -8,6 +8,7 @@ const adminId = "11111111-1111-1111-1111-111111111111";
 const aliceId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
 const bobId = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
 let friendships: Friendship[] = [];
+let requestSequence = 0;
 
 function dateKey(): string {
   return new Date().toISOString().slice(0, 10);
@@ -62,13 +63,14 @@ export class DemoSocialRepository implements SocialRepository {
     if (
       friendships.some(
         (item) =>
-          (item.user_id === userId && item.friend_id === friendId) ||
-          (item.user_id === friendId && item.friend_id === userId),
+          item.status !== "declined" &&
+          ((item.user_id === userId && item.friend_id === friendId) ||
+            (item.user_id === friendId && item.friend_id === userId)),
       )
     )
       throw new RepositoryError("Friend request already exists", "conflict");
     const friendship: Friendship = {
-      id: `demo-request-${Date.now()}`,
+      id: `demo-request-${Date.now()}-${++requestSequence}`,
       user_id: userId,
       friend_id: friendId,
       status: "pending",
@@ -76,6 +78,17 @@ export class DemoSocialRepository implements SocialRepository {
     };
     friendships = [...friendships, friendship];
     return friendship;
+  }
+
+  async cancelFriendRequest(friendshipId: string, requesterId: string): Promise<void> {
+    if (!friendshipId.trim() || !requesterId.trim())
+      throw new RepositoryError("Friendship and requester IDs are required", "validation");
+    const existing = friendships.find(
+      (item) =>
+        item.id === friendshipId && item.user_id === requesterId && item.status === "pending",
+    );
+    if (!existing) throw new RepositoryError("Outgoing friend request not found", "not_found");
+    friendships = friendships.filter((item) => item.id !== friendshipId);
   }
 
   async respond(friendshipId: string, status: "accepted" | "declined"): Promise<Friendship> {

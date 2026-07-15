@@ -53,4 +53,31 @@ describe("custom plant schema", () => {
       updatedAt: plant.updatedAt,
     });
   });
+
+  it("repairs legacy layers with transforms nested inside the anchor", () => {
+    const legacyPlant = JSON.parse(JSON.stringify(plant)) as typeof plant;
+    const layer = legacyPlant.plantSpec.layers[0] as Record<string, unknown>;
+    layer.anchor = { x: 200, y: 180, scale: 1.25, rotation: -12 };
+    delete layer.scale;
+    delete layer.rotation;
+
+    const parsed = customPlantSchema.parse(legacyPlant);
+
+    expect(parsed.plantSpec.layers[0]).toMatchObject({
+      anchor: { x: 200, y: 180 },
+      scale: 1.25,
+      rotation: -12,
+    });
+  });
+
+  it("defaults omitted legacy layer transforms", () => {
+    const legacyPlant = JSON.parse(JSON.stringify(plant)) as typeof plant;
+    const layer = legacyPlant.plantSpec.layers[0] as Record<string, unknown>;
+    delete layer.scale;
+    delete layer.rotation;
+
+    const parsed = customPlantSchema.parse(legacyPlant);
+
+    expect(parsed.plantSpec.layers[0]).toMatchObject({ scale: 1, rotation: 0 });
+  });
 });

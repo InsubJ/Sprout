@@ -5,12 +5,15 @@ import { useServices } from "../providers/ServicesProvider";
 
 export interface UserMediaUploadState {
   userId?: string;
-  upload: (asset: UploadAsset) => Promise<{ imageUrl?: string; pendingAsset?: UploadAsset }>;
+  uploadReflection: (
+    asset: UploadAsset,
+  ) => Promise<{ imageUrl?: string; pendingAsset?: UploadAsset }>;
+  uploadAvatar: (asset: UploadAsset) => Promise<string>;
 }
 export function useUserMediaUpload(): UserMediaUploadState {
   const { user } = useAuth();
   const { storage, isDemo } = useServices();
-  const upload = useCallback(
+  const uploadReflection = useCallback(
     async (asset: UploadAsset): Promise<{ imageUrl?: string; pendingAsset?: UploadAsset }> => {
       if (!user) throw new Error("Sign in before uploading an image");
       if (storage) {
@@ -26,5 +29,14 @@ export function useUserMediaUpload(): UserMediaUploadState {
     },
     [isDemo, storage, user],
   );
-  return { userId: user?.id, upload };
+  const uploadAvatar = useCallback(
+    async (asset: UploadAsset): Promise<string> => {
+      if (!user) throw new Error("Sign in before uploading an avatar");
+      if (storage) return storage.uploadProfileAvatar(user.id, asset);
+      if (isDemo) return asset.uri;
+      throw new Error("Avatar storage is unavailable");
+    },
+    [isDemo, storage, user],
+  );
+  return { userId: user?.id, uploadReflection, uploadAvatar };
 }

@@ -22,7 +22,7 @@
         "expo-image-picker",
         {
           "photosPermission": "Allow Sprout to attach photos to habit reflections and your profile.",
-          "cameraPermission": "Allow Sprout to capture photos for habit reflections."
+          "cameraPermission": "Allow Sprout to capture photos for habit reflections and your profile."
         }
       ],
       [
@@ -35,7 +35,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.insubj.sprout"
+      "bundleIdentifier": "com.insubj.sprout",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -45,10 +48,22 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.insubj.sprout"
+      "package": "com.insubj.sprout",
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9341450c-d3cf-4a08-960c-efc4f3f434b8"
+      }
+    },
+    "owner": "ianjeon"
   }
 }

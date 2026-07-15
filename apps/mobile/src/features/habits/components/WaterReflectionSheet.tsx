@@ -10,24 +10,37 @@ import type { UploadAsset } from "@sprout/services";
 import { useTheme } from "../../../providers/ThemeProvider";
 import { useImageAcquisition } from "../../../hooks/useImageAcquisition";
 import { useUserMediaUpload } from "../../../hooks/useUserMediaUpload";
+import { CameraCaptureModal } from "../../../components/CameraCaptureModal";
+import { CameraOpenButton } from "../../../components/CameraOpenButton";
 interface Props {
   habit: Habit | null;
   busy: boolean;
+  note: string;
+  imageUri: string | null;
+  onNoteChange(value: string): void;
+  onImageUriChange(value: string | null): void;
   onClose(): void;
   onConfirm(note?: string, imageUrl?: string, pendingAsset?: UploadAsset): Promise<void>;
 }
-export function WaterReflectionSheet({ habit, busy, onClose, onConfirm }: Props) {
+export function WaterReflectionSheet({
+  habit,
+  busy,
+  note,
+  imageUri,
+  onNoteChange,
+  onImageUriChange,
+  onClose,
+  onConfirm,
+}: Props) {
   const theme = useTheme();
-  const [note, setNote] = useState("");
-  const { imageUri, setImageUri, acquire, clear } = useImageAcquisition({
+  const { acquire, setImageUri: setAcquiredImageUri } = useImageAcquisition({
     quality: 0.8,
     recoverAndroidResult: Boolean(habit),
+    onImageUriChange,
   });
-  const { userId, upload } = useUserMediaUpload();
+  const { userId, uploadReflection } = useUserMediaUpload();
   const [submitting, setSubmitting] = useState(false);
-  const choose = async (camera: boolean) => {
-    await acquire(camera ? "camera" : "library");
-  };
+  const [cameraVisible, setCameraVisible] = useState(false);
   const confirm = async () => {
     if (submitting || busy) return;
     setSubmitting(true);
@@ -37,11 +50,10 @@ export function WaterReflectionSheet({ habit, busy, onClose, onConfirm }: Props)
       if (imageUri && userId) {
         const id = `${userId}-${habit?.id ?? "reflection"}-${Date.now()}`;
         const prepared = await prepareUploadAsset(imageUri, id);
-        ({ imageUrl, pendingAsset } = await upload(prepared));
+        ({ imageUrl, pendingAsset } = await uploadReflection(prepared));
       }
       await onConfirm(note.trim() || undefined, imageUrl, pendingAsset);
-      setNote("");
-      clear();
+      setAcquiredImageUri(null);
       onClose();
     } finally {
       setSubmitting(false);
@@ -50,8 +62,7 @@ export function WaterReflectionSheet({ habit, busy, onClose, onConfirm }: Props)
   const working = busy || submitting;
   const close = () => {
     if (working) return;
-    setNote("");
-    clear();
+    setAcquiredImageUri(null);
     onClose();
   };
   return (
@@ -72,27 +83,21 @@ export function WaterReflectionSheet({ habit, busy, onClose, onConfirm }: Props)
         <TextField
           label="Reflection"
           value={note}
-          onChangeText={setNote}
+          onChangeText={onNoteChange}
           multiline
           maxLength={500}
         />
         {imageUri ? <Image source={imageUri} style={styles.preview} contentFit="cover" /> : null}
         {imageUri ? (
-          <AppButton label="Remove photo" tone="quiet" onPress={() => setImageUri(null)} />
+          <AppButton label="Remove photo" tone="quiet" onPress={() => setAcquiredImageUri(null)} />
         ) : null}
         <View style={styles.row}>
           <View style={styles.flex}>
-            <AppButton
+            <CameraOpenButton
               label="Camera"
-              tone="quiet"
-              onPress={() =>
-                void choose(true).catch((cause) =>
-                  Alert.alert(
-                    "Camera unavailable",
-                    cause instanceof Error ? cause.message : "Try again",
-                  ),
-                )
-              }
+              onOpenCamera={() => setCameraVisible(true)}
+              onCapture={setAcquiredImageUri}
+              onError={(error) => Alert.alert("Camera unavailable", error.message)}
             />
           </View>
           <View style={styles.flex}>
@@ -100,7 +105,7 @@ export function WaterReflectionSheet({ habit, busy, onClose, onConfirm }: Props)
               label="Photo"
               tone="quiet"
               onPress={() =>
-                void choose(false).catch((cause) =>
+                void acquire("library").catch((cause) =>
                   Alert.alert(
                     "Photos unavailable",
                     cause instanceof Error ? cause.message : "Try again",
@@ -120,6 +125,12 @@ export function WaterReflectionSheet({ habit, busy, onClose, onConfirm }: Props)
           }
         />
         <AppButton label="Cancel" tone="quiet" disabled={working} onPress={close} />
+        <CameraCaptureModal
+          visible={cameraVisible}
+          onCapture={setAcquiredImageUri}
+          onClose={() => setCameraVisible(false)}
+          onError={(error) => Alert.alert("Camera unavailable", error.message)}
+        />
       </KeyboardAvoidingView>
     </Modal>
   );

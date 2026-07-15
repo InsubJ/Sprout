@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 import type { CustomPlant } from "@sprout/shared";
 import { useAuth } from "../../../providers/AuthProvider";
 import { useServices } from "../../../providers/ServicesProvider";
+import { useDataRevision } from "../../../providers/DataProvider";
 import { readCachedCustomPlants, writeCachedCustomPlants } from "../services/customPlantCache";
 export function useCustomPlants() {
   const { user } = useAuth();
   const { customPlants } = useServices();
+  const { revision } = useDataRevision();
   const [plants, setPlants] = useState<CustomPlant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,8 +17,14 @@ export function useCustomPlants() {
       setLoading(false);
       return;
     }
-    const cached = await readCachedCustomPlants(user.id);
-    if (cached.length) setPlants(cached);
+    setLoading(true);
+    setError(null);
+    try {
+      const cached = await readCachedCustomPlants(user.id);
+      if (cached.length) setPlants(cached);
+    } catch {
+      // A fresh server response below replaces malformed or stale cache data.
+    }
     try {
       const fresh = await customPlants.getByOwner(user.id);
       setPlants(fresh);
@@ -29,7 +37,7 @@ export function useCustomPlants() {
   }, [customPlants, user]);
   useEffect(() => {
     void refresh();
-  }, [refresh]);
+  }, [refresh, revision]);
   const deletePlant = useCallback(
     async (plantId: string): Promise<void> => {
       if (!user) throw new Error("Sign in to delete a custom plant");

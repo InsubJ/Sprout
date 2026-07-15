@@ -90,7 +90,9 @@ export function DiscoHabitCard({
               </Text>
             </View>
           </View>
-          <DiscoStatusBadge state={state} dark={theme.dark} plantGod={plantGodMode} />
+          <View style={styles.statusBadge}>
+            <DiscoStatusBadge state={state} dark={theme.dark} plantGod={plantGodMode} />
+          </View>
         </View>
         <View
           style={[
@@ -141,19 +143,9 @@ export function DiscoHabitCard({
         {plantGodMode ? (
           <View style={styles.actions}>
             <PlantGodGenerationFlow
-              onSaved={() =>
-                void (async () => {
-                  await eligibility.refresh();
-                })()
-              }
-              onCompleted={() => void eligibility.bankCredit()}
+              onCompleted={eligibility.finishGeneration}
               onCreditLockedChange={setGenerationCreditLocked}
-              onFailed={() =>
-                void (async () => {
-                  await eligibility.refresh();
-                  await eligibility.bankCredit();
-                })()
-              }
+              onFailed={() => void eligibility.finishGeneration()}
             />
             {!generationCreditLocked && eligibility.balance.availableCredits > 0 ? (
               <AppButton
@@ -214,11 +206,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.28,
   },
   hovered: { transform: [{ translateY: -6 }], shadowOpacity: 0.28, shadowRadius: 20 },
-  header: { flexDirection: "row", alignItems: "flex-start", gap: 16 },
-  heading: { flex: 1, gap: 6 },
-  name: { fontFamily: "Outfit_700Bold", fontSize: 20, lineHeight: 24 },
-  badges: { flexDirection: "row", gap: 8 },
+  header: { position: "relative" },
+  heading: { width: "100%", gap: 6 },
+  name: {
+    paddingRight: 94,
+    fontFamily: "Outfit_700Bold",
+    fontSize: 20,
+    lineHeight: 24,
+  },
+  statusBadge: { position: "absolute", right: 0, top: 0 },
+  badges: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   special: {
+    flexShrink: 0,
+    alignSelf: "flex-start",
     fontSize: 12,
     fontFamily: "Outfit_700Bold",
     color: "#6B357D",
@@ -229,6 +229,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   mythical: {
+    flexShrink: 0,
+    alignSelf: "flex-start",
     fontSize: 12,
     fontFamily: "Outfit_700Bold",
     color: "#70418C",

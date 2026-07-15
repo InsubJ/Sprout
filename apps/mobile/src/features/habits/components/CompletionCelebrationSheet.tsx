@@ -2,6 +2,7 @@ import { Modal, StyleSheet, Text, View } from "react-native";
 import type { Habit, PlantSpecies } from "@sprout/shared";
 import { spacing } from "@sprout/design-tokens";
 import { AppButton } from "../../../components/AppButton";
+import { SafeAreaModalView } from "../../../components/SafeAreaModalView";
 import { useTheme } from "../../../providers/ThemeProvider";
 import { nativePlantRegistry, plantDisplayName } from "../../plants/plantRegistry";
 import { CompletionConfetti } from "./CompletionConfetti";
@@ -19,7 +20,7 @@ export function CompletionCelebrationSheet({
     : null;
   return (
     <Modal transparent visible={Boolean(habit)} animationType="fade">
-      <View style={styles.backdrop}>
+      <SafeAreaModalView style={styles.backdrop}>
         <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
           <CompletionConfetti />
           <Text style={styles.trophy}>🏆</Text>
@@ -46,7 +47,7 @@ export function CompletionCelebrationSheet({
           ) : null}
           <AppButton label="Visit Sanctuary" onPress={onVisitSanctuary} />
         </View>
-      </View>
+      </SafeAreaModalView>
     </Modal>
   );
 }

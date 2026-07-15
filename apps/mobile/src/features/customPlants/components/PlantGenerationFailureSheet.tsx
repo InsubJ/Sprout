@@ -1,6 +1,7 @@
 import { Modal, StyleSheet, Text, View } from "react-native";
 import { colors, spacing } from "@sprout/design-tokens";
 import { AppButton } from "../../../components/AppButton";
+import { SafeAreaModalView } from "../../../components/SafeAreaModalView";
 import { useTheme } from "../../../providers/ThemeProvider";
 
 export function PlantGenerationFailureSheet({
@@ -15,7 +16,7 @@ export function PlantGenerationFailureSheet({
   const theme = useTheme();
   return (
     <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <SafeAreaModalView style={styles.backdrop}>
         <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
           <Text style={styles.eyebrow}>PLANT GOD</Text>
           <Text style={[styles.title, { color: theme.text }]}>Plant generation failed</Text>
@@ -25,7 +26,7 @@ export function PlantGenerationFailureSheet({
           </Text>
           <AppButton label="Return to Disco Plant" onPress={onClose} />
         </View>
-      </View>
+      </SafeAreaModalView>
     </Modal>
   );
 }

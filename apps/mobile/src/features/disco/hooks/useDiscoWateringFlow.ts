@@ -19,6 +19,19 @@ export interface DiscoWateringFlowState {
   completeDonation: () => Promise<void>;
   complete: () => Promise<void>;
 }
+
+export async function applyCompletedDiscoReward(
+  action: () => Promise<boolean>,
+  onWater: () => Promise<void>,
+  onRewardRecorded: () => Promise<void>,
+): Promise<boolean> {
+  const completed = await action();
+  if (!completed) return false;
+  await onWater();
+  await onRewardRecorded();
+  return true;
+}
+
 export function useDiscoWateringFlow(
   onWater: () => Promise<void>,
   onRewardRecorded: () => Promise<void>,
@@ -50,9 +63,8 @@ export function useDiscoWateringFlow(
     setBusy(true);
     setError(null);
     try {
-      const completed = await action();
+      const completed = await applyCompletedDiscoReward(action, onWater, onRewardRecorded);
       if (!completed) return;
-      await onRewardRecorded();
       setOpen(false);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to record reward");

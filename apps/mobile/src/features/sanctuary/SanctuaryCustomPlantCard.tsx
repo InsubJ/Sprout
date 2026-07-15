@@ -17,12 +17,13 @@ export function SanctuaryCustomPlantCard({
 }: {
   plant: CustomPlant;
   width: number;
-  onRequestDelete(plant: CustomPlant): void;
+  onRequestDelete?(plant: CustomPlant): void;
 }) {
   const theme = useTheme();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const swipeAction = useSwipeUpActionReveal();
   const requestDeletion = (): void => {
+    if (!onRequestDelete) return;
     swipeAction.hide();
     onRequestDelete(plant);
   };
@@ -30,7 +31,7 @@ export function SanctuaryCustomPlantCard({
   return (
     <>
       <View
-        {...swipeAction.panHandlers}
+        {...(onRequestDelete ? swipeAction.panHandlers : {})}
         style={[
           styles.card,
           {
@@ -40,22 +41,24 @@ export function SanctuaryCustomPlantCard({
           },
         ]}
       >
-        <View
-          accessibilityElementsHidden={!swipeAction.revealed}
-          importantForAccessibility={swipeAction.revealed ? "yes" : "no-hide-descendants"}
-          pointerEvents={swipeAction.revealed ? "auto" : "none"}
-          style={styles.deleteTray}
-        >
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Delete ${plant.displayName} from Sanctuary`}
-            onPress={requestDeletion}
-            style={({ pressed }) => [styles.trashButton, pressed && styles.trashButtonPressed]}
+        {onRequestDelete ? (
+          <View
+            accessibilityElementsHidden={!swipeAction.revealed}
+            importantForAccessibility={swipeAction.revealed ? "yes" : "no-hide-descendants"}
+            pointerEvents={swipeAction.revealed ? "auto" : "none"}
+            style={styles.deleteTray}
           >
-            <TrashCanIcon color={colors.paper} size={25} />
-            <Text style={styles.deleteLabel}>Delete plant</Text>
-          </Pressable>
-        </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Delete ${plant.displayName} from Sanctuary`}
+              onPress={requestDeletion}
+              style={({ pressed }) => [styles.trashButton, pressed && styles.trashButtonPressed]}
+            >
+              <TrashCanIcon color={colors.paper} size={25} />
+              <Text style={styles.deleteLabel}>Delete plant</Text>
+            </Pressable>
+          </View>
+        ) : null}
 
         <Animated.View
           style={[
@@ -91,10 +94,14 @@ export function SanctuaryCustomPlantCard({
         plant={plant}
         visible={detailsOpen}
         onClose={() => setDetailsOpen(false)}
-        onRequestDelete={() => {
-          setDetailsOpen(false);
-          requestDeletion();
-        }}
+        onRequestDelete={
+          onRequestDelete
+            ? () => {
+                setDetailsOpen(false);
+                requestDeletion();
+              }
+            : undefined
+        }
       />
     </>
   );

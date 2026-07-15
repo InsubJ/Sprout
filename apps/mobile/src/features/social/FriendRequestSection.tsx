@@ -10,10 +10,14 @@ export function FriendRequestSection({
   incoming,
   outgoing,
   onRespond,
+  onCancel,
+  workingRequestId,
 }: {
   incoming: BudRow[];
   outgoing: BudRow[];
   onRespond: (friendship: Friendship, status: "accepted" | "declined") => void;
+  onCancel: (friendship: Friendship) => void;
+  workingRequestId: string | null;
 }): React.JSX.Element {
   const theme = useTheme();
   const card = (row: BudRow, incomingRequest: boolean): React.JSX.Element => (
@@ -36,7 +40,15 @@ export function FriendRequestSection({
           />
         </View>
       ) : (
-        <Text style={[styles.awaiting, { color: theme.muted }]}>Awaiting response</Text>
+        <View style={styles.outgoingStatus}>
+          <Text style={[styles.awaiting, { color: theme.muted }]}>Awaiting response</Text>
+          <AppButton
+            label={workingRequestId === row.friendship.id ? "Cancelling…" : "Cancel request"}
+            tone="quiet"
+            disabled={workingRequestId !== null}
+            onPress={() => onCancel(row.friendship)}
+          />
+        </View>
       )}
     </View>
   );
@@ -83,4 +95,5 @@ const styles = StyleSheet.create({
   },
   actions: { flexDirection: "row", gap: spacing.sm },
   awaiting: { fontSize: 12, fontFamily: "Outfit_500Medium" },
+  outgoingStatus: { gap: spacing.sm },
 });

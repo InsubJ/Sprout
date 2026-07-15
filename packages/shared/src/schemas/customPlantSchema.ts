@@ -2,20 +2,37 @@ import { z } from "zod";
 import { GENERATED_PLANT_ARCHETYPES, GENERATED_PLANT_LAYER_TYPES } from "../types/customPlant";
 
 const hexColor = z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a six-digit hexadecimal colour");
-const layerSchema = z
-  .object({
-    type: z.enum(GENERATED_PLANT_LAYER_TYPES),
-    geometry: z.string().trim().min(1).max(40),
-    anchor: z.object({ x: z.number().min(20).max(380), y: z.number().min(20).max(380) }).strict(),
-    scale: z.number().min(0.1).max(2),
-    rotation: z.number().min(-180).max(180),
-    count: z.number().int().min(1).max(20).optional(),
-    petalCount: z.number().int().min(3).max(24).optional(),
-    fill: hexColor,
-    stroke: hexColor.optional(),
-    zIndex: z.number().int().min(0).max(100),
-  })
-  .strict();
+function normalizeGeneratedPlantLayer(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const layer = value as Record<string, unknown>;
+  const anchor =
+    layer.anchor && typeof layer.anchor === "object" && !Array.isArray(layer.anchor)
+      ? (layer.anchor as Record<string, unknown>)
+      : {};
+  return {
+    ...layer,
+    anchor: { x: anchor.x, y: anchor.y },
+    scale: layer.scale ?? anchor.scale ?? 1,
+    rotation: layer.rotation ?? anchor.rotation ?? 0,
+  };
+}
+const layerSchema = z.preprocess(
+  normalizeGeneratedPlantLayer,
+  z
+    .object({
+      type: z.enum(GENERATED_PLANT_LAYER_TYPES),
+      geometry: z.string().trim().min(1).max(40),
+      anchor: z.object({ x: z.number().min(20).max(380), y: z.number().min(20).max(380) }).strict(),
+      scale: z.number().min(0.1).max(2),
+      rotation: z.number().min(-180).max(180),
+      count: z.number().int().min(1).max(20).optional(),
+      petalCount: z.number().int().min(3).max(24).optional(),
+      fill: hexColor,
+      stroke: hexColor.optional(),
+      zIndex: z.number().int().min(0).max(100),
+    })
+    .strict(),
+);
 const animation = z.enum(["none", "gentle_sway", "soft_glimmer", "droop"]);
 export const generatedPlantSpecSchema = z
   .object({

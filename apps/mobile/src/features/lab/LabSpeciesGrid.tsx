@@ -15,23 +15,24 @@ const colors: Record<DifficultyTier, string> = {
   rare: "#E91E63",
   mythical: "#FFC107",
 };
+
+interface LabSpeciesGridProps {
+  species: PlantSpecies[];
+  completed: Set<string>;
+  revealAll: boolean;
+  growth: number;
+  status: HabitStatus;
+  cardWidth: number;
+}
+
 export function LabSpeciesGrid({
   species,
   completed,
   revealAll,
   growth,
-  witherCount,
   status,
   cardWidth,
-}: {
-  species: PlantSpecies[];
-  completed: Set<string>;
-  revealAll: boolean;
-  growth: number;
-  witherCount: number;
-  status: HabitStatus;
-  cardWidth: number;
-}): React.JSX.Element {
+}: LabSpeciesGridProps): React.JSX.Element {
   const theme = useTheme();
   return (
     <View style={styles.grid}>
@@ -63,12 +64,12 @@ export function LabSpeciesGrid({
                 <Renderer
                   currentWaterings={growth}
                   targetWaterings={100}
-                  witherCount={witherCount}
+                  witherCount={0}
                   status={status}
                   size={220}
                 />
                 <Text style={[styles.details, { color: theme.muted }]}>
-                  Waterings: {growth} / 100 · Setbacks: {witherCount}
+                  Progress: {growth}% · {status}
                 </Text>
               </>
             ) : (
@@ -89,8 +90,15 @@ export function LabSpeciesGrid({
     </View>
   );
 }
+
 const styles = StyleSheet.create({
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.md },
+  grid: {
+    width: "100%",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: spacing.md,
+  },
   card: {
     height: 340,
     borderWidth: 1,
@@ -115,5 +123,5 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   lock: { fontSize: 58 },
-  details: { textAlign: "center", fontSize: 12 },
+  details: { textAlign: "center", fontSize: 12, textTransform: "capitalize" },
 });

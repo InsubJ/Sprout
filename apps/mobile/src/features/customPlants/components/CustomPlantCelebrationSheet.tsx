@@ -2,6 +2,7 @@ import { Modal, StyleSheet, Text, View } from "react-native";
 import { spacing } from "@sprout/design-tokens";
 import type { PlantGenerationJob } from "@sprout/shared";
 import { AppButton } from "../../../components/AppButton";
+import { SafeAreaModalView } from "../../../components/SafeAreaModalView";
 import { useTheme } from "../../../providers/ThemeProvider";
 import { CompletionConfetti } from "../../habits/components/CompletionConfetti";
 import { GeneratedPlantRenderer } from "./GeneratedPlantRenderer";
@@ -16,7 +17,7 @@ export function CustomPlantCelebrationSheet({
   const theme = useTheme();
   return (
     <Modal transparent visible={Boolean(job?.generatedSpec)} animationType="fade">
-      <View style={styles.backdrop}>
+      <SafeAreaModalView style={styles.backdrop}>
         <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
           <CompletionConfetti />
           {job?.generatedSpec ? (
@@ -28,7 +29,7 @@ export function CustomPlantCelebrationSheet({
           </Text>
           <AppButton label="Visit Sanctuary" onPress={onVisitSanctuary} />
         </View>
-      </View>
+      </SafeAreaModalView>
     </Modal>
   );
 }

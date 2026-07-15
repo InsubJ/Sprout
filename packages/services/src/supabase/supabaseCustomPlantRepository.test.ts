@@ -13,6 +13,30 @@ function deletionClient(result: { data: { id: string } | null; error: Error | nu
   return { client, deleteRows, eq, select, maybeSingle };
 }
 
+function visibilityClient() {
+  const order = vi.fn(async () => ({ data: [], error: null }));
+  const query = { eq: vi.fn(), is: vi.fn(), order };
+  query.eq.mockReturnValue(query);
+  query.is.mockReturnValue(query);
+  const select = vi.fn(() => query);
+  const from = vi.fn(() => ({ select }));
+  const client = { from } as unknown as SupabaseClient<Database>;
+  return { client, eq: query.eq, is: query.is, order };
+}
+
+describe("SupabaseCustomPlantRepository friend visibility", () => {
+  it("explicitly requests only friend-visible plants for the selected owner", async () => {
+    const fake = visibilityClient();
+    const repository = new SupabaseCustomPlantRepository(fake.client);
+
+    await repository.getVisibleForUser("friend-1");
+
+    expect(fake.eq).toHaveBeenNthCalledWith(1, "user_id", "friend-1");
+    expect(fake.eq).toHaveBeenNthCalledWith(2, "visibility", "friends");
+    expect(fake.is).toHaveBeenCalledWith("archived_at", null);
+  });
+});
+
 describe("SupabaseCustomPlantRepository deletion", () => {
   it("deletes exactly the requested custom plant", async () => {
     const fake = deletionClient({ data: { id: "plant-1" }, error: null });

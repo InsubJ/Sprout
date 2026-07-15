@@ -20,6 +20,34 @@ export async function writeCachedCustomPlants(
 ): Promise<void> {
   await AsyncStorage.setItem(plantsKey(userId), JSON.stringify(plants));
 }
+export async function cacheSavedCustomPlant(
+  userId: string,
+  job: PlantGenerationJob,
+  visibility: "friends" | "private",
+): Promise<void> {
+  if (!userId || !job.customPlantId || !job.generatedSpec)
+    throw new Error("A completed custom plant is required for caching");
+  const timestamp = job.completedAt ?? job.updatedAt;
+  const plant = customPlantSchema.parse({
+    id: job.customPlantId,
+    userId,
+    displayName: job.editedName ?? job.suggestedName ?? job.generatedSpec.displayName,
+    originalPrompt: job.originalPrompt,
+    sanitizedPrompt: job.sanitizedPrompt,
+    description: job.generatedSpec.description,
+    plantSpec: job.generatedSpec,
+    renderVersion: 1,
+    rarity: "custom",
+    generationJobId: job.id,
+    previewImageUrl: null,
+    visibility,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    archivedAt: null,
+  });
+  const cached = await readCachedCustomPlants(userId);
+  await writeCachedCustomPlants(userId, [plant, ...cached.filter((item) => item.id !== plant.id)]);
+}
 export async function readCachedGenerationCredits(
   userId: string,
 ): Promise<GenerationCreditBalance | null> {

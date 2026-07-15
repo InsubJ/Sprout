@@ -1,8 +1,20 @@
 import { useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions } from "react-native";
-import type { HabitStatus } from "@sprout/shared";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+  type LayoutChangeEvent,
+} from "react-native";
 import { spacing } from "@sprout/design-tokens";
 import { AppButton } from "../../components/AppButton";
+import {
+  PAGE_CONTENT_MAX_WIDTH,
+  ResponsivePageContent,
+} from "../../components/ResponsivePageContent";
 import { SearchField } from "../../components/SearchField";
 import { useTheme } from "../../providers/ThemeProvider";
 import { useHabitCollection } from "../habits/hooks/useHabitCollection";
@@ -10,6 +22,8 @@ import { nativePlantRegistry } from "../plants/plantRegistry";
 import { LabSimulationControls } from "./LabSimulationControls";
 import { LabSortDropdown, type LabSortOption } from "./LabSortDropdown";
 import { LabSpeciesGrid } from "./LabSpeciesGrid";
+import { calculateLabResponsiveLayout } from "./labResponsiveLayout";
+import { labStatusFromProgress, type LabPreviewStatus } from "./labSimulationStatus";
 import { useLabSpecies } from "./useLabSpecies";
 
 export function LabScreen(): React.JSX.Element {
@@ -17,24 +31,27 @@ export function LabScreen(): React.JSX.Element {
   const { width } = useWindowDimensions();
   const { habits } = useHabitCollection();
   const [growth, setGrowth] = useState(50);
-  const [witherCount, setWitherCount] = useState(0);
-  const [status, setStatus] = useState<HabitStatus>("healthy");
+  const [status, setStatus] = useState<LabPreviewStatus>("healthy");
   const [revealAll, setRevealAll] = useState(false);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<LabSortOption>("alphabetical");
   const [controlsOpen, setControlsOpen] = useState(false);
-  const mobile = width < 768;
-  const columns = mobile ? 1 : width >= 1200 ? 4 : 3;
-  const cardWidth = Math.floor((width - spacing.lg * 2 - spacing.md * (columns - 1)) / columns);
-  const lab = useLabSpecies(habits, search, sort, revealAll, mobile ? 4 : 8);
+  const [measuredContentWidth, setMeasuredContentWidth] = useState<number | null>(null);
+  const contentWidth = measuredContentWidth ?? Math.min(width, PAGE_CONTENT_MAX_WIDTH);
+  const layout = calculateLabResponsiveLayout(contentWidth);
+  const compact = contentWidth < 768;
+  const lab = useLabSpecies(habits, search, sort, revealAll, layout.pageSize);
+  const renderedStatus = labStatusFromProgress(growth, status);
+  const measureContent = (event: LayoutChangeEvent): void => {
+    const nextWidth = event.nativeEvent.layout.width;
+    if (nextWidth > 0 && nextWidth !== measuredContentWidth) setMeasuredContentWidth(nextWidth);
+  };
   const controls = (
     <LabSimulationControls
       growth={growth}
-      witherCount={witherCount}
       status={status}
       revealAll={revealAll}
       onGrowthChange={setGrowth}
-      onWitherCountChange={setWitherCount}
       onStatusChange={setStatus}
       onRevealAllChange={setRevealAll}
     />
@@ -42,46 +59,47 @@ export function LabScreen(): React.JSX.Element {
   return (
     <ScrollView
       style={[styles.root, { backgroundColor: theme.background }]}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={styles.scrollContent}
     >
-      <Text style={[styles.title, { color: theme.text }]}>Botanical Laboratory</Text>
-      <Text style={[styles.subtitle, { color: theme.muted }]}>
-        Simulate growth, setbacks, and variants for all {Object.keys(nativePlantRegistry).length}{" "}
-        plant species.
-      </Text>
-      {mobile ? <AppButton label="Simulate" onPress={() => setControlsOpen(true)} /> : controls}
-      <SearchField
-        value={search}
-        onChangeText={setSearch}
-        placeholder="Search species by name or rarity..."
-      />
-      <LabSortDropdown value={sort} onChange={setSort} />
-      <LabSpeciesGrid
-        species={lab.species}
-        completed={lab.completed}
-        revealAll={revealAll}
-        growth={growth}
-        witherCount={witherCount}
-        status={status}
-        cardWidth={cardWidth}
-      />
-      <Text style={{ color: theme.text, textAlign: "center" }}>
-        Page {lab.page} of {lab.totalPages}
-      </Text>
-      <Pressable style={styles.pagination}>
-        <AppButton
-          label="◀ Prev"
-          tone="quiet"
-          disabled={lab.page === 1}
-          onPress={() => lab.setPage((value) => Math.max(1, value - 1))}
+      <ResponsivePageContent style={styles.content} onLayout={measureContent}>
+        <Text style={[styles.title, { color: theme.text }]}>Botanical Laboratory</Text>
+        <Text style={[styles.subtitle, { color: theme.muted }]}>
+          Preview growth and healthy or withered variants for all{" "}
+          {Object.keys(nativePlantRegistry).length} plant species.
+        </Text>
+        {compact ? <AppButton label="Simulate" onPress={() => setControlsOpen(true)} /> : controls}
+        <SearchField
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search species by name or rarity..."
         />
-        <AppButton
-          label="Next ▶"
-          tone="quiet"
-          disabled={lab.page === lab.totalPages}
-          onPress={() => lab.setPage((value) => Math.min(lab.totalPages, value + 1))}
+        <LabSortDropdown value={sort} onChange={setSort} />
+        <LabSpeciesGrid
+          species={lab.species}
+          completed={lab.completed}
+          revealAll={revealAll}
+          growth={growth}
+          status={renderedStatus}
+          cardWidth={layout.cardWidth}
         />
-      </Pressable>
+        <Text style={{ color: theme.text, textAlign: "center" }}>
+          Page {lab.page} of {lab.totalPages}
+        </Text>
+        <View style={styles.pagination}>
+          <AppButton
+            label="◀ Prev"
+            tone="quiet"
+            disabled={lab.page === 1}
+            onPress={() => lab.setPage((value) => Math.max(1, value - 1))}
+          />
+          <AppButton
+            label="Next ▶"
+            tone="quiet"
+            disabled={lab.page === lab.totalPages}
+            onPress={() => lab.setPage((value) => Math.min(lab.totalPages, value + 1))}
+          />
+        </View>
+      </ResponsivePageContent>
       <Modal
         visible={controlsOpen}
         transparent
@@ -104,7 +122,12 @@ export function LabScreen(): React.JSX.Element {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  content: { padding: spacing.lg, paddingTop: spacing.xl, gap: spacing.md },
+  scrollContent: { alignItems: "center" },
+  content: {
+    padding: spacing.lg,
+    paddingTop: spacing.xl,
+    gap: spacing.md,
+  },
   title: { fontSize: 32, fontFamily: "Outfit_700Bold" },
   subtitle: { lineHeight: 21 },
   pagination: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },

@@ -9,7 +9,7 @@ export class SupabaseCustomPlantRepository implements CustomPlantRepository {
     return this.queryOwner(userId);
   }
   async getVisibleForUser(ownerId: string): Promise<CustomPlant[]> {
-    return this.queryOwner(ownerId);
+    return this.queryOwner(ownerId, true);
   }
   async deleteById(plantId: string): Promise<void> {
     if (!plantId) throw new Error("Plant ID is required");
@@ -22,14 +22,15 @@ export class SupabaseCustomPlantRepository implements CustomPlantRepository {
     if (error) throw error;
     if (!data) throw new Error("Custom plant was not found or could not be deleted");
   }
-  private async queryOwner(userId: string): Promise<CustomPlant[]> {
+  private async queryOwner(userId: string, friendsOnly = false): Promise<CustomPlant[]> {
     if (!userId) throw new Error("User ID is required");
-    const { data, error } = await this.client
+    let query = this.client
       .from("custom_plants")
       .select("*")
       .eq("user_id", userId)
-      .is("archived_at", null)
-      .order("created_at", { ascending: false });
+      .is("archived_at", null);
+    if (friendsOnly) query = query.eq("visibility", "friends");
+    const { data, error } = await query.order("created_at", { ascending: false });
     if (error) throw error;
     return (data ?? []).map(mapCustomPlantRow);
   }

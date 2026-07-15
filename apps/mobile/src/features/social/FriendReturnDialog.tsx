@@ -18,11 +18,13 @@ export function FriendReturnDialog({
     <Modal transparent visible={visible} animationType="fade" onRequestClose={onDismiss}>
       <View style={styles.backdrop}>
         <View style={[styles.dialog, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.dialogTitle, { color: theme.text }]}>Return to your forest?</Text>
-          <Text style={{ color: theme.muted }}>
-            You’re currently visiting a friend. Return home to your own forest?
+          <Text style={[styles.dialogTitle, { color: theme.text }]}>
+            Leave your friend's garden?
           </Text>
-          <AppButton label="Return home" onPress={onConfirm} />
+          <Text style={{ color: theme.muted }}>
+            You’re currently visiting a friend. Return to your own garden?
+          </Text>
+          <AppButton label="Leave garden" onPress={onConfirm} />
           <AppButton label="Keep visiting" tone="quiet" onPress={onDismiss} />
         </View>
       </View>

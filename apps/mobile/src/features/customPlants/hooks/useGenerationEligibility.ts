@@ -3,10 +3,12 @@ import type { GenerationCreditBalance } from "@sprout/shared";
 import { useAuth } from "../../../providers/AuthProvider";
 import { useServices } from "../../../providers/ServicesProvider";
 import {
+  readCachedGenerationJob,
   readCachedGenerationCredits,
   writeCachedGenerationCredits,
 } from "../services/customPlantCache";
 import { readPlantGodActive, writePlantGodActive } from "../services/plantGodModeCache";
+import { generationJobKeepsPlantGodActive } from "../utils/generationJobKeepsPlantGodActive";
 const empty: GenerationCreditBalance = {
   availableCredits: 0,
   verifiedAdsTowardNextCredit: 0,
@@ -27,13 +29,23 @@ export function useGenerationEligibility() {
       return empty;
     }
     setError(null);
-    const cached = await readCachedGenerationCredits(user.id);
-    setPlantGodActive(await readPlantGodActive(user.id));
+    const [cached, cachedPlantGodActive, cachedJob] = await Promise.all([
+      readCachedGenerationCredits(user.id),
+      readPlantGodActive(user.id),
+      readCachedGenerationJob(user.id),
+    ]);
+    const generationActive = generationJobKeepsPlantGodActive(cachedJob);
+    setPlantGodActive(cachedPlantGodActive || generationActive);
+    if (generationActive && !cachedPlantGodActive) await writePlantGodActive(user.id, true);
     if (cached) setBalance(cached);
     try {
       const fresh = await generationCredits.getBalance(user.id);
       setBalance(fresh);
       await writeCachedGenerationCredits(user.id, fresh);
+      if (fresh.availableCredits === 0 && !generationActive) {
+        setPlantGodActive(false);
+        await writePlantGodActive(user.id, false);
+      }
       return fresh;
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to refresh generation credits");
@@ -57,6 +69,10 @@ export function useGenerationEligibility() {
     const refreshed = await refresh();
     await setActive(refreshed.availableCredits > 0);
   }, [refresh, setActive]);
+  const finishGeneration = useCallback(async () => {
+    await refresh();
+    await setActive(false);
+  }, [refresh, setActive]);
   return {
     balance,
     loading,
@@ -67,5 +83,6 @@ export function useGenerationEligibility() {
     activatePlantGod: () => setActive(true),
     bankCredit: () => setActive(false),
     rewardRecorded,
+    finishGeneration,
   };
 }

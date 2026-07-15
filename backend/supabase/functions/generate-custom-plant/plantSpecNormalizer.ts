@@ -75,12 +75,27 @@ function normalizeTreeLayer(layer: Record<string, any>, prompt: string): Record<
   };
 }
 
+function normalizeLayerLayout(layer: Record<string, unknown>): Record<string, unknown> {
+  const anchor =
+    layer.anchor && typeof layer.anchor === "object" && !Array.isArray(layer.anchor)
+      ? (layer.anchor as Record<string, unknown>)
+      : {};
+  return {
+    ...layer,
+    anchor: { x: anchor.x, y: anchor.y },
+    scale: layer.scale ?? anchor.scale ?? 1,
+    rotation: layer.rotation ?? anchor.rotation ?? 0,
+  };
+}
+
 export function normalizePlantSpec(value: unknown, prompt: string): unknown {
   if (!value || typeof value !== "object") return value;
   const source = value as Record<string, any>;
   const layers = Array.isArray(source.layers)
     ? source.layers.map((layer: unknown) =>
-        layer && typeof layer === "object" ? { ...(layer as Record<string, unknown>) } : layer,
+        layer && typeof layer === "object" && !Array.isArray(layer)
+          ? normalizeLayerLayout(layer as Record<string, unknown>)
+          : layer,
       )
     : [];
   const metadata =

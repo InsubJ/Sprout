@@ -1,77 +1,87 @@
-import { useState } from "react";
 import { Platform, ScrollView, StyleSheet, Text } from "react-native";
-import type { Habit } from "@sprout/shared";
 import { colors, spacing } from "@sprout/design-tokens";
 import { ScreenState } from "../../components/ScreenState";
+import { ResponsivePageContent } from "../../components/ResponsivePageContent";
 import { useTheme } from "../../providers/ThemeProvider";
+import { useAuth } from "../../providers/AuthProvider";
+import { useCarouselPosition } from "../../providers/CarouselPositionProvider";
 import { GardenCarousel } from "../habits/components/GardenCarousel";
 import { ReflectionBookSheet } from "../habits/components/ReflectionBookSheet";
+import { usePersistedHabitSelection } from "../habits/hooks/usePersistedHabitSelection";
 import { SanctuaryCatalogueControls } from "./SanctuaryCatalogueControls";
 import { SanctuaryCustomPlantCard } from "./SanctuaryCustomPlantCard";
 import { SanctuaryPlantCard } from "./SanctuaryPlantCard";
 import { useSanctuaryCatalogue } from "./useSanctuaryCatalogue";
 import { DeleteCustomPlantConfirmationSheet } from "./DeleteCustomPlantConfirmationSheet";
+import { SanctuaryEmptyCard } from "./SanctuaryEmptyCard";
 import { useSanctuaryPlantDeletion } from "./useSanctuaryPlantDeletion";
 export function SanctuaryScreen() {
+  const { user } = useAuth();
   const theme = useTheme(),
     catalogue = useSanctuaryCatalogue();
+  const carouselPosition = useCarouselPosition(`sanctuary:${user?.id ?? "guest"}`);
   const deletion = useSanctuaryPlantDeletion(catalogue.deleteCustomPlant);
-  const [selected, setSelected] = useState<Habit | null>(null);
+  const reflectionBook = usePersistedHabitSelection(user?.id, "sanctuary", catalogue.classicHabits);
   return (
     <>
       <ScrollView
         disableScrollViewPanResponder={Platform.OS === "web"}
         style={[styles.root, { backgroundColor: theme.background }]}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={styles.scrollContent}
       >
-        <Text style={[styles.eyebrow, theme.dark && styles.eyebrowDark]}>MEMORY GARDEN</Text>
-        <Text style={[styles.title, { color: theme.text }]}>Sanctuary</Text>
-        <Text style={[styles.subtitle, { color: theme.muted }]}>
-          Every completed habit leaves a living story.
-        </Text>
-        <SanctuaryCatalogueControls
-          query={catalogue.query}
-          onQuery={catalogue.setQuery}
-          filter={catalogue.filter}
-          onFilter={catalogue.setFilter}
-          sort={catalogue.sort}
-          onSort={catalogue.setSort}
-        />
-        {catalogue.loading && !catalogue.items.length ? (
-          <ScreenState message="Opening the Sanctuary…" />
-        ) : catalogue.items.length ? (
-          <GardenCarousel
-            items={catalogue.items}
-            accessibilityLabel="Classic and custom plants in your Sanctuary"
-            keyExtractor={(item) =>
-              item.kind === "custom" ? `custom-${item.plant.id}` : `classic-${item.habit.id}`
-            }
-            renderCard={(item, width) =>
-              item.kind === "custom" ? (
-                <SanctuaryCustomPlantCard
-                  plant={item.plant}
-                  width={width}
-                  onRequestDelete={deletion.requestDeletion}
-                />
-              ) : (
-                <SanctuaryPlantCard
-                  habit={item.habit}
-                  width={width}
-                  onOpenJournal={() => setSelected(item.habit)}
-                />
-              )
-            }
-          />
-        ) : (
-          <ScreenState message="Completed and custom plants will bloom here." />
-        )}
-        {catalogue.error ? (
-          <Text accessibilityLiveRegion="polite" style={styles.error}>
-            {catalogue.error}
+        <ResponsivePageContent style={styles.content}>
+          <Text style={[styles.eyebrow, theme.dark && styles.eyebrowDark]}>MEMORY GARDEN</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Sanctuary</Text>
+          <Text style={[styles.subtitle, { color: theme.muted }]}>
+            Every completed habit leaves a living story.
           </Text>
-        ) : null}
+          <SanctuaryCatalogueControls
+            query={catalogue.query}
+            onQuery={catalogue.setQuery}
+            filter={catalogue.filter}
+            onFilter={catalogue.setFilter}
+            sort={catalogue.sort}
+            sortDirection={catalogue.sortDirection}
+            onSort={catalogue.setSort}
+          />
+          {catalogue.loading && !catalogue.items.length ? (
+            <ScreenState message="Opening the Sanctuary…" />
+          ) : catalogue.items.length ? (
+            <GardenCarousel
+              items={catalogue.items}
+              accessibilityLabel="Classic and custom plants in your Sanctuary"
+              initialItemKey={carouselPosition.initialItemKey}
+              onFocusedItemChange={carouselPosition.rememberItem}
+              keyExtractor={(item) =>
+                item.kind === "custom" ? `custom-${item.plant.id}` : `classic-${item.habit.id}`
+              }
+              renderCard={(item, width) =>
+                item.kind === "custom" ? (
+                  <SanctuaryCustomPlantCard
+                    plant={item.plant}
+                    width={width}
+                    onRequestDelete={deletion.requestDeletion}
+                  />
+                ) : (
+                  <SanctuaryPlantCard
+                    habit={item.habit}
+                    width={width}
+                    onOpenJournal={() => reflectionBook.open(item.habit)}
+                  />
+                )
+              }
+            />
+          ) : (
+            <SanctuaryEmptyCard filtered={catalogue.hasPlants} />
+          )}
+          {catalogue.error ? (
+            <Text accessibilityLiveRegion="polite" style={styles.error}>
+              {catalogue.error}
+            </Text>
+          ) : null}
+        </ResponsivePageContent>
       </ScrollView>
-      <ReflectionBookSheet habit={selected} onClose={() => setSelected(null)} />
+      <ReflectionBookSheet habit={reflectionBook.habit} onClose={reflectionBook.close} />
       <DeleteCustomPlantConfirmationSheet
         plant={deletion.plant}
         deleting={deletion.deleting}
@@ -84,6 +94,7 @@ export function SanctuaryScreen() {
 }
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.sand },
+  scrollContent: { alignItems: "center" },
   content: { paddingTop: spacing.xl, paddingBottom: spacing.xxl },
   eyebrow: {
     color: colors.forest,

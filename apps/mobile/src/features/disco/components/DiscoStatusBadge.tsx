@@ -39,6 +39,7 @@ export function DiscoStatusBadge({
   }, [reduced, shine, state]);
   return (
     <Animated.Text
+      numberOfLines={1}
       style={[
         styles.base,
         plantGod ? styles.awakened : null,
@@ -60,6 +61,7 @@ export function DiscoStatusBadge({
 }
 const styles = StyleSheet.create({
   base: {
+    flexShrink: 0,
     fontSize: 12,
     fontFamily: "Outfit_700Bold",
     paddingHorizontal: 10,

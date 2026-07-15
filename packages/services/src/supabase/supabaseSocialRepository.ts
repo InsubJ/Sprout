@@ -28,6 +28,20 @@ export class SupabaseSocialRepository implements SocialRepository {
     if (error) throw toRepositoryError("Unable to send request", error);
     return data as Friendship;
   }
+  async cancelFriendRequest(friendshipId: string, requesterId: string): Promise<void> {
+    if (!friendshipId.trim() || !requesterId.trim())
+      throw new RepositoryError("Friendship and requester IDs are required", "validation");
+    const { data, error } = await this.client
+      .from("friendships")
+      .delete()
+      .eq("id", friendshipId)
+      .eq("user_id", requesterId)
+      .eq("status", "pending")
+      .select("id")
+      .maybeSingle();
+    if (error) throw toRepositoryError("Unable to cancel request", error);
+    if (!data) throw new RepositoryError("Outgoing friend request not found", "not_found");
+  }
   async respond(friendshipId: string, status: "accepted" | "declined"): Promise<Friendship> {
     if (!friendshipId.trim()) throw new RepositoryError("Friendship ID is required", "validation");
     const { data, error } = await this.client

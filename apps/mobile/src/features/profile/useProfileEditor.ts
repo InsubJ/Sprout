@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { useAuth } from "../../providers/AuthProvider";
+import { useDataRevision } from "../../providers/DataProvider";
 import { useServices } from "../../providers/ServicesProvider";
 
 export interface ProfileEditorState {
   displayName: string;
   setDisplayName: Dispatch<SetStateAction<string>>;
   username: string;
-  setUsername: Dispatch<SetStateAction<string>>;
   avatar: string | null;
   setAvatar: Dispatch<SetStateAction<string | null>>;
   loaded: boolean;
@@ -14,6 +14,7 @@ export interface ProfileEditorState {
 }
 export function useProfileEditor(): ProfileEditorState {
   const { user } = useAuth();
+  const { invalidate } = useDataRevision();
   const { profiles } = useServices();
   const [displayName, setDisplayName] = useState("Sprout Gardener");
   const [username, setUsername] = useState("gardener");
@@ -45,15 +46,14 @@ export function useProfileEditor(): ProfileEditorState {
   }, [profiles, user]);
   const save = useCallback(async (): Promise<void> => {
     if (!user || !profiles) return;
-    if (username.trim().length < 3) throw new Error("Username must contain at least 3 characters");
-    const current = await profiles.getById(user.id);
-    if (!current) throw new Error("Profile is unavailable");
-    await profiles.update({
-      ...current,
-      username: username.trim(),
+    const saved = await profiles.update({
+      id: user.id,
       display_name: displayName.trim() || null,
       avatar_url: avatar,
     });
-  }, [avatar, displayName, profiles, user, username]);
-  return { displayName, setDisplayName, username, setUsername, avatar, setAvatar, loaded, save };
+    setDisplayName(saved.display_name ?? "");
+    setAvatar(saved.avatar_url);
+    invalidate();
+  }, [avatar, displayName, invalidate, profiles, user]);
+  return { displayName, setDisplayName, username, avatar, setAvatar, loaded, save };
 }

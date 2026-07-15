@@ -1,79 +1,125 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import { Platform, ScrollView, StyleSheet } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import type { Habit } from "@sprout/shared";
+import { ResponsivePageContent } from "../../components/ResponsivePageContent";
 import { ScreenState } from "../../components/ScreenState";
 import { useAuth } from "../../providers/AuthProvider";
 import { useTheme } from "../../providers/ThemeProvider";
+import { useCarouselPosition } from "../../providers/CarouselPositionProvider";
 import { GardenCarousel } from "../habits/components/GardenCarousel";
+import { GardenEmptyCard } from "../habits/components/GardenEmptyCard";
 import { ReflectionBookSheet } from "../habits/components/ReflectionBookSheet";
+import { usePersistedHabitSelection } from "../habits/hooks/usePersistedHabitSelection";
 import { FriendGardenHeader } from "../social/FriendGardenHeader";
+import { visibleHabitForVisitor } from "../social/friendHabitVisibility";
 import { useFriendGarden } from "../social/useFriendGarden";
+import { SanctuaryCatalogueControls } from "./SanctuaryCatalogueControls";
+import { SanctuaryCustomPlantCard } from "./SanctuaryCustomPlantCard";
 import { SanctuaryPlantCard } from "./SanctuaryPlantCard";
+import {
+  type SanctuaryCatalogueItem,
+  useSanctuaryCatalogueFilter,
+} from "./useSanctuaryCatalogueFilter";
 
-export function VisitorSanctuaryScreen() {
+type VisitorSanctuaryItem = SanctuaryCatalogueItem | { kind: "empty" };
+
+export function VisitorSanctuaryScreen(): React.JSX.Element {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
   const theme = useTheme();
-  const { profile, habits: publicHabits, error } = useFriendGarden(id);
-  const habits = publicHabits.filter((item) => item.status === "completed");
-  const [selected, setSelected] = useState<Habit | null>(null);
+  const garden = useFriendGarden(id);
+  const carouselPosition = useCarouselPosition(`friend-sanctuary:${user?.id ?? "guest"}:${id}`);
+  const habits = useMemo(
+    () =>
+      garden.habits
+        .filter((item) => item.status === "completed")
+        .map((habit) => visibleHabitForVisitor(habit, user?.id ?? "")),
+    [garden.habits, user?.id],
+  );
+  const catalogue = useSanctuaryCatalogueFilter(habits, garden.customPlants);
+  const carouselItems = useMemo<VisitorSanctuaryItem[]>(
+    () => (catalogue.items.length ? catalogue.items : [{ kind: "empty" }]),
+    [catalogue.items],
+  );
+  const reflectionBook = usePersistedHabitSelection(user?.id, `friend-sanctuary:${id}`, habits);
 
-  const visibleHabit = (habit: Habit): Habit => {
-    const viewerId = user?.id ?? "";
-    return {
-      ...habit,
-      name:
-        habit.hide_name && !habit.share_name_friends?.includes(viewerId)
-          ? "Private Plant"
-          : habit.name,
-      description:
-        habit.hide_description && !habit.share_desc_friends?.includes(viewerId)
-          ? null
-          : habit.description,
-    };
-  };
-
-  if (profile === undefined && !error)
+  if (garden.profile === undefined && !garden.error)
     return <ScreenState message="Opening your bud's Sanctuary…" />;
-  if (!profile) return <ScreenState message={error ?? "This Sanctuary is unavailable."} error />;
+  if (!garden.profile)
+    return <ScreenState message={garden.error ?? "This Sanctuary is unavailable."} error />;
+
   return (
     <ScrollView
       disableScrollViewPanResponder={Platform.OS === "web"}
       style={[styles.root, { backgroundColor: theme.background }]}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={styles.scrollContent}
     >
-      <Stack.Screen options={{ headerShown: false }} />
-      <FriendGardenHeader
-        profile={profile}
-        active="sanctuary"
-        onLeave={() => router.replace("/(tabs)/buds")}
-        onOpenForest={() => router.replace(`/friend-forest/${id}`)}
-        onOpenSanctuary={() => undefined}
-      />
-      {habits.length ? (
-        <GardenCarousel
-          items={habits}
-          accessibilityLabel={`${profile.display_name || profile.username}'s completed plants`}
-          keyExtractor={(habit) => habit.id}
-          renderCard={(habit, cardWidth) => {
-            const visible = visibleHabit(habit);
-            return (
-              <SanctuaryPlantCard
-                habit={visible}
-                width={cardWidth}
-                onOpenJournal={() => setSelected(visible)}
-              />
-            );
-          }}
+      <ResponsivePageContent style={styles.content}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <FriendGardenHeader
+          profile={garden.profile}
+          active="sanctuary"
+          onLeave={() => router.replace("/(tabs)/buds")}
+          onOpenForest={() => router.replace(`/friend-forest/${id}`)}
+          onOpenSanctuary={() => undefined}
         />
-      ) : (
-        <ScreenState message="No public completed plants are blooming here yet." />
-      )}
-      <ReflectionBookSheet habit={selected} onClose={() => setSelected(null)} />
+        <SanctuaryCatalogueControls
+          query={catalogue.query}
+          onQuery={catalogue.setQuery}
+          filter={catalogue.filter}
+          onFilter={catalogue.setFilter}
+          sort={catalogue.sort}
+          sortDirection={catalogue.sortDirection}
+          onSort={catalogue.setSort}
+        />
+        <GardenCarousel
+          items={carouselItems}
+          accessibilityLabel={`${garden.profile.display_name || garden.profile.username}'s completed and custom plants`}
+          initialItemKey={carouselPosition.initialItemKey}
+          onFocusedItemChange={carouselPosition.rememberItem}
+          keyExtractor={(item) =>
+            item.kind === "custom"
+              ? `custom-${item.plant.id}`
+              : item.kind === "classic"
+                ? `classic-${item.habit.id}`
+                : "empty"
+          }
+          renderCard={(item, cardWidth) =>
+            item.kind === "custom" ? (
+              <SanctuaryCustomPlantCard plant={item.plant} width={cardWidth} />
+            ) : item.kind === "classic" ? (
+              <SanctuaryPlantCard
+                habit={item.habit}
+                width={cardWidth}
+                onOpenJournal={() => reflectionBook.open(item.habit)}
+              />
+            ) : (
+              <GardenEmptyCard
+                width={cardWidth}
+                icon="🌿"
+                title={
+                  catalogue.hasPlants
+                    ? "No plants match these filters"
+                    : "No shared Sanctuary plants yet"
+                }
+                copy={
+                  catalogue.hasPlants
+                    ? "Try another search or filter."
+                    : "Completed and friend-visible custom plants will bloom here when they are ready."
+                }
+              />
+            )
+          }
+        />
+        <ReflectionBookSheet habit={reflectionBook.habit} onClose={reflectionBook.close} />
+      </ResponsivePageContent>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({ root: { flex: 1 }, content: { paddingBottom: 32 } });
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  scrollContent: { alignItems: "center" },
+  content: { paddingBottom: 32 },
+});

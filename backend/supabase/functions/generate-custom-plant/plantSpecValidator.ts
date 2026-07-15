@@ -84,15 +84,23 @@ export function validatePlantSpec(value: unknown): { valid: boolean; errors: str
     if (!allowedTypes.has(layer.type)) errors.push("Unknown layer type");
     if (
       !layer.anchor ||
+      typeof layer.anchor.x !== "number" ||
+      !Number.isFinite(layer.anchor.x) ||
       layer.anchor.x < 20 ||
       layer.anchor.x > 380 ||
+      typeof layer.anchor.y !== "number" ||
+      !Number.isFinite(layer.anchor.y) ||
       layer.anchor.y < 20 ||
       layer.anchor.y > 380
     )
       errors.push("Layer outside safe bounds");
     if (
+      typeof layer.scale !== "number" ||
+      !Number.isFinite(layer.scale) ||
       layer.scale < 0.1 ||
       layer.scale > 2 ||
+      typeof layer.rotation !== "number" ||
+      !Number.isFinite(layer.rotation) ||
       layer.rotation < -180 ||
       layer.rotation > 180 ||
       !color.test(layer.fill ?? "")

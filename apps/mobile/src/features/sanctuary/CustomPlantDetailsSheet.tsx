@@ -15,7 +15,7 @@ export function CustomPlantDetailsSheet({
   plant: CustomPlant;
   visible: boolean;
   onClose(): void;
-  onRequestDelete(): void;
+  onRequestDelete?(): void;
 }): React.JSX.Element {
   const theme = useTheme();
   const metadata = plant.plantSpec.generationMetadata;
@@ -83,7 +83,9 @@ export function CustomPlantDetailsSheet({
 
         <View style={styles.actions}>
           <AppButton label="Close details" onPress={onClose} />
-          <AppButton label="Delete from Sanctuary" tone="danger" onPress={onRequestDelete} />
+          {onRequestDelete ? (
+            <AppButton label="Delete from Sanctuary" tone="danger" onPress={onRequestDelete} />
+          ) : null}
         </View>
       </ScrollView>
     </ModalSheet>

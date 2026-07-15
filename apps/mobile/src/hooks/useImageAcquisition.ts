@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
@@ -7,6 +7,7 @@ export interface ImageAcquisitionOptions {
   aspect?: [number, number];
   quality: number;
   recoverAndroidResult?: boolean;
+  onImageUriChange?: (value: string | null) => void;
 }
 export interface ImageAcquisitionState {
   imageUri: string | null;
@@ -15,8 +16,30 @@ export interface ImageAcquisitionState {
   clear: () => void;
 }
 
+export function imagePickerRequiresPermission(platform: string): boolean {
+  return platform !== "web";
+}
+
 export function useImageAcquisition(options: ImageAcquisitionOptions): ImageAcquisitionState {
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageUri, setImageUriState] = useState<string | null>(null);
+  const currentUri = useRef<string | null>(null);
+  const setImageUri = useCallback(
+    (value: string | null): void => {
+      const previous = currentUri.current;
+      if (previous && previous !== value && previous.startsWith("blob:"))
+        URL.revokeObjectURL(previous);
+      currentUri.current = value;
+      setImageUriState(value);
+      options.onImageUriChange?.(value);
+    },
+    [options.onImageUriChange],
+  );
+  useEffect(
+    () => () => {
+      if (currentUri.current?.startsWith("blob:")) URL.revokeObjectURL(currentUri.current);
+    },
+    [],
+  );
   useEffect(() => {
     if (!options.recoverAndroidResult || Platform.OS !== "android") return;
     let active = true;
@@ -29,21 +52,23 @@ export function useImageAcquisition(options: ImageAcquisitionOptions): ImageAcqu
     return () => {
       active = false;
     };
-  }, [options.recoverAndroidResult]);
+  }, [options.recoverAndroidResult, setImageUri]);
   const acquire = useCallback(
     async (source: "camera" | "library"): Promise<string | null> => {
-      const permission =
-        source === "camera"
-          ? await ImagePicker.requestCameraPermissionsAsync()
-          : await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted)
-        throw new Error(`${source === "camera" ? "Camera" : "Photo"} permission is required`);
       const pickerOptions: ImagePicker.ImagePickerOptions = {
         mediaTypes: ["images"],
         allowsEditing: options.allowsEditing,
         aspect: options.aspect,
         quality: options.quality,
       };
+      if (imagePickerRequiresPermission(Platform.OS)) {
+        const permission =
+          source === "camera"
+            ? await ImagePicker.requestCameraPermissionsAsync()
+            : await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted)
+          throw new Error(`${source === "camera" ? "Camera" : "Photo"} permission is required`);
+      }
       const result =
         source === "camera"
           ? await ImagePicker.launchCameraAsync(pickerOptions)
@@ -54,7 +79,7 @@ export function useImageAcquisition(options: ImageAcquisitionOptions): ImageAcqu
       setImageUri(uri);
       return uri;
     },
-    [options.allowsEditing, options.aspect, options.quality],
+    [options.allowsEditing, options.aspect, options.quality, setImageUri],
   );
   return { imageUri, setImageUri, acquire, clear: () => setImageUri(null) };
 }

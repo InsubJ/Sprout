@@ -1,30 +1,29 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Slider from "@react-native-community/slider";
-import type { HabitStatus } from "@sprout/shared";
 import { colors, radii, spacing } from "@sprout/design-tokens";
-import { AppButton } from "../../components/AppButton";
 import { PreferenceSwitchRow } from "../../components/PreferenceSwitchRow";
 import { useTheme } from "../../providers/ThemeProvider";
+import type { LabPreviewStatus } from "./labSimulationStatus";
+
+interface LabSimulationControlsProps {
+  growth: number;
+  status: LabPreviewStatus;
+  revealAll: boolean;
+  onGrowthChange(value: number): void;
+  onStatusChange(value: LabPreviewStatus): void;
+  onRevealAllChange(value: boolean): void;
+}
+
+const previewStatuses = ["healthy", "withered"] as const;
 
 export function LabSimulationControls({
   growth,
-  witherCount,
   status,
   revealAll,
   onGrowthChange,
-  onWitherCountChange,
   onStatusChange,
   onRevealAllChange,
-}: {
-  growth: number;
-  witherCount: number;
-  status: HabitStatus;
-  revealAll: boolean;
-  onGrowthChange: (value: number) => void;
-  onWitherCountChange: (value: number) => void;
-  onStatusChange: (value: HabitStatus) => void;
-  onRevealAllChange: (value: boolean) => void;
-}): React.JSX.Element {
+}: LabSimulationControlsProps): React.JSX.Element {
   const theme = useTheme();
   return (
     <View style={[styles.panel, { backgroundColor: theme.surface, borderColor: theme.border }]}>
@@ -42,7 +41,7 @@ export function LabSimulationControls({
       />
       <Text style={{ color: theme.text }}>Plant Status</Text>
       <View style={styles.row}>
-        {(["healthy", "withered", "completed"] as const).map((value) => (
+        {previewStatuses.map((value) => (
           <Pressable
             key={value}
             accessibilityRole="button"
@@ -54,17 +53,11 @@ export function LabSimulationControls({
           </Pressable>
         ))}
       </View>
-      <View style={styles.stepper}>
-        <Text style={{ color: theme.text }}>Setbacks: {witherCount}</Text>
-        <View style={styles.row}>
-          <AppButton
-            label="−"
-            tone="quiet"
-            onPress={() => onWitherCountChange(Math.max(0, witherCount - 1))}
-          />
-          <AppButton label="+" tone="quiet" onPress={() => onWitherCountChange(witherCount + 1)} />
-        </View>
-      </View>
+      {growth >= 100 ? (
+        <Text accessibilityLiveRegion="polite" style={{ color: theme.muted }}>
+          Completed automatically at 100% progress
+        </Text>
+      ) : null}
       <PreferenceSwitchRow
         label="Reveal all species (Admin Mode)"
         value={revealAll}
@@ -73,6 +66,7 @@ export function LabSimulationControls({
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   panel: { padding: spacing.lg, borderRadius: radii.lg, gap: spacing.md, borderWidth: 1 },
   title: { fontSize: 20, fontFamily: "Outfit_700Bold" },
@@ -87,5 +81,4 @@ const styles = StyleSheet.create({
   active: { backgroundColor: colors.forest, borderColor: colors.forest },
   chipText: { color: colors.muted, textTransform: "capitalize" },
   activeText: { color: colors.paper, fontFamily: "Outfit_700Bold" },
-  stepper: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
 });

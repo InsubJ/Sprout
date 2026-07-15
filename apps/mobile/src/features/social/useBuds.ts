@@ -20,10 +20,12 @@ export interface BudsState {
   friends: BudRow[];
   incoming: BudRow[];
   outgoing: BudRow[];
+  workingRequestId: string | null;
   error: string | null;
   search: (query: string) => Promise<void>;
   add: (profile: Profile) => Promise<void>;
   respond: (friendship: Friendship, status: "accepted" | "declined") => Promise<void>;
+  cancel: (friendship: Friendship) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -35,6 +37,7 @@ export function useBuds(): BudsState {
   const [incoming, setIncoming] = useState<BudRow[]>([]);
   const [outgoing, setOutgoing] = useState<BudRow[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [workingRequestId, setWorkingRequestId] = useState<string | null>(null);
   const requestId = useRef(0);
 
   const resolveRows = useCallback(
@@ -135,5 +138,36 @@ export function useBuds(): BudsState {
     },
     [refresh, social],
   );
-  return { isDemo, results, friends, incoming, outgoing, error, search, add, respond, refresh };
+  const cancel = useCallback(
+    async (friendship: Friendship): Promise<void> => {
+      if (!user || !social) {
+        setOutgoing((current) => current.filter((item) => item.friendship.id !== friendship.id));
+        return;
+      }
+      if (friendship.user_id !== user.id || friendship.status !== "pending")
+        throw new Error("Only your pending outgoing requests can be cancelled");
+      setWorkingRequestId(friendship.id);
+      try {
+        await social.cancelFriendRequest(friendship.id, user.id);
+        await refresh();
+      } finally {
+        setWorkingRequestId(null);
+      }
+    },
+    [refresh, social, user],
+  );
+  return {
+    isDemo,
+    results,
+    friends,
+    incoming,
+    outgoing,
+    workingRequestId,
+    error,
+    search,
+    add,
+    respond,
+    cancel,
+    refresh,
+  };
 }

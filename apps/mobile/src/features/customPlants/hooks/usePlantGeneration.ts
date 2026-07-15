@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import type { PlantGenerationJob } from "@sprout/shared";
 import { useAuth } from "../../../providers/AuthProvider";
 import { useServices } from "../../../providers/ServicesProvider";
-import { readCachedGenerationJob, writeCachedGenerationJob } from "../services/customPlantCache";
+import { useDataRevision } from "../../../providers/DataProvider";
+import {
+  cacheSavedCustomPlant,
+  readCachedGenerationJob,
+  writeCachedGenerationJob,
+} from "../services/customPlantCache";
 import { createUuid } from "../utils/createUuid";
 const activeStatuses = new Set([
   "queued",
@@ -15,6 +20,7 @@ const activeStatuses = new Set([
 export function usePlantGeneration() {
   const { user } = useAuth();
   const { plantGeneration } = useServices();
+  const { invalidate } = useDataRevision();
   const [job, setJob] = useState<PlantGenerationJob | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +78,14 @@ export function usePlantGeneration() {
       const saved = await plantGeneration.save(job.id, displayName, visibility);
       setJob(saved);
       if (user) await writeCachedGenerationJob(user.id, saved);
+      if (user) {
+        try {
+          await cacheSavedCustomPlant(user.id, saved, visibility);
+        } catch {
+          // Saving succeeded on the server. Global invalidation below repairs cache if needed.
+        }
+      }
+      invalidate();
       return true;
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to save the plant");

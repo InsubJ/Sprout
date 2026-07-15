@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Habit } from "@sprout/shared";
 import { useAuth } from "../../../providers/AuthProvider";
 import { useServices } from "../../../providers/ServicesProvider";
+import { useDataRevision } from "../../../providers/DataProvider";
 import { readCachedHabits, writeCachedHabits } from "../services/habitCache";
 
 export interface HabitCollectionState {
@@ -15,6 +16,7 @@ export interface HabitCollectionState {
 export function useHabitCollection(): HabitCollectionState {
   const { user } = useAuth();
   const { habits: repository } = useServices();
+  const { revision } = useDataRevision();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,10 +30,14 @@ export function useHabitCollection(): HabitCollectionState {
     }
     setLoading(true);
     setError(null);
-    const cached = await readCachedHabits(user.id);
-    if (cached.length && request === requestId.current) {
-      setHabits(cached);
-      setLoading(false);
+    try {
+      const cached = await readCachedHabits(user.id);
+      if (cached.length && request === requestId.current) {
+        setHabits(cached);
+        setLoading(false);
+      }
+    } catch {
+      // A fresh server response below replaces malformed or stale cache data.
     }
     try {
       const fresh = await repository.getByUserId(user.id);
@@ -49,7 +55,7 @@ export function useHabitCollection(): HabitCollectionState {
     return () => {
       requestId.current += 1;
     };
-  }, [refresh]);
+  }, [refresh, revision]);
   const updateLocal = useCallback(
     (update: (current: Habit[]) => Habit[]): void => setHabits(update),
     [],

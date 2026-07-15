@@ -169,6 +169,7 @@ describe.each(socialFactories)("%s social contract", (_name, factory) => {
   it("shares request shapes, duplicate behavior, and validation categories", async () => {
     const repository = factory();
     await expectCategory(repository.getFriendships(" "), "validation");
+    await expectCategory(repository.cancelFriendRequest(" ", "requester"), "validation");
     const first = await repository.sendFriendRequest(
       "dddddddd-dddd-dddd-dddd-dddddddddddd",
       "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",

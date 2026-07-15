@@ -13,10 +13,12 @@ import type { UploadAsset } from "@sprout/services";
 import { colors, spacing } from "@sprout/design-tokens";
 import { useRouter } from "expo-router";
 import { AppButton } from "../../../components/AppButton";
+import { ResponsivePageContent } from "../../../components/ResponsivePageContent";
 import { ScreenState } from "../../../components/ScreenState";
 import { useAuth } from "../../../providers/AuthProvider";
 import { useSync } from "../../../providers/SyncProvider";
 import { useTheme } from "../../../providers/ThemeProvider";
+import { useCarouselPosition } from "../../../providers/CarouselPositionProvider";
 import { DiscoHabitCard } from "../../disco/components/DiscoHabitCard";
 import { CompletionCelebrationSheet } from "../components/CompletionCelebrationSheet";
 import { ForestFilters } from "../components/ForestFilters";
@@ -30,6 +32,8 @@ import { ReflectionBookSheet } from "../components/ReflectionBookSheet";
 import { WaterReflectionSheet } from "../components/WaterReflectionSheet";
 import { useForestFilter } from "../hooks/useForestFilter";
 import { useHabits } from "../hooks/useHabits";
+import { usePersistedHabitSelection } from "../hooks/usePersistedHabitSelection";
+import { useWaterReflectionDraft } from "../hooks/useWaterReflectionDraft";
 
 type ForestCarouselItem = { kind: "habit"; habit: Habit } | { kind: "empty" } | { kind: "disco" };
 export function ForestScreen(): React.JSX.Element {
@@ -39,11 +43,16 @@ export function ForestScreen(): React.JSX.Element {
   const sync = useSync();
   const theme = useTheme();
   const habitState = useHabits();
+  const carouselPosition = useCarouselPosition(`forest:${user?.id ?? "guest"}`);
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [selected, setSelected] = useState<Habit | null>(null);
-  const [reflectionHabit, setReflectionHabit] = useState<Habit | null>(null);
   const [completed, setCompleted] = useState<Habit | null>(null);
+  const wateringDraft = useWaterReflectionDraft(user?.id);
+  const selected = useMemo(
+    () => habitState.habits.find((habit) => habit.id === wateringDraft.habitId) ?? null,
+    [habitState.habits, wateringDraft.habitId],
+  );
+  const reflectionBook = usePersistedHabitSelection(user?.id, "forest", habitState.habits);
   const forest = useForestFilter(
     habitState.habits,
     habitState.wateringsToday,
@@ -84,7 +93,7 @@ export function ForestScreen(): React.JSX.Element {
       <ScrollView
         disableScrollViewPanResponder={Platform.OS === "web"}
         style={[styles.screen, { backgroundColor: theme.background }]}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={habitState.loading}
@@ -92,63 +101,69 @@ export function ForestScreen(): React.JSX.Element {
           />
         }
       >
-        <ForestHeader
-          gardenerName={gardenerName}
-          online={sync.online}
-          syncing={sync.syncing}
-          pending={sync.pending}
-        />
-        <ForestFilters
-          query={forest.query}
-          filter={forest.filter}
-          onQueryChange={forest.setQuery}
-          onFilterChange={forest.setFilter}
-        />
-        {habitState.loading && !habitState.habits.length ? (
-          <ScreenState message="Walking into the woods…" />
-        ) : habitState.error && !habitState.habits.length ? (
-          <ScreenState message={habitState.error} error />
-        ) : (
-          <GardenCarousel
-            items={items}
-            accessibilityLabel="Your garden plants"
-            keyExtractor={(item) => (item.kind === "habit" ? item.habit.id : item.kind)}
-            renderCard={(item, cardWidth) =>
-              item.kind === "habit" ? (
-                <HabitCard
-                  habit={item.habit}
-                  wateringsToday={habitState.wateringsToday[item.habit.id] ?? 0}
-                  watering={habitState.wateringId === item.habit.id}
-                  cardWidth={cardWidth}
-                  onWater={() => setSelected(item.habit)}
-                  onOpenReflections={() => setReflectionHabit(item.habit)}
-                />
-              ) : item.kind === "disco" ? (
-                <DiscoHabitCard cardWidth={cardWidth} />
-              ) : (
-                <GardenEmptyCard
-                  width={cardWidth}
-                  icon={forest.filter === "needs-water" && !forest.query.trim() ? "🎉" : undefined}
-                  title={
-                    forest.filter === "needs-water" && !forest.query.trim()
-                      ? "Congratulations, you’re all caught up"
-                      : undefined
-                  }
-                  copy={
-                    forest.filter === "needs-water" && !forest.query.trim()
-                      ? "Every active plant has been watered for today."
-                      : undefined
-                  }
-                />
-              )
-            }
+        <ResponsivePageContent style={styles.content}>
+          <ForestHeader
+            gardenerName={gardenerName}
+            online={sync.online}
+            syncing={sync.syncing}
+            pending={sync.pending}
           />
-        )}
-        <View style={styles.seed}>
-          <AppButton label="🌱 Plant New Seed" onPress={() => setFormOpen(true)} />
-        </View>
-        <ForestStats habits={habitState.habits} compact={width < 430} />
-        {habitState.error ? <Text style={styles.error}>{habitState.error}</Text> : null}
+          <ForestFilters
+            query={forest.query}
+            filter={forest.filter}
+            onQueryChange={forest.setQuery}
+            onFilterChange={forest.setFilter}
+          />
+          {habitState.loading && !habitState.habits.length ? (
+            <ScreenState message="Walking into the woods…" />
+          ) : habitState.error && !habitState.habits.length ? (
+            <ScreenState message={habitState.error} error />
+          ) : (
+            <GardenCarousel
+              items={items}
+              accessibilityLabel="Your garden plants"
+              initialItemKey={carouselPosition.initialItemKey}
+              onFocusedItemChange={carouselPosition.rememberItem}
+              keyExtractor={(item) => (item.kind === "habit" ? item.habit.id : item.kind)}
+              renderCard={(item, cardWidth) =>
+                item.kind === "habit" ? (
+                  <HabitCard
+                    habit={item.habit}
+                    wateringsToday={habitState.wateringsToday[item.habit.id] ?? 0}
+                    watering={habitState.wateringId === item.habit.id}
+                    cardWidth={cardWidth}
+                    onWater={() => wateringDraft.start(item.habit.id)}
+                    onOpenReflections={() => reflectionBook.open(item.habit)}
+                  />
+                ) : item.kind === "disco" ? (
+                  <DiscoHabitCard cardWidth={cardWidth} />
+                ) : (
+                  <GardenEmptyCard
+                    width={cardWidth}
+                    icon={
+                      forest.filter === "needs-water" && !forest.query.trim() ? "🎉" : undefined
+                    }
+                    title={
+                      forest.filter === "needs-water" && !forest.query.trim()
+                        ? "Congratulations, you’re all caught up"
+                        : undefined
+                    }
+                    copy={
+                      forest.filter === "needs-water" && !forest.query.trim()
+                        ? "Every active plant has been watered for today."
+                        : undefined
+                    }
+                  />
+                )
+              }
+            />
+          )}
+          <View style={styles.seed}>
+            <AppButton label="🌱 Plant New Seed" onPress={() => setFormOpen(true)} />
+          </View>
+          <ForestStats habits={habitState.habits} compact={width < 430} />
+          {habitState.error ? <Text style={styles.error}>{habitState.error}</Text> : null}
+        </ResponsivePageContent>
       </ScrollView>
       <HabitFormSheet
         visible={formOpen}
@@ -166,10 +181,14 @@ export function ForestScreen(): React.JSX.Element {
       <WaterReflectionSheet
         habit={selected}
         busy={Boolean(habitState.wateringId)}
-        onClose={() => setSelected(null)}
+        note={wateringDraft.note}
+        imageUri={wateringDraft.imageUri}
+        onNoteChange={wateringDraft.setNote}
+        onImageUriChange={wateringDraft.setImageUri}
+        onClose={wateringDraft.discard}
         onConfirm={confirmWater}
       />
-      <ReflectionBookSheet habit={reflectionHabit} onClose={() => setReflectionHabit(null)} />
+      <ReflectionBookSheet habit={reflectionBook.habit} onClose={reflectionBook.close} />
       <CompletionCelebrationSheet
         habit={completed}
         onVisitSanctuary={() => {
@@ -182,6 +201,7 @@ export function ForestScreen(): React.JSX.Element {
 }
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.sand },
+  scrollContent: { alignItems: "center" },
   content: { paddingBottom: spacing.xxl },
   seed: { paddingHorizontal: spacing.lg, marginVertical: spacing.sm },
   error: { color: colors.danger, textAlign: "center" },

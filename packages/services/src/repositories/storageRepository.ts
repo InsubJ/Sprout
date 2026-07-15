@@ -6,4 +6,5 @@ export interface UploadAsset {
 }
 export interface StorageRepository {
   uploadReflection(userId: string, asset: UploadAsset): Promise<string>;
+  uploadProfileAvatar(userId: string, asset: UploadAsset): Promise<string>;
 }

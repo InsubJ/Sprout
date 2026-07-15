@@ -3,43 +3,43 @@ import { StyleSheet, Text, View } from "react-native";
 import { spacing } from "@sprout/design-tokens";
 import { useRouter } from "expo-router";
 import { AppButton } from "../../../components/AppButton";
+import { useAuth } from "../../../providers/AuthProvider";
 import { useTheme } from "../../../providers/ThemeProvider";
+import { usePlantGenerationDraft } from "../hooks/usePlantGenerationDraft";
 import { usePlantGeneration } from "../hooks/usePlantGeneration";
 import { GeneratedPlantPreview } from "./GeneratedPlantPreview";
 import { GenerationPromptSheet } from "./GenerationPromptSheet";
 import { CustomPlantCelebrationSheet } from "./CustomPlantCelebrationSheet";
 import { PlantGenerationFailureSheet } from "./PlantGenerationFailureSheet";
 export function PlantGodGenerationFlow({
-  onSaved,
   onCompleted,
   onFailed,
   onCreditLockedChange,
 }: {
-  onSaved(): void;
-  onCompleted(): void;
+  onCompleted(): Promise<void>;
   onFailed(): void;
   onCreditLockedChange(locked: boolean): void;
 }) {
   const router = useRouter();
+  const { user } = useAuth();
   const theme = useTheme();
-  const [open, setOpen] = useState(false),
-    [previewOpen, setPreviewOpen] = useState(false),
+  const draft = usePlantGenerationDraft(user?.id);
+  const [previewOpen, setPreviewOpen] = useState(false),
     [celebrationOpen, setCelebrationOpen] = useState(false),
     [failureOpen, setFailureOpen] = useState(false),
-    [prompt, setPrompt] = useState(""),
     [name, setName] = useState("");
   const generation = usePlantGeneration();
   useEffect(() => {
     if (generation.job?.status === "preview_ready") {
       setName(generation.job.suggestedName ?? "");
-      setOpen(false);
+      draft.setOpen(false);
     }
     if (generation.job?.status === "failed") {
-      setOpen(false);
+      draft.setOpen(false);
       setPreviewOpen(false);
       setFailureOpen(true);
     }
-  }, [generation.job]);
+  }, [generation.job, draft.setOpen]);
   useEffect(() => {
     if (generation.error && !generation.job) setFailureOpen(true);
   }, [generation.error, generation.job]);
@@ -56,8 +56,8 @@ export function PlantGodGenerationFlow({
     onCreditLockedChange(generating || preview);
   }, [generating, onCreditLockedChange, preview]);
   function startGeneration(): void {
-    setOpen(false);
-    void generation.generate(prompt);
+    draft.setOpen(false);
+    void generation.generate(draft.prompt);
   }
   return (
     <>
@@ -89,18 +89,18 @@ export function PlantGodGenerationFlow({
             tone="disco"
             label={preview ? "Generation finished" : "Create custom plant"}
             disabled={generation.busy}
-            onPress={() => (preview ? setPreviewOpen(true) : setOpen(true))}
+            onPress={() => (preview ? setPreviewOpen(true) : draft.setOpen(true))}
           />
         )}
       </View>
       <GenerationPromptSheet
-        visible={open && !preview}
-        prompt={prompt}
+        visible={draft.hydrated && draft.open && !preview}
+        prompt={draft.prompt}
         busy={generation.busy}
         error={generation.error}
-        onChange={setPrompt}
+        onChange={draft.setPrompt}
         onGenerate={startGeneration}
-        onClose={() => setOpen(false)}
+        onClose={() => draft.setOpen(false)}
       />
       {preview && generation.job ? (
         <GeneratedPlantPreview
@@ -113,10 +113,9 @@ export function PlantGodGenerationFlow({
           onSave={() =>
             void generation.save(name).then((saved) => {
               if (!saved) return;
-              setPrompt("");
+              draft.clear();
               setPreviewOpen(false);
               setCelebrationOpen(true);
-              onSaved();
             })
           }
           onClose={() => setPreviewOpen(false)}
@@ -124,12 +123,14 @@ export function PlantGodGenerationFlow({
       ) : null}
       <CustomPlantCelebrationSheet
         job={celebrationOpen ? generation.job : null}
-        onVisitSanctuary={() => {
-          setCelebrationOpen(false);
-          generation.reset();
-          onCompleted();
-          router.push("/(tabs)/sanctuary");
-        }}
+        onVisitSanctuary={() =>
+          void (async () => {
+            setCelebrationOpen(false);
+            generation.reset();
+            await onCompleted();
+            router.push("/(tabs)/sanctuary");
+          })()
+        }
       />
       <PlantGenerationFailureSheet
         visible={failureOpen}

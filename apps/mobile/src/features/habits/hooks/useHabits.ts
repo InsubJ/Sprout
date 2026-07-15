@@ -3,6 +3,7 @@ import { getLocalDateKey, type CreateHabitInput, type Habit } from "@sprout/shar
 import { useAuth } from "../../../providers/AuthProvider";
 import { useServices } from "../../../providers/ServicesProvider";
 import { useSync } from "../../../providers/SyncProvider";
+import { useDataRevision } from "../../../providers/DataProvider";
 import {
   isRetryableRepositoryError,
   type QueuedHabitLogInput,
@@ -27,6 +28,7 @@ export function useHabits(): HabitsState {
   const { user } = useAuth();
   const { habits: repository, logs, queue } = useServices();
   const { refreshPending } = useSync();
+  const { invalidate } = useDataRevision();
   const collection = useHabitCollection();
   const { habits, loading, refresh } = collection;
   const [mutationError, setMutationError] = useState<string | null>(null);
@@ -71,8 +73,9 @@ export function useHabits(): HabitsState {
       if (!user) throw new Error("Sign in before creating a habit");
       await repository.create({ ...input, user_id: user.id });
       await refresh();
+      invalidate();
     },
-    [repository, refresh, user],
+    [invalidate, repository, refresh, user],
   );
   const water = useCallback(
     async (
@@ -159,6 +162,7 @@ export function useHabits(): HabitsState {
           });
         }
         await refresh();
+        invalidate();
       } catch (cause) {
         const message = cause instanceof Error ? cause.message : "Unable to water habit";
         setMutationError(message);
@@ -167,7 +171,7 @@ export function useHabits(): HabitsState {
         setWateringId(null);
       }
     },
-    [logs, queue, refresh, refreshPending, repository, user],
+    [invalidate, logs, queue, refresh, refreshPending, repository, user],
   );
   return {
     habits,

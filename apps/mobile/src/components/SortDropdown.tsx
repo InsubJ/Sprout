@@ -5,6 +5,7 @@ import { useTheme } from "../providers/ThemeProvider";
 export interface SortOption<Value extends string> {
   value: Value;
   label: string;
+  accessibilityHint?: string;
 }
 interface Props<Value extends string> {
   value: Value;
@@ -55,6 +56,7 @@ export function SortDropdown<Value extends string>({
                   key={option.value}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: active }}
+                  accessibilityHint={option.accessibilityHint}
                   onPress={() => {
                     onChange(option.value);
                     setOpen(false);

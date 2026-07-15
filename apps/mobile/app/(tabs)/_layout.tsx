@@ -1,9 +1,12 @@
-import { useState } from "react";
 import { Redirect, Tabs, usePathname, useRouter } from "expo-router";
 import { Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@sprout/design-tokens";
 import { LockScreen } from "../../src/features/auth/LockScreen";
+import { TabBarPressable } from "../../src/components/TabBarPressable";
 import { FriendReturnDialog } from "../../src/features/social/FriendReturnDialog";
+import { useFriendGardenTabGuard } from "../../src/features/social/useFriendGardenTabGuard";
+import { useUsernameOnboarding } from "../../src/features/auth/useUsernameOnboarding";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { useAppLock } from "../../src/providers/AppLockProvider";
 import { useTheme } from "../../src/providers/ThemeProvider";
@@ -16,14 +19,25 @@ const Icon = ({ value }: { value: string }): React.JSX.Element => (
 
 export default function TabsLayout(): React.JSX.Element | null {
   const { user, loading } = useAuth();
+  const usernameOnboarding = useUsernameOnboarding();
   const { locked, checking } = useAppLock();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const pathname = usePathname();
   const router = useRouter();
-  const [confirmHome, setConfirmHome] = useState(false);
   const visitingFriend =
     pathname.startsWith("/friend-forest/") || pathname.startsWith("/friend-sanctuary/");
+  const friendGardenGuard = useFriendGardenTabGuard(visitingFriend, (destination) =>
+    router.replace(destination),
+  );
   if (!loading && !user) return <Redirect href="/(auth)/login" />;
+  if (!loading && user && usernameOnboarding.status === "loading") return null;
+  if (
+    !loading &&
+    user &&
+    (usernameOnboarding.status === "required" || usernameOnboarding.status === "error")
+  )
+    return <Redirect href="/(auth)/choose-username" />;
   if (checking) return null;
   if (locked) return <LockScreen />;
   return (
@@ -33,10 +47,32 @@ export default function TabsLayout(): React.JSX.Element | null {
           headerShown: false,
           tabBarActiveTintColor: theme.dark ? "#9BCB8E" : colors.forest,
           tabBarInactiveTintColor: theme.muted,
+          tabBarButton: ({
+            children,
+            style,
+            onPress,
+            onLongPress,
+            accessibilityState,
+            accessibilityLabel,
+            testID,
+          }) => (
+            <TabBarPressable
+              containerStyle={style}
+              accessibilityRole="button"
+              accessibilityState={accessibilityState}
+              accessibilityLabel={accessibilityLabel}
+              testID={testID}
+              onLongPress={onLongPress}
+              onPress={(event) => onPress?.(event)}
+            >
+              {children}
+            </TabBarPressable>
+          ),
           sceneStyle: { backgroundColor: theme.background },
+          tabBarHideOnKeyboard: true,
           tabBarStyle: {
-            height: 64,
-            paddingBottom: 8,
+            height: 56 + Math.max(insets.bottom, 8),
+            paddingBottom: Math.max(insets.bottom, 8),
             paddingTop: 6,
             backgroundColor: theme.surface,
             borderTopColor: theme.border,
@@ -51,12 +87,7 @@ export default function TabsLayout(): React.JSX.Element | null {
             tabBarIcon: () => <Icon value="🌲" />,
           }}
           listeners={{
-            tabPress: (event) => {
-              if (visitingFriend) {
-                event.preventDefault();
-                setConfirmHome(true);
-              }
-            },
+            tabPress: friendGardenGuard.guardTabPress("forest"),
           }}
         />
         <Tabs.Screen
@@ -66,6 +97,9 @@ export default function TabsLayout(): React.JSX.Element | null {
             tabBarAccessibilityLabel: "Sanctuary tab",
             tabBarIcon: () => <Icon value="🏡" />,
           }}
+          listeners={{
+            tabPress: friendGardenGuard.guardTabPress("sanctuary"),
+          }}
         />
         <Tabs.Screen
           name="buds"
@@ -73,6 +107,9 @@ export default function TabsLayout(): React.JSX.Element | null {
             title: "Buds",
             tabBarAccessibilityLabel: "Buds tab",
             tabBarIcon: () => <Icon value="🌿" />,
+          }}
+          listeners={{
+            tabPress: friendGardenGuard.guardTabPress("buds"),
           }}
         />
         <Tabs.Screen
@@ -82,6 +119,9 @@ export default function TabsLayout(): React.JSX.Element | null {
             tabBarAccessibilityLabel: "Lab tab",
             tabBarIcon: () => <Icon value="🧪" />,
           }}
+          listeners={{
+            tabPress: friendGardenGuard.guardTabPress("lab"),
+          }}
         />
         <Tabs.Screen
           name="profile"
@@ -90,18 +130,18 @@ export default function TabsLayout(): React.JSX.Element | null {
             tabBarAccessibilityLabel: "Profile tab",
             tabBarIcon: () => <Icon value="👤" />,
           }}
+          listeners={{
+            tabPress: friendGardenGuard.guardTabPress("profile"),
+          }}
         />
         <Tabs.Screen name="friend-forest/[id]" options={{ href: null }} />
         <Tabs.Screen name="friend-sanctuary/[id]" options={{ href: null }} />
         <Tabs.Screen name="wrapped" options={{ href: null }} />
       </Tabs>
       <FriendReturnDialog
-        visible={confirmHome}
-        onDismiss={() => setConfirmHome(false)}
-        onConfirm={() => {
-          setConfirmHome(false);
-          router.replace("/(tabs)/forest");
-        }}
+        visible={friendGardenGuard.confirmationVisible}
+        onDismiss={friendGardenGuard.dismissExit}
+        onConfirm={friendGardenGuard.confirmExit}
       />
     </>
   );

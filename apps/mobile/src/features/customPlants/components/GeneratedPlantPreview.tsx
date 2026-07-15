@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { colors, spacing } from "@sprout/design-tokens";
 import type { PlantGenerationJob } from "@sprout/shared";
 import { AppButton } from "../../../components/AppButton";
@@ -28,25 +28,34 @@ export function GeneratedPlantPreview({
   if (!job.generatedSpec) return null;
   return (
     <ModalSheet visible={visible} onClose={onClose}>
-      <Text style={[styles.eyebrow, theme.dark && styles.eyebrowDark]}>CUSTOM PLANT PREVIEW</Text>
-      <View style={[styles.scene, { backgroundColor: theme.elevated, borderColor: theme.border }]}>
-        <GeneratedPlantRenderer spec={job.generatedSpec} size={260} state="completed" />
-      </View>
-      <Text style={[styles.label, { color: theme.text }]}>Plant name</Text>
-      <TextInput
-        value={name}
-        maxLength={60}
-        onChangeText={onNameChange}
-        style={[
-          styles.input,
-          { color: theme.text, backgroundColor: theme.elevated, borderColor: theme.border },
-        ]}
-        accessibilityLabel="Custom plant name"
-      />
-      <Text style={[styles.description, { color: theme.text }]}>
-        {job.generatedSpec.description}
-      </Text>
-      <Text style={[styles.meta, { color: theme.muted }]}>Inspired by: {job.originalPrompt}</Text>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator
+      >
+        <Text style={[styles.eyebrow, theme.dark && styles.eyebrowDark]}>CUSTOM PLANT PREVIEW</Text>
+        <View
+          style={[styles.scene, { backgroundColor: theme.elevated, borderColor: theme.border }]}
+        >
+          <GeneratedPlantRenderer spec={job.generatedSpec} size={260} state="completed" />
+        </View>
+        <Text style={[styles.label, { color: theme.text }]}>Plant name</Text>
+        <TextInput
+          value={name}
+          maxLength={60}
+          onChangeText={onNameChange}
+          style={[
+            styles.input,
+            { color: theme.text, backgroundColor: theme.elevated, borderColor: theme.border },
+          ]}
+          accessibilityLabel="Custom plant name"
+        />
+        <Text style={[styles.description, { color: theme.text }]}>
+          {job.generatedSpec.description}
+        </Text>
+        <Text style={[styles.meta, { color: theme.muted }]}>Inspired by: {job.originalPrompt}</Text>
+      </ScrollView>
       {error ? <Text style={[styles.error, theme.dark && styles.errorDark]}>{error}</Text> : null}
       <View style={styles.actions}>
         <AppButton
@@ -61,6 +70,8 @@ export function GeneratedPlantPreview({
   );
 }
 const styles = StyleSheet.create({
+  scroll: { flex: 1 },
+  scrollContent: { paddingBottom: spacing.md },
   eyebrow: { color: colors.purple, fontFamily: "Outfit_700Bold", letterSpacing: 1.4 },
   eyebrowDark: { color: "#D7B4F0" },
   scene: {
@@ -84,5 +95,5 @@ const styles = StyleSheet.create({
   meta: { color: colors.muted, fontStyle: "italic", marginVertical: spacing.md },
   error: { color: colors.danger, marginBottom: spacing.md },
   errorDark: { color: "#FFB4A8" },
-  actions: { gap: spacing.md, marginTop: spacing.sm },
+  actions: { gap: spacing.md, paddingTop: spacing.md },
 });

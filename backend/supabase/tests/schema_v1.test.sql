@@ -1,8 +1,8 @@
 ﻿-- Start transaction and plan tests
 BEGIN;
 
--- We plan to run 24 assertions
-SELECT plan(24);
+-- We plan to run 27 assertions
+SELECT plan(27);
 
 -- 1. Check schemas and extensions
 SELECT has_extension('uuid-ossp', 'Extension uuid-ossp should be installed');
@@ -22,6 +22,12 @@ SELECT col_type_is('public', 'profiles', 'username', 'character varying(50)', 'p
 SELECT has_column('public', 'profiles', 'display_name', 'profiles should have display_name column');
 SELECT has_column('public', 'profiles', 'avatar_url', 'profiles should have avatar_url column');
 SELECT has_column('public', 'profiles', 'created_at', 'profiles should have created_at column');
+SELECT has_column(
+    'public',
+    'profiles',
+    'username_set_at',
+    'profiles should track one-time username setup'
+);
 
 -- 4. Verify Columns in habits Table
 SELECT has_column('public', 'habits', 'id', 'habits should have id column');
@@ -54,6 +60,20 @@ SELECT ok(
 
 -- 7. Verify helper function exists
 SELECT has_function('public', 'handle_new_user', 'function public.handle_new_user should exist');
+SELECT has_function(
+    'public',
+    'reject_profile_username_change',
+    'function public.reject_profile_username_change should exist'
+);
+
+SELECT ok(
+    EXISTS (
+        SELECT 1 FROM pg_trigger
+        WHERE tgname = 'reject_profile_username_change'
+          AND NOT tgisinternal
+    ),
+    'Profile username immutability trigger should be defined'
+);
 
 -- 8. Verify trigger exists on auth.users (if auth schema is active, otherwise mock verification)
 -- In a standard test environment, auth schema is loaded. Let's verify trigger name and table if it exists.

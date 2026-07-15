@@ -1,13 +1,13 @@
-import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { colors, spacing } from "@sprout/design-tokens";
 import { useTheme } from "../../providers/ThemeProvider";
 import { reactionChoices, useReflectionInteractions } from "./useReflectionInteractions";
+import { useReflectionCommentDraft } from "./useReflectionCommentDraft";
 
 export function ReflectionInteractions({ logId }: { logId: string }): React.JSX.Element {
   const theme = useTheme();
-  const [content, setContent] = useState("");
   const state = useReflectionInteractions(logId);
+  const draft = useReflectionCommentDraft(state.userId, logId);
   if (!state.available)
     return (
       <Text style={[styles.hint, { color: theme.muted }]}>
@@ -16,11 +16,6 @@ export function ReflectionInteractions({ logId }: { logId: string }): React.JSX.
     );
   return (
     <View style={[styles.root, { borderTopColor: theme.border }]}>
-      {state.loading ? (
-        <Text accessibilityLiveRegion="polite" style={[styles.hint, { color: theme.muted }]}>
-          Loading existing reactions and comments…
-        </Text>
-      ) : null}
       <View style={styles.row}>
         {reactionChoices.map((choice) => {
           const active = state.reactions.some(
@@ -59,7 +54,7 @@ export function ReflectionInteractions({ logId }: { logId: string }): React.JSX.
             </Text>
           </View>
         ))
-      ) : (
+      ) : state.loading ? null : (
         <Text style={[styles.hint, { color: theme.muted }]}>
           No comments yet. Leave a kind word.
         </Text>
@@ -69,9 +64,9 @@ export function ReflectionInteractions({ logId }: { logId: string }): React.JSX.
           accessibilityLabel="Write a comment"
           placeholder="Write a comment…"
           placeholderTextColor={theme.muted}
-          value={content}
+          value={draft.content}
           maxLength={500}
-          onChangeText={setContent}
+          onChangeText={draft.setContent}
           style={[
             styles.input,
             { color: theme.text, borderColor: theme.border, backgroundColor: theme.elevated },
@@ -79,10 +74,10 @@ export function ReflectionInteractions({ logId }: { logId: string }): React.JSX.
         />
         <Pressable
           accessibilityRole="button"
-          disabled={state.busy || !content.trim()}
+          disabled={state.busy || !draft.content.trim()}
           onPress={() =>
-            void state.comment(content).then((saved) => {
-              if (saved) setContent("");
+            void state.comment(draft.content).then((saved) => {
+              if (saved) draft.clear();
             })
           }
           style={styles.send}

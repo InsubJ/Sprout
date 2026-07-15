@@ -10,7 +10,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import type { HabitFrequency, Profile } from "@sprout/shared";
+import type { HabitFrequency } from "@sprout/shared";
 import { colors, spacing } from "@sprout/design-tokens";
 import { PreferenceSwitchRow } from "../../../components/PreferenceSwitchRow";
 import { AppButton } from "../../../components/AppButton";
@@ -18,6 +18,7 @@ import { TextField } from "../../../components/TextField";
 import { useTheme } from "../../../providers/ThemeProvider";
 import { useAcceptedFriends } from "../../social/useAcceptedFriends";
 import { useHabitForm, type HabitFormErrors } from "../hooks/useHabitForm";
+import { FriendExceptionPicker } from "./FriendExceptionPicker";
 interface Props {
   visible: boolean;
   submitting: boolean;
@@ -245,34 +246,38 @@ export function HabitFormSheet({ visible, submitting, onClose, onSubmit }: Props
               onChange={setIsPublic}
             />
             {isPublic ? (
-              <PreferenceSwitchRow
-                label="Hide habit name"
-                value={hideName}
-                onChange={setHideName}
-              />
+              <>
+                <PreferenceSwitchRow
+                  label="Hide habit name"
+                  value={hideName}
+                  onChange={setHideName}
+                />
+                {hideName && friends.length ? (
+                  <FriendExceptionPicker
+                    label="Share hidden name with"
+                    friends={friends}
+                    selected={shareNameFriends}
+                    onChange={setShareNameFriends}
+                  />
+                ) : null}
+              </>
             ) : null}
             {isPublic ? (
-              <PreferenceSwitchRow
-                label="Hide description"
-                value={hideDescription}
-                onChange={setHideDescription}
-              />
-            ) : null}
-            {isPublic && hideName && friends.length ? (
-              <FriendExceptions
-                label="Share hidden name with"
-                friends={friends}
-                selected={shareNameFriends}
-                onChange={setShareNameFriends}
-              />
-            ) : null}
-            {isPublic && hideDescription && friends.length ? (
-              <FriendExceptions
-                label="Share hidden description with"
-                friends={friends}
-                selected={shareDescFriends}
-                onChange={setShareDescFriends}
-              />
+              <>
+                <PreferenceSwitchRow
+                  label="Hide description"
+                  value={hideDescription}
+                  onChange={setHideDescription}
+                />
+                {hideDescription && friends.length ? (
+                  <FriendExceptionPicker
+                    label="Share hidden description with"
+                    friends={friends}
+                    selected={shareDescFriends}
+                    onChange={setShareDescFriends}
+                  />
+                ) : null}
+              </>
             ) : null}
           </View>
           {submitError ? <Text style={styles.error}>{submitError}</Text> : null}
@@ -287,50 +292,6 @@ export function HabitFormSheet({ visible, submitting, onClose, onSubmit }: Props
         </ScrollView>
       </KeyboardAvoidingView>
     </Modal>
-  );
-}
-function FriendExceptions({
-  label,
-  friends,
-  selected,
-  onChange,
-}: {
-  label: string;
-  friends: Profile[];
-  selected: string[];
-  onChange(value: string[]): void;
-}) {
-  const theme = useTheme();
-  return (
-    <View style={[styles.exceptions, { backgroundColor: theme.surface }]}>
-      <Text style={[styles.fieldLabel, { color: theme.text }]}>{label}</Text>
-      <View style={styles.frequencyList}>
-        {friends.map((friend) => {
-          const active = selected.includes(friend.id);
-          return (
-            <Pressable
-              key={friend.id}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: active }}
-              onPress={() =>
-                onChange(
-                  active ? selected.filter((id) => id !== friend.id) : [...selected, friend.id],
-                )
-              }
-              style={[
-                styles.friendChip,
-                { borderColor: theme.border },
-                active && styles.frequencySelected,
-              ]}
-            >
-              <Text style={[{ color: theme.muted }, active && styles.frequencyTextSelected]}>
-                @{friend.username}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
   );
 }
 const styles = StyleSheet.create({
@@ -361,11 +322,4 @@ const styles = StyleSheet.create({
   frequencyTextSelected: { color: colors.paper },
   flexibleRow: { flexDirection: "row", gap: spacing.sm },
   flexibleField: { flex: 1 },
-  exceptions: { padding: spacing.md, borderRadius: 14, gap: spacing.sm },
-  friendChip: {
-    borderWidth: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: 999,
-  },
 });

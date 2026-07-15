@@ -1,5 +1,5 @@
 import type { Profile } from "@sprout/shared";
-import { RepositoryError, type ProfileRepository } from "@sprout/services";
+import { RepositoryError, type ProfileRepository, type UpdateProfileInput } from "@sprout/services";
 
 const createdAt = "2026-01-01T00:00:00.000Z";
 let profiles: Profile[] = [
@@ -59,12 +59,28 @@ export class DemoProfileRepository implements ProfileRepository {
     );
   }
 
-  async update(profile: Profile): Promise<Profile> {
-    if (!profile.id.trim() || profile.username.trim().length < 3)
-      throw new RepositoryError("A valid profile is required", "validation");
-    if (!profiles.some((item) => item.id === profile.id))
-      throw new RepositoryError("Profile not found", "not_found");
-    profiles = profiles.map((item) => (item.id === profile.id ? profile : item));
-    return profile;
+  async setInitialUsername(userId: string, username: string): Promise<Profile> {
+    if (!userId.trim() || username.trim().length < 3)
+      throw new RepositoryError("A valid profile and username are required", "validation");
+    const current = profiles.find((item) => item.id === userId);
+    if (!current) throw new RepositoryError("Profile not found", "not_found");
+    if (current.username_set_at !== null)
+      throw new RepositoryError("Username has already been set", "conflict");
+    const updated: Profile = {
+      ...current,
+      username: username.trim(),
+      username_set_at: new Date().toISOString(),
+    };
+    profiles = profiles.map((item) => (item.id === userId ? updated : item));
+    return updated;
+  }
+
+  async update(profile: UpdateProfileInput): Promise<Profile> {
+    if (!profile.id.trim()) throw new RepositoryError("A valid profile is required", "validation");
+    const current = profiles.find((item) => item.id === profile.id);
+    if (!current) throw new RepositoryError("Profile not found", "not_found");
+    const updated: Profile = { ...current, ...profile };
+    profiles = profiles.map((item) => (item.id === profile.id ? updated : item));
+    return updated;
   }
 }

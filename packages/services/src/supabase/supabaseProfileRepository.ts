@@ -1,7 +1,7 @@
-import type { Profile } from "@sprout/shared";
+import { usernameSchema, type Profile } from "@sprout/shared";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { RepositoryError } from "../errors/repositoryError";
-import type { ProfileRepository } from "../repositories/profileRepository";
+import type { ProfileRepository, UpdateProfileInput } from "../repositories/profileRepository";
 import { toRepositoryError } from "./supabaseFailure";
 
 export class SupabaseProfileRepository implements ProfileRepository {
@@ -31,16 +31,28 @@ export class SupabaseProfileRepository implements ProfileRepository {
     if (error) throw toRepositoryError("Unable to search gardeners", error);
     return (data ?? []) as Profile[];
   }
-  async update(profile: Profile): Promise<Profile> {
-    if (!profile.id.trim() || profile.username.trim().length < 3)
+  async setInitialUsername(userId: string, username: string): Promise<Profile> {
+    if (!userId.trim()) throw new RepositoryError("Profile ID is required", "validation");
+    const parsedUsername = usernameSchema.safeParse(username);
+    if (!parsedUsername.success)
       throw new RepositoryError(
-        "A profile ID and username of at least 3 characters are required",
+        "Username must be 3–50 characters using only letters, numbers, or _",
         "validation",
       );
     const { data, error } = await this.client
       .from("profiles")
+      .update({ username: parsedUsername.data })
+      .eq("id", userId)
+      .select()
+      .single();
+    if (error) throw toRepositoryError("Unable to set username", error);
+    return data as Profile;
+  }
+  async update(profile: UpdateProfileInput): Promise<Profile> {
+    if (!profile.id.trim()) throw new RepositoryError("Profile ID is required", "validation");
+    const { data, error } = await this.client
+      .from("profiles")
       .update({
-        username: profile.username.trim(),
         display_name: profile.display_name?.trim() || null,
         avatar_url: profile.avatar_url,
       })
