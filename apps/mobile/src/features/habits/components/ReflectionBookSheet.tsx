@@ -63,7 +63,9 @@ export function ReflectionBookSheet({ habit, onClose }: { habit: Habit | null; o
                 data={entries}
                 keyExtractor={(item) => item.id}
                 ListEmptyComponent={
-                  loading ? null : <ScreenState message="No watering check-ins yet." />
+                  loading ? null : (
+                    <ScreenState message="No watering check-ins yet." loading={false} />
+                  )
                 }
                 renderItem={({ item }) => (
                   <View

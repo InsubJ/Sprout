@@ -12,7 +12,6 @@ import { SyncProvider } from "../src/providers/SyncProvider";
 import { DataProvider } from "../src/providers/DataProvider";
 import { CarouselPositionProvider } from "../src/providers/CarouselPositionProvider";
 import { AppErrorBoundary } from "../src/components/AppErrorBoundary";
-import { AppRoutePersistence } from "../src/providers/AppRoutePersistence";
 import {
   Outfit_300Light,
   Outfit_400Regular,
@@ -41,7 +40,6 @@ export default function RootLayout() {
                   <AuthProvider>
                     <CarouselPositionProvider>
                       <AppLockProvider>
-                        <AppRoutePersistence />
                         <Stack screenOptions={{ headerShown: false }} />
                         <StatusBar style="auto" />
                       </AppLockProvider>

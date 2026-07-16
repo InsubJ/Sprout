@@ -52,6 +52,7 @@ const habits: HabitRepository = {
     throw new Error("unused");
   },
   update: async (_id, value) => value as Habit,
+  delete: async () => undefined,
 };
 
 class FakeLogQuery {

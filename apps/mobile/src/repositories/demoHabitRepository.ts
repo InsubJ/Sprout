@@ -144,4 +144,10 @@ export class DemoHabitRepository implements HabitRepository {
     habits = habits.map((h) => (h.id === id ? updated : h));
     return updated;
   }
+  async delete(id: string): Promise<void> {
+    if (!id.trim()) throw new RepositoryError("Habit ID is required", "validation");
+    const exists = habits.some((habit) => habit.id === id);
+    if (!exists) throw new RepositoryError("Habit not found", "not_found");
+    habits = habits.filter((habit) => habit.id !== id);
+  }
 }

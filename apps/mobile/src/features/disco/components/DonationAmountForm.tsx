@@ -1,6 +1,7 @@
-import { StyleSheet, Text, TextInput } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { colors, spacing } from "@sprout/design-tokens";
 import { AppButton } from "../../../components/AppButton";
+import { DismissibleTextInput } from "../../../components/DismissibleTextInput";
 
 export function DonationAmountForm({
   value,
@@ -21,7 +22,7 @@ export function DonationAmountForm({
         Donate USD $1 or more. Every complete $5 grants one generation credit; the remainder carries
         forward.
       </Text>
-      <TextInput
+      <DismissibleTextInput
         accessibilityLabel="Donation amount"
         keyboardType="decimal-pad"
         value={value}

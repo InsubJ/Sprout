@@ -7,6 +7,7 @@ export interface SanctuaryState {
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
+  deleteHabit: (habitId: string) => Promise<void>;
 }
 export function useSanctuary(): SanctuaryState {
   const collection = useHabitCollection();
@@ -19,5 +20,6 @@ export function useSanctuary(): SanctuaryState {
     loading: collection.loading,
     error: collection.error,
     refresh: collection.refresh,
+    deleteHabit: collection.deleteHabit,
   };
 }

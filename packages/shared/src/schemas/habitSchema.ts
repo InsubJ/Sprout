@@ -3,6 +3,7 @@ export const habitFrequencySchema = z.enum([
   "twice_daily",
   "daily",
   "weekly",
+  "fortnightly",
   "monthly",
   "yearly",
   "flexible",

@@ -3,6 +3,7 @@ import {
   FlatList,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -233,9 +234,15 @@ export function GardenCarousel<Item>({
         data={items as Item[]}
         keyExtractor={keyExtractor}
         renderItem={({ item }) => (
-          <View style={{ width: cardWidth, height: cardHeight }}>
+          <ScrollView
+            nestedScrollEnabled
+            directionalLockEnabled
+            showsVerticalScrollIndicator
+            style={{ width: cardWidth, height: cardHeight }}
+            contentContainerStyle={{ minHeight: cardHeight }}
+          >
             {renderCard(item, cardWidth)}
-          </View>
+          </ScrollView>
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={{
@@ -252,6 +259,7 @@ export function GardenCarousel<Item>({
         initialNumToRender={Math.min(items.length, cardsPerPage + 2)}
         maxToRenderPerBatch={cardsPerPage + 2}
         windowSize={5}
+        removeClippedSubviews={false}
         getItemLayout={(_data, index) => ({
           length: interval,
           offset: interval * index,

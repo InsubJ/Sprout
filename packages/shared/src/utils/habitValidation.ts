@@ -24,6 +24,7 @@ const validFrequencies: HabitFrequency[] = [
   "twice_daily",
   "daily",
   "weekly",
+  "fortnightly",
   "monthly",
   "yearly",
   "flexible",

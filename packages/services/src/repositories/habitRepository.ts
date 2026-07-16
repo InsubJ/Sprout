@@ -4,4 +4,5 @@ export interface HabitRepository {
   getByUserId(userId: string): Promise<Habit[]>;
   create(input: CreateHabitInput): Promise<Habit>;
   update(id: string, input: UpdateHabitInput): Promise<Habit>;
+  delete(id: string): Promise<void>;
 }

@@ -30,7 +30,7 @@ export function GardenEmptyCard({
 
 const styles = StyleSheet.create({
   card: {
-    height: gardenCardGeometry.height,
+    minHeight: gardenCardGeometry.height,
     justifyContent: "center",
     padding: spacing.xl,
     alignItems: "center",

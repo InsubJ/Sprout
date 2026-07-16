@@ -6,6 +6,8 @@ import { useTheme } from "../../providers/ThemeProvider";
 import { nativePlantRegistry, plantDisplayName } from "../plants/plantRegistry";
 import { normalizePlantSpecies } from "../plants/components/PlantRenderer";
 import { gardenCardGeometry } from "../habits/components/gardenCardGeometry";
+import { HoldToRevealDeleteCard } from "./HoldToRevealDeleteCard";
+
 const rarityBorder = {
   common: "#6F9B68",
   uncommon: "#3FA868",
@@ -18,24 +20,26 @@ export function SanctuaryPlantCard({
   width,
   displayName,
   onOpenJournal,
+  onRequestDelete,
 }: {
   habit: Habit;
   width: number;
   displayName?: string;
   onOpenJournal(): void;
-}) {
+  onRequestDelete?(habit: Habit): void;
+}): React.JSX.Element {
   const theme = useTheme();
   const species = normalizePlantSpecies(habit.plant_type);
   const Plant = nativePlantRegistry[species as PlantSpecies] ?? nativePlantRegistry.bonsai;
-  return (
-    <View
-      style={[
-        styles.card,
-        { width, backgroundColor: theme.surface, borderColor: rarityBorder[habit.difficulty_tier] },
-      ]}
-    >
+  const plantName = displayName ?? habit.name;
+  const cardStyle = [
+    styles.card,
+    { width, backgroundColor: theme.surface, borderColor: rarityBorder[habit.difficulty_tier] },
+  ];
+  const content = (
+    <View style={styles.content}>
       <View>
-        <Text style={[styles.name, { color: theme.text }]}>{displayName ?? habit.name}</Text>
+        <Text style={[styles.name, { color: theme.text }]}>{plantName}</Text>
         <Text style={[styles.species, { color: theme.muted }]}>
           {plantDisplayName(species)} · Fully grown
         </Text>
@@ -63,9 +67,21 @@ export function SanctuaryPlantCard({
       <AppButton label="Open Reflection Book" tone="quiet" onPress={onOpenJournal} />
     </View>
   );
+
+  return onRequestDelete ? (
+    <HoldToRevealDeleteCard
+      plantName={plantName}
+      style={cardStyle}
+      onRequestDelete={() => onRequestDelete(habit)}
+    >
+      {content}
+    </HoldToRevealDeleteCard>
+  ) : (
+    <View style={cardStyle}>{content}</View>
+  );
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
+function Metric({ label, value }: { label: string; value: number }): React.JSX.Element {
   const theme = useTheme();
   return (
     <View style={styles.metric}>
@@ -77,16 +93,19 @@ function Metric({ label, value }: { label: string; value: number }) {
 
 const styles = StyleSheet.create({
   card: {
-    height: gardenCardGeometry.height,
+    minHeight: gardenCardGeometry.height,
     borderWidth: 2,
     borderRadius: 20,
-    padding: gardenCardGeometry.padding,
-    gap: spacing.md,
     shadowColor: "#18321E",
     shadowOpacity: 0.08,
     shadowRadius: 16,
     elevation: 4,
     overflow: "hidden",
+  },
+  content: {
+    minHeight: gardenCardGeometry.height - 4,
+    padding: gardenCardGeometry.padding,
+    gap: spacing.md,
   },
   name: { fontSize: 22, fontFamily: "Outfit_700Bold" },
   species: { marginTop: 3, fontFamily: "Outfit_500Medium" },
@@ -99,11 +118,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   summary: { minHeight: 58, lineHeight: 19, fontStyle: "italic" },
-  metrics: {
-    flexDirection: "row",
-    borderRadius: radii.md,
-    padding: spacing.sm,
-  },
+  metrics: { flexDirection: "row", borderRadius: radii.md, padding: spacing.sm },
   metric: { flex: 1, alignItems: "center" },
   metricValue: { fontSize: 18, fontFamily: "Outfit_700Bold" },
   metricLabel: { fontSize: 10, textAlign: "center" },

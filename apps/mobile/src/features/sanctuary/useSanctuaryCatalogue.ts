@@ -12,5 +12,6 @@ export function useSanctuaryCatalogue() {
     loading: classic.loading || custom.loading,
     error: classic.error ?? custom.error,
     deleteCustomPlant: custom.deletePlant,
+    deleteHabit: classic.deleteHabit,
   };
 }

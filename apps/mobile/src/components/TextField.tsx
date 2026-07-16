@@ -2,6 +2,7 @@ import { forwardRef, useState } from "react";
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from "react-native";
 import { colors, radii, spacing } from "@sprout/design-tokens";
 import { useTheme } from "../providers/ThemeProvider";
+import { DismissibleTextInput } from "./DismissibleTextInput";
 interface Props extends TextInputProps {
   label: string;
   error?: string;
@@ -15,7 +16,7 @@ export const TextField = forwardRef<TextInput, Props>(function TextField(
   return (
     <View style={styles.group}>
       <Text style={[styles.label, { color: theme.text }]}>{label}</Text>
-      <TextInput
+      <DismissibleTextInput
         ref={ref}
         accessibilityLabel={label}
         placeholderTextColor={theme.muted}

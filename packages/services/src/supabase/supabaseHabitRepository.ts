@@ -57,4 +57,15 @@ export class SupabaseHabitRepository implements HabitRepository {
     if (error) throw toRepositoryError("Unable to update habit", error);
     return data as Habit;
   }
+  async delete(id: string): Promise<void> {
+    if (!id.trim()) throw new RepositoryError("Habit ID is required", "validation");
+    const { data, error } = await this.client
+      .from("habits")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+    if (error) throw toRepositoryError("Unable to delete habit", error);
+    if (!data) throw new RepositoryError("Habit not found", "not_found");
+  }
 }

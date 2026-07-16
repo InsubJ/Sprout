@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import type { HabitLog } from "@sprout/shared";
 import { useServices } from "../../../providers/ServicesProvider";
+import { useRealtimeRefresh } from "../../../hooks/useRealtimeRefresh";
+
+const habitLogRealtimeTables = ["habit_logs"] as const;
 
 export interface HabitLogsState {
   entries: HabitLog[];
@@ -69,6 +72,13 @@ export function useHabitLogs(habitId?: string): HabitLogsState {
       if (timeout) clearTimeout(timeout);
     };
   }, [habitId, logs, requestId]);
+
+  useRealtimeRefresh({
+    channelName: `habit-logs-${habitId ?? "closed"}`,
+    tables: habitLogRealtimeTables,
+    enabled: Boolean(habitId),
+    onChange: retry,
+  });
 
   return { entries, loading, error, retry };
 }

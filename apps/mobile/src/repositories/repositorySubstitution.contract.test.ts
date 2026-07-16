@@ -120,6 +120,7 @@ describe.each(habitFactories)("%s habit contract", (_name, factory) => {
   it("shares validation and not-found behavior", async () => {
     const repository = factory();
     await expectCategory(repository.getById(" "), "validation");
+    await expectCategory(repository.delete(" "), "validation");
     await expect(repository.getById("99999999-9999-9999-9999-999999999999")).resolves.toBeNull();
     await expect(repository.getByUserId("99999999-9999-9999-9999-999999999999")).resolves.toEqual(
       [],

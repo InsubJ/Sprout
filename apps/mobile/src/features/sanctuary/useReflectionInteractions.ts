@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { LogComment, LogReaction } from "@sprout/shared";
+import type { LogComment, LogReaction, Profile } from "@sprout/shared";
 import { useAuth } from "../../providers/AuthProvider";
 import { useServices } from "../../providers/ServicesProvider";
+import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
+
+const interactionRealtimeTables = ["log_comments", "log_reactions", "profiles"] as const;
 
 export const reactionChoices = ["👍", "❤️", "👏", "🌱"] as const;
 export interface ReflectionInteractionsState {
   available: boolean;
   userId?: string;
   comments: LogComment[];
+  commentAuthors: Record<string, Profile>;
   reactions: LogReaction[];
   counts: Record<string, number>;
   busy: boolean;
@@ -19,8 +23,9 @@ export interface ReflectionInteractionsState {
 
 export function useReflectionInteractions(logId: string): ReflectionInteractionsState {
   const { user } = useAuth();
-  const { interactions } = useServices();
+  const { interactions, profiles } = useServices();
   const [comments, setComments] = useState<LogComment[]>([]);
+  const [commentAuthors, setCommentAuthors] = useState<Record<string, Profile>>({});
   const [reactions, setReactions] = useState<LogReaction[]>([]);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -45,9 +50,21 @@ export function useReflectionInteractions(logId: string): ReflectionInteractions
           );
         }),
       ]);
+      const authorEntries = profiles
+        ? await Promise.all(
+            [...new Set(nextComments.map((comment) => comment.user_id))].map(
+              async (userId) => [userId, await profiles.getById(userId)] as const,
+            ),
+          )
+        : [];
       if (request === requestId.current) {
         setComments(nextComments);
         setReactions(nextReactions);
+        setCommentAuthors(
+          Object.fromEntries(
+            authorEntries.filter((entry): entry is readonly [string, Profile] => Boolean(entry[1])),
+          ),
+        );
       }
     } catch (cause) {
       if (request === requestId.current)
@@ -56,13 +73,19 @@ export function useReflectionInteractions(logId: string): ReflectionInteractions
       if (timeout) clearTimeout(timeout);
       if (request === requestId.current) setLoading(false);
     }
-  }, [interactions, logId]);
+  }, [interactions, logId, profiles]);
   useEffect(() => {
     void load();
     return () => {
       requestId.current += 1;
     };
   }, [load]);
+  useRealtimeRefresh({
+    channelName: `reflection-interactions-${logId}`,
+    tables: interactionRealtimeTables,
+    enabled: Boolean(logId),
+    onChange: () => void load(),
+  });
   const counts = useMemo(
     () =>
       Object.fromEntries(
@@ -116,6 +139,7 @@ export function useReflectionInteractions(logId: string): ReflectionInteractions
     available: Boolean(interactions && user),
     userId: user?.id,
     comments,
+    commentAuthors,
     reactions,
     counts,
     busy,

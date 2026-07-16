@@ -9,6 +9,7 @@ export const FREQUENCY_MULTIPLIERS: Record<HabitFrequency, number> = {
   twice_daily: 2.5,
   daily: 2.0,
   weekly: 1.5,
+  fortnightly: 1.25,
   monthly: 1.0,
   yearly: 0.5,
   flexible: 1.8,

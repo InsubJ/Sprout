@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Friendship, Profile } from "@sprout/shared";
 import { useAuth } from "../../providers/AuthProvider";
 import { useServices } from "../../providers/ServicesProvider";
+import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
+
+const budsRealtimeTables = ["friendships", "profiles"] as const;
 
 export interface BudRow {
   friendship: Friendship;
@@ -105,6 +108,12 @@ export function useBuds(): BudsState {
       requestId.current += 1;
     };
   }, [refresh]);
+  useRealtimeRefresh({
+    channelName: `buds-${user?.id ?? "signed-out"}`,
+    tables: budsRealtimeTables,
+    enabled: Boolean(user),
+    onChange: () => void refresh(),
+  });
   const search = useCallback(
     async (query: string): Promise<void> => {
       if (!user || !profiles) {

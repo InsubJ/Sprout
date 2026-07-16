@@ -7,87 +7,80 @@ import { BudIdentity } from "./BudIdentity";
 import type { BudRow } from "./useBuds";
 
 export function FriendRequestSection({
-  incoming,
-  outgoing,
+  mode,
+  rows,
   onRespond,
   onCancel,
   workingRequestId,
 }: {
-  incoming: BudRow[];
-  outgoing: BudRow[];
+  mode: "incoming" | "outgoing";
+  rows: BudRow[];
   onRespond: (friendship: Friendship, status: "accepted" | "declined") => void;
   onCancel: (friendship: Friendship) => void;
   workingRequestId: string | null;
 }): React.JSX.Element {
   const theme = useTheme();
-  const card = (row: BudRow, incomingRequest: boolean): React.JSX.Element => (
-    <View
-      key={row.friendship.id}
-      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
-    >
-      <BudIdentity profile={row.profile} compact />
-      {incomingRequest ? (
-        <View style={styles.actions}>
-          <AppButton
-            label="Accept"
-            tone="quiet"
-            onPress={() => onRespond(row.friendship, "accepted")}
-          />
-          <AppButton
-            label="Decline"
-            tone="quiet"
-            onPress={() => onRespond(row.friendship, "declined")}
-          />
-        </View>
+  const incoming = mode === "incoming";
+  return (
+    <View style={styles.root}>
+      <Text style={[styles.section, { color: theme.text }]}>
+        {incoming ? "Incoming requests" : "Pending requests"}
+      </Text>
+      {rows.length ? (
+        rows.map((row) => (
+          <View
+            key={row.friendship.id}
+            style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
+          >
+            <BudIdentity profile={row.profile} compact />
+            {incoming ? (
+              <View style={styles.actions}>
+                <AppButton
+                  label="Accept"
+                  tone="quiet"
+                  disabled={workingRequestId !== null}
+                  onPress={() => onRespond(row.friendship, "accepted")}
+                />
+                <AppButton
+                  label="Decline"
+                  tone="quiet"
+                  disabled={workingRequestId !== null}
+                  onPress={() => onRespond(row.friendship, "declined")}
+                />
+              </View>
+            ) : (
+              <View style={styles.outgoingStatus}>
+                <Text style={[styles.awaiting, { color: theme.muted }]}>Awaiting response</Text>
+                <AppButton
+                  label={workingRequestId === row.friendship.id ? "Cancelling…" : "Cancel request"}
+                  tone="quiet"
+                  disabled={workingRequestId !== null}
+                  onPress={() => onCancel(row.friendship)}
+                />
+              </View>
+            )}
+          </View>
+        ))
       ) : (
-        <View style={styles.outgoingStatus}>
-          <Text style={[styles.awaiting, { color: theme.muted }]}>Awaiting response</Text>
-          <AppButton
-            label={workingRequestId === row.friendship.id ? "Cancelling…" : "Cancel request"}
-            tone="quiet"
-            disabled={workingRequestId !== null}
-            onPress={() => onCancel(row.friendship)}
-          />
-        </View>
+        <Text style={[styles.empty, { color: theme.muted }]}>
+          {incoming ? "No incoming requests." : "No pending requests."}
+        </Text>
       )}
     </View>
   );
-  return (
-    <>
-      <Text style={[styles.section, { color: theme.text }]}>Friend requests</Text>
-      <Text style={[styles.heading, { color: theme.text }]}>Incoming</Text>
-      {incoming.length ? (
-        incoming.map((row) => card(row, true))
-      ) : (
-        <Text style={[styles.empty, { color: theme.muted }]}>No incoming requests.</Text>
-      )}
-      <Text style={[styles.heading, { color: theme.text }]}>Outgoing</Text>
-      {outgoing.length ? (
-        outgoing.map((row) => card(row, false))
-      ) : (
-        <Text style={[styles.empty, { color: theme.muted }]}>No outgoing requests.</Text>
-      )}
-    </>
-  );
 }
+
 const styles = StyleSheet.create({
+  root: { gap: spacing.sm },
   section: {
     fontFamily: "Outfit_700Bold",
     fontSize: 20,
     marginHorizontal: spacing.lg,
-    marginTop: spacing.xl,
-    marginBottom: spacing.sm,
+    marginTop: spacing.md,
   },
-  heading: {
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.sm,
-    fontFamily: "Outfit_700Bold",
-    fontSize: 15,
-  },
-  empty: { marginHorizontal: spacing.lg, paddingVertical: spacing.sm },
+  empty: { marginHorizontal: spacing.lg, paddingVertical: spacing.lg, textAlign: "center" },
   card: {
     marginHorizontal: spacing.lg,
-    marginTop: spacing.sm,
     borderWidth: 1,
     borderRadius: radii.md,
     padding: spacing.md,

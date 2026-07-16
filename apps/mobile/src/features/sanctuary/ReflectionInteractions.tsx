@@ -1,11 +1,15 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, spacing } from "@sprout/design-tokens";
+import { useRouter } from "expo-router";
+import { Avatar } from "../../components/Avatar";
+import { DismissibleTextInput } from "../../components/DismissibleTextInput";
 import { useTheme } from "../../providers/ThemeProvider";
 import { reactionChoices, useReflectionInteractions } from "./useReflectionInteractions";
 import { useReflectionCommentDraft } from "./useReflectionCommentDraft";
 
 export function ReflectionInteractions({ logId }: { logId: string }): React.JSX.Element {
   const theme = useTheme();
+  const router = useRouter();
   const state = useReflectionInteractions(logId);
   const draft = useReflectionCommentDraft(state.userId, logId);
   if (!state.available)
@@ -48,10 +52,33 @@ export function ReflectionInteractions({ logId }: { logId: string }): React.JSX.
       {state.comments.length ? (
         state.comments.map((item) => (
           <View key={item.id} style={[styles.comment, { backgroundColor: theme.elevated }]}>
+            <View style={styles.commentHeader}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Visit ${state.commentAuthors[item.user_id]?.username ?? "gardener"}'s garden`}
+                onPress={() =>
+                  router.push(
+                    item.user_id === state.userId
+                      ? "/(tabs)/forest"
+                      : `/friend-forest/${item.user_id}`,
+                  )
+                }
+                style={({ pressed }) => [styles.author, pressed && styles.authorPressed]}
+              >
+                <Avatar
+                  uri={state.commentAuthors[item.user_id]?.avatar_url}
+                  label={state.commentAuthors[item.user_id]?.username ?? "Gardener"}
+                  size={24}
+                />
+                <Text style={[styles.username, { color: theme.text }]}>
+                  @{state.commentAuthors[item.user_id]?.username ?? "gardener"}
+                </Text>
+              </Pressable>
+              <Text style={[styles.date, { color: theme.muted }]}>
+                {new Date(item.created_at).toLocaleDateString()}
+              </Text>
+            </View>
             <Text style={{ color: theme.text }}>{item.content}</Text>
-            <Text style={[styles.date, { color: theme.muted }]}>
-              {new Date(item.created_at).toLocaleDateString()}
-            </Text>
           </View>
         ))
       ) : state.loading ? null : (
@@ -60,7 +87,7 @@ export function ReflectionInteractions({ logId }: { logId: string }): React.JSX.
         </Text>
       )}
       <View style={styles.form}>
-        <TextInput
+        <DismissibleTextInput
           accessibilityLabel="Write a comment"
           placeholder="Write a comment…"
           placeholderTextColor={theme.muted}
@@ -107,7 +134,17 @@ const styles = StyleSheet.create({
   },
   heading: { fontWeight: "800", marginTop: spacing.xs },
   comment: { borderRadius: 10, padding: spacing.sm },
-  date: { fontSize: 11, marginTop: 3 },
+  commentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  author: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  authorPressed: { opacity: 0.6 },
+  username: { fontSize: 12, fontFamily: "Outfit_700Bold" },
+  date: { fontSize: 11 },
   hint: { fontSize: 12 },
   form: { flexDirection: "row", gap: spacing.sm },
   input: {

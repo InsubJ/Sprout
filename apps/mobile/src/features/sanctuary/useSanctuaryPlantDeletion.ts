@@ -1,47 +1,68 @@
 import { useCallback, useState } from "react";
-import type { CustomPlant } from "@sprout/shared";
+import type { CustomPlant, Habit } from "@sprout/shared";
+
+export type SanctuaryDeletionTarget =
+  | { kind: "custom"; plant: CustomPlant }
+  | { kind: "classic"; habit: Habit };
 
 interface SanctuaryPlantDeletion {
-  plant: CustomPlant | null;
+  target: SanctuaryDeletionTarget | null;
   deleting: boolean;
   error: string | null;
-  requestDeletion(plant: CustomPlant): void;
+  requestCustomPlantDeletion(plant: CustomPlant): void;
+  requestHabitDeletion(habit: Habit): void;
   cancelDeletion(): void;
   confirmDeletion(): Promise<void>;
 }
 
 export function useSanctuaryPlantDeletion(
-  deletePlant: (plantId: string) => Promise<void>,
+  deleteCustomPlant: (plantId: string) => Promise<void>,
+  deleteHabit: (habitId: string) => Promise<void>,
 ): SanctuaryPlantDeletion {
-  const [plant, setPlant] = useState<CustomPlant | null>(null);
+  const [target, setTarget] = useState<SanctuaryDeletionTarget | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const requestDeletion = useCallback((nextPlant: CustomPlant): void => {
-    if (!nextPlant.id) throw new Error("A saved custom plant is required");
+  const requestCustomPlantDeletion = useCallback((plant: CustomPlant): void => {
+    if (!plant.id) throw new Error("A saved custom plant is required");
     setError(null);
-    setPlant(nextPlant);
+    setTarget({ kind: "custom", plant });
+  }, []);
+
+  const requestHabitDeletion = useCallback((habit: Habit): void => {
+    if (!habit.id || habit.status !== "completed") throw new Error("A completed habit is required");
+    setError(null);
+    setTarget({ kind: "classic", habit });
   }, []);
 
   const cancelDeletion = useCallback((): void => {
     if (deleting) return;
     setError(null);
-    setPlant(null);
+    setTarget(null);
   }, [deleting]);
 
   const confirmDeletion = useCallback(async (): Promise<void> => {
-    if (!plant || deleting) return;
+    if (!target || deleting) return;
     setDeleting(true);
     setError(null);
     try {
-      await deletePlant(plant.id);
-      setPlant(null);
+      if (target.kind === "custom") await deleteCustomPlant(target.plant.id);
+      else await deleteHabit(target.habit.id);
+      setTarget(null);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to delete this plant");
     } finally {
       setDeleting(false);
     }
-  }, [deletePlant, deleting, plant]);
+  }, [deleteCustomPlant, deleteHabit, deleting, target]);
 
-  return { plant, deleting, error, requestDeletion, cancelDeletion, confirmDeletion };
+  return {
+    target,
+    deleting,
+    error,
+    requestCustomPlantDeletion,
+    requestHabitDeletion,
+    cancelDeletion,
+    confirmDeletion,
+  };
 }

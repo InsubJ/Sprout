@@ -6,6 +6,7 @@ const frequencyLabels = {
   twice_daily: "Twice Daily",
   daily: "Daily",
   weekly: "Weekly",
+  fortnightly: "Fortnightly",
   monthly: "Monthly",
   yearly: "Yearly",
   flexible: "Flexible",

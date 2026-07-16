@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import type { CustomPlant, Habit, Profile } from "@sprout/shared";
 import { useAuth } from "../../providers/AuthProvider";
 import { useServices } from "../../providers/ServicesProvider";
+import { useRealtimeRefresh } from "../../hooks/useRealtimeRefresh";
+
+const friendGardenRealtimeTables = ["friendships", "profiles", "habits", "custom_plants"] as const;
 
 export interface FriendGardenState {
   profile: Profile | null | undefined;
@@ -74,6 +77,13 @@ export function useFriendGarden(friendId?: string): FriendGardenState {
       active = false;
     };
   }, [customPlantRepository, friendId, habitRepository, profiles, requestId, social, user]);
+
+  useRealtimeRefresh({
+    channelName: `friend-garden-${user?.id ?? "signed-out"}-${friendId ?? "missing"}`,
+    tables: friendGardenRealtimeTables,
+    enabled: Boolean(friendId && user),
+    onChange: () => void refresh(),
+  });
 
   return { profile, habits, customPlants, error, refresh };
 }

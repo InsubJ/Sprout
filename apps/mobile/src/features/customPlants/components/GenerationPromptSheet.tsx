@@ -1,6 +1,7 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { colors, spacing } from "@sprout/design-tokens";
 import { AppButton } from "../../../components/AppButton";
+import { DismissibleTextInput } from "../../../components/DismissibleTextInput";
 import { ModalSheet } from "../../../components/ModalSheet";
 import { useTheme } from "../../../providers/ThemeProvider";
 export function GenerationPromptSheet({
@@ -30,7 +31,7 @@ export function GenerationPromptSheet({
         Describe colours, mood, botanical shapes, or a gentle fantasy. Sprout will generate safe
         plant data using its existing native geometry.
       </Text>
-      <TextInput
+      <DismissibleTextInput
         multiline
         maxLength={1000}
         value={prompt}

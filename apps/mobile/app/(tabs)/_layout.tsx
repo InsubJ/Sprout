@@ -43,6 +43,7 @@ export default function TabsLayout(): React.JSX.Element | null {
   return (
     <>
       <Tabs
+        initialRouteName="forest"
         screenOptions={{
           headerShown: false,
           tabBarActiveTintColor: theme.dark ? "#9BCB8E" : colors.forest,
@@ -68,7 +69,7 @@ export default function TabsLayout(): React.JSX.Element | null {
               {children}
             </TabBarPressable>
           ),
-          sceneStyle: { backgroundColor: theme.background },
+          sceneStyle: { backgroundColor: theme.background, paddingTop: insets.top },
           tabBarHideOnKeyboard: true,
           tabBarStyle: {
             height: 56 + Math.max(insets.bottom, 8),

@@ -10,6 +10,7 @@ export interface HabitCollectionState {
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
+  deleteHabit: (habitId: string) => Promise<void>;
   updateLocal: (update: (habits: Habit[]) => Habit[]) => void;
 }
 
@@ -60,5 +61,17 @@ export function useHabitCollection(): HabitCollectionState {
     (update: (current: Habit[]) => Habit[]): void => setHabits(update),
     [],
   );
-  return { habits, loading, error, refresh, updateLocal };
+  const deleteHabit = useCallback(
+    async (habitId: string): Promise<void> => {
+      if (!habitId.trim()) throw new Error("Habit ID is required");
+      await repository.delete(habitId);
+      setHabits((current) => current.filter((habit) => habit.id !== habitId));
+      if (!user) return;
+      const fresh = await repository.getByUserId(user.id);
+      setHabits(fresh);
+      await writeCachedHabits(user.id, fresh);
+    },
+    [repository, user],
+  );
+  return { habits, loading, error, refresh, deleteHabit, updateLocal };
 }

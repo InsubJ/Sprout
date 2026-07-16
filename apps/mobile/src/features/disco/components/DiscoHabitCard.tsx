@@ -58,7 +58,7 @@ export function DiscoHabitCard({
           hovered && styles.hovered,
           {
             width: cardWidth,
-            height: gardenCardGeometry.height,
+            minHeight: gardenCardGeometry.height,
             padding: gardenCardGeometry.padding,
             gap: 12,
           },

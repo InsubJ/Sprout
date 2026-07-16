@@ -1,7 +1,8 @@
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { colors, spacing } from "@sprout/design-tokens";
 import type { PlantGenerationJob } from "@sprout/shared";
 import { AppButton } from "../../../components/AppButton";
+import { DismissibleTextInput } from "../../../components/DismissibleTextInput";
 import { ModalSheet } from "../../../components/ModalSheet";
 import { useTheme } from "../../../providers/ThemeProvider";
 import { GeneratedPlantRenderer } from "./GeneratedPlantRenderer";
@@ -32,6 +33,7 @@ export function GeneratedPlantPreview({
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
         showsVerticalScrollIndicator
       >
         <Text style={[styles.eyebrow, theme.dark && styles.eyebrowDark]}>CUSTOM PLANT PREVIEW</Text>
@@ -41,7 +43,7 @@ export function GeneratedPlantPreview({
           <GeneratedPlantRenderer spec={job.generatedSpec} size={260} state="completed" />
         </View>
         <Text style={[styles.label, { color: theme.text }]}>Plant name</Text>
-        <TextInput
+        <DismissibleTextInput
           value={name}
           maxLength={60}
           onChangeText={onNameChange}

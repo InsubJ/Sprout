@@ -3,6 +3,12 @@ import type { Habit } from "@sprout/shared";
 
 export type ForestFilter = "all" | "watered" | "needs-water";
 
+export function habitNeedsWater(habit: Habit, wateringsToday: number): boolean {
+  if (!Number.isInteger(wateringsToday) || wateringsToday < 0)
+    throw new Error("Today's watering count must be a non-negative integer");
+  return wateringsToday < (habit.frequency === "twice_daily" ? 2 : 1);
+}
+
 export function useForestFilter(
   habits: Habit[],
   wateringsToday: Record<string, number>,
@@ -19,12 +25,16 @@ export function useForestFilter(
             (filter === "all" ||
               (filter === "watered"
                 ? (wateringsToday[habit.id] ?? 0) > 0
-                : (wateringsToday[habit.id] ?? 0) < (habit.frequency === "twice_daily" ? 2 : 1))) &&
+                : habitNeedsWater(habit, wateringsToday[habit.id] ?? 0))) &&
             (habit.name.toLowerCase().includes(query.trim().toLowerCase()) ||
               Boolean(habit.description?.toLowerCase().includes(query.trim().toLowerCase()))),
         )
         .sort((a, b) => {
           if (filter !== "all") return 0;
+          const wateringDifference =
+            Number(habitNeedsWater(b, wateringsToday[b.id] ?? 0)) -
+            Number(habitNeedsWater(a, wateringsToday[a.id] ?? 0));
+          if (wateringDifference) return wateringDifference;
           const rank = (status: Habit["status"]): number =>
             status === "withered" ? 0 : status === "healthy" ? 1 : 2;
           const statusDifference = rank(a.status) - rank(b.status);

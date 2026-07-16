@@ -1,9 +1,17 @@
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { colors, spacing } from "@sprout/design-tokens";
-export function ScreenState({ message, error = false }: { message: string; error?: boolean }) {
+export function ScreenState({
+  message,
+  error = false,
+  loading = !error,
+}: {
+  message: string;
+  error?: boolean;
+  loading?: boolean;
+}) {
   return (
     <View style={styles.root}>
-      {error ? null : <ActivityIndicator color={colors.forest} />}
+      {loading ? <ActivityIndicator color={colors.forest} /> : null}
       <Text style={[styles.text, error && styles.error]}>{message}</Text>
     </View>
   );

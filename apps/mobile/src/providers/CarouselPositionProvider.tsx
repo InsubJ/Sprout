@@ -1,5 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 
 interface CarouselPositionStore {
   read(carouselId: string): string | null;
@@ -14,25 +13,12 @@ interface CarouselPosition {
 const CarouselPositionContext = createContext<CarouselPositionStore | null>(null);
 
 type CarouselPositions = Record<string, string>;
-const storageKey = "sprout_carousel_positions_v1";
-
-export function parseCarouselPositions(value: unknown): CarouselPositions {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
-  return Object.fromEntries(
-    Object.entries(value).filter(
-      ([carouselId, itemKey]) =>
-        Boolean(carouselId.trim()) && typeof itemKey === "string" && Boolean(itemKey.trim()),
-    ),
-  );
-}
 
 export function createCarouselPositionStore(
   initialPositions: CarouselPositions = {},
   onChange?: (positions: CarouselPositions) => void,
 ): CarouselPositionStore {
-  const positions = new Map<string, string>(
-    Object.entries(parseCarouselPositions(initialPositions)),
-  );
+  const positions = new Map<string, string>(Object.entries(initialPositions));
   return {
     read: (carouselId) => positions.get(carouselId) ?? null,
     write: (carouselId, itemKey) => {
@@ -46,32 +32,7 @@ export function createCarouselPositionStore(
 }
 
 export function CarouselPositionProvider({ children }: { children: ReactNode }) {
-  const [store, setStore] = useState<CarouselPositionStore | null>(null);
-  useEffect(() => {
-    let active = true;
-    const createPersistedStore = (positions: CarouselPositions): CarouselPositionStore =>
-      createCarouselPositionStore(positions, (next) => {
-        void AsyncStorage.setItem(storageKey, JSON.stringify(next)).catch(() => undefined);
-      });
-    void AsyncStorage.getItem(storageKey)
-      .then((raw) => {
-        let positions: CarouselPositions = {};
-        try {
-          positions = parseCarouselPositions(raw ? JSON.parse(raw) : null);
-        } catch {
-          positions = {};
-        }
-        if (!active) return;
-        setStore(createPersistedStore(positions));
-      })
-      .catch(() => {
-        if (active) setStore(createPersistedStore({}));
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-  if (!store) return null;
+  const [store] = useState<CarouselPositionStore>(() => createCarouselPositionStore());
   return (
     <CarouselPositionContext.Provider value={store}>{children}</CarouselPositionContext.Provider>
   );

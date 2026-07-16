@@ -12,7 +12,7 @@ import { SanctuaryCatalogueControls } from "./SanctuaryCatalogueControls";
 import { SanctuaryCustomPlantCard } from "./SanctuaryCustomPlantCard";
 import { SanctuaryPlantCard } from "./SanctuaryPlantCard";
 import { useSanctuaryCatalogue } from "./useSanctuaryCatalogue";
-import { DeleteCustomPlantConfirmationSheet } from "./DeleteCustomPlantConfirmationSheet";
+import { DeleteSanctuaryPlantConfirmationSheet } from "./DeleteSanctuaryPlantConfirmationSheet";
 import { SanctuaryEmptyCard } from "./SanctuaryEmptyCard";
 import { useSanctuaryPlantDeletion } from "./useSanctuaryPlantDeletion";
 export function SanctuaryScreen() {
@@ -20,7 +20,7 @@ export function SanctuaryScreen() {
   const theme = useTheme(),
     catalogue = useSanctuaryCatalogue();
   const carouselPosition = useCarouselPosition(`sanctuary:${user?.id ?? "guest"}`);
-  const deletion = useSanctuaryPlantDeletion(catalogue.deleteCustomPlant);
+  const deletion = useSanctuaryPlantDeletion(catalogue.deleteCustomPlant, catalogue.deleteHabit);
   const reflectionBook = usePersistedHabitSelection(user?.id, "sanctuary", catalogue.classicHabits);
   return (
     <>
@@ -60,13 +60,14 @@ export function SanctuaryScreen() {
                   <SanctuaryCustomPlantCard
                     plant={item.plant}
                     width={width}
-                    onRequestDelete={deletion.requestDeletion}
+                    onRequestDelete={deletion.requestCustomPlantDeletion}
                   />
                 ) : (
                   <SanctuaryPlantCard
                     habit={item.habit}
                     width={width}
                     onOpenJournal={() => reflectionBook.open(item.habit)}
+                    onRequestDelete={deletion.requestHabitDeletion}
                   />
                 )
               }
@@ -82,8 +83,8 @@ export function SanctuaryScreen() {
         </ResponsivePageContent>
       </ScrollView>
       <ReflectionBookSheet habit={reflectionBook.habit} onClose={reflectionBook.close} />
-      <DeleteCustomPlantConfirmationSheet
-        plant={deletion.plant}
+      <DeleteSanctuaryPlantConfirmationSheet
+        target={deletion.target}
         deleting={deletion.deleting}
         error={deletion.error}
         onCancel={deletion.cancelDeletion}
