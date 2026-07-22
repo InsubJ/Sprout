@@ -123,6 +123,7 @@ export function GardenCarousel<Item>({
   );
   const listRef = useRef<FlatList<Item>>(null);
   const keyExtractorRef = useRef(keyExtractor);
+  const itemsRef = useRef(items);
   const focusedItemChangeRef = useRef(onFocusedItemChange);
   const webSettleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const webTouchActive = useRef(false);
@@ -132,7 +133,9 @@ export function GardenCarousel<Item>({
   );
   const [focusedStartIndex, setFocusedStartIndex] = useState(initialStartIndex);
   keyExtractorRef.current = keyExtractor;
+  itemsRef.current = items;
   focusedItemChangeRef.current = onFocusedItemChange;
+  const itemKeySignature = items.map(keyExtractor).join("\u001f");
 
   const usableWidth = Math.max(240, viewportWidth - spacing.md * 2);
   const cardWidth = Math.min(
@@ -158,18 +161,23 @@ export function GardenCarousel<Item>({
 
   useEffect(() => {
     const getItemKey = keyExtractorRef.current;
-    const nextItemIndex = carouselIndexFromItemKey(items, getItemKey, focusedItemKey.current);
+    const currentItems = itemsRef.current;
+    const nextItemIndex = carouselIndexFromItemKey(
+      currentItems,
+      getItemKey,
+      focusedItemKey.current,
+    );
     const nextStartIndex = carouselStartIndexFromItemIndex(
       nextItemIndex,
       cardsPerPage,
-      items.length,
+      currentItems.length,
     );
-    const nextKey = items[nextStartIndex] ? getItemKey(items[nextStartIndex]) : null;
+    const nextKey = currentItems[nextStartIndex] ? getItemKey(currentItems[nextStartIndex]) : null;
     focusedItemKey.current = nextKey;
     setFocusedStartIndex(nextStartIndex);
     if (nextKey) focusedItemChangeRef.current?.(nextKey);
     listRef.current?.scrollToOffset({ offset: nextStartIndex * interval, animated: false });
-  }, [cardsPerPage, interval, items]);
+  }, [cardsPerPage, interval, itemKeySignature]);
 
   useEffect(
     () => () => {
@@ -237,9 +245,13 @@ export function GardenCarousel<Item>({
           <ScrollView
             nestedScrollEnabled
             directionalLockEnabled
+            disableScrollViewPanResponder
             showsVerticalScrollIndicator
             style={{ width: cardWidth, height: cardHeight }}
             contentContainerStyle={{ minHeight: cardHeight }}
+            onScroll={(event) => event.stopPropagation()}
+            onScrollEndDrag={(event) => event.stopPropagation()}
+            onMomentumScrollEnd={(event) => event.stopPropagation()}
           >
             {renderCard(item, cardWidth)}
           </ScrollView>

@@ -25,6 +25,7 @@ export default function TabsLayout(): React.JSX.Element | null {
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
   const router = useRouter();
+  const activeTabColor = theme.dark ? "#9BCB8E" : colors.forest;
   const visitingFriend =
     pathname.startsWith("/friend-forest/") || pathname.startsWith("/friend-sanctuary/");
   const friendGardenGuard = useFriendGardenTabGuard(visitingFriend, (destination) =>
@@ -46,7 +47,7 @@ export default function TabsLayout(): React.JSX.Element | null {
         initialRouteName="forest"
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: theme.dark ? "#9BCB8E" : colors.forest,
+          tabBarActiveTintColor: activeTabColor,
           tabBarInactiveTintColor: theme.muted,
           tabBarButton: ({
             children,
@@ -60,7 +61,12 @@ export default function TabsLayout(): React.JSX.Element | null {
             <TabBarPressable
               containerStyle={style}
               accessibilityRole="button"
-              accessibilityState={accessibilityState}
+              accessibilityState={{
+                ...accessibilityState,
+                selected:
+                  Boolean(accessibilityState?.selected) ||
+                  (visitingFriend && accessibilityLabel === "Buds tab"),
+              }}
               accessibilityLabel={accessibilityLabel}
               testID={testID}
               onLongPress={onLongPress}
@@ -107,6 +113,11 @@ export default function TabsLayout(): React.JSX.Element | null {
           options={{
             title: "Buds",
             tabBarAccessibilityLabel: "Buds tab",
+            tabBarLabel: ({ color }) => (
+              <Text style={[tabStyles.label, { color: visitingFriend ? activeTabColor : color }]}>
+                Buds
+              </Text>
+            ),
             tabBarIcon: () => <Icon value="🌿" />,
           }}
           listeners={{
@@ -147,3 +158,7 @@ export default function TabsLayout(): React.JSX.Element | null {
     </>
   );
 }
+
+const tabStyles = {
+  label: { fontSize: 10, fontFamily: "Outfit_500Medium" },
+} as const;

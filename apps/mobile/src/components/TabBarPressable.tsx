@@ -13,6 +13,7 @@ interface Props extends Omit<PressableProps, "style"> {
 
 export function TabBarPressable({ containerStyle, children, ...props }: Props): React.JSX.Element {
   const theme = useTheme();
+  const selected = Boolean(props.accessibilityState?.selected);
   return (
     <Pressable
       {...props}
@@ -20,6 +21,10 @@ export function TabBarPressable({ containerStyle, children, ...props }: Props): 
       style={({ pressed }) => [
         containerStyle,
         styles.root,
+        selected && {
+          backgroundColor: theme.dark ? "#263E32" : "#E0EFDC",
+          borderColor: theme.dark ? "#6F9B68" : "#8AB780",
+        },
         pressed && {
           opacity: 0.76,
           backgroundColor: theme.dark ? "#2A4035" : "#DCEBD9",
@@ -35,6 +40,8 @@ export function TabBarPressable({ containerStyle, children, ...props }: Props): 
 const styles = StyleSheet.create({
   root: {
     borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "transparent",
     marginHorizontal: 3,
     overflow: "hidden",
   },
