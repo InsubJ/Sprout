@@ -5,7 +5,7 @@ const key = "sprout_disco_plant";
 export function computeDiscoState(lastWateredAt: string | null, now = Date.now()): DiscoPlantState {
   if (!lastWateredAt) return "withered";
   const hours = (now - new Date(lastWateredAt).getTime()) / 3_600_000;
-  return hours < 24 ? "dancing" : hours < 168 ? "smiling" : "withered";
+  return hours < 24 ? "dancing" : hours < 48 ? "smiling" : "withered";
 }
 export interface DiscoPlantStateResult {
   state: DiscoPlantState;

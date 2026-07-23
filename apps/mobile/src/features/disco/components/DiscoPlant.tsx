@@ -113,6 +113,7 @@ export function DiscoPlant({
     transform: [
       { translateY: jump.interpolate({ inputRange: [0, 1], outputRange: [0, -10] }) },
       { rotate: jump.interpolate({ inputRange: [0, 1], outputRange: ["-3deg", "3deg"] }) },
+      ...(withered ? [{ rotate: "12deg" }, { translateY: 6 }] : []),
     ],
   };
   const twinkle = (value: Animated.Value) => ({
@@ -199,20 +200,30 @@ export function DiscoPlant({
           fill="none"
           strokeLinecap="round"
         />
-        <Line
-          x1={60}
-          y1={23}
-          x2={60}
-          y2={10}
-          stroke={withered ? "#aaa" : "#7e57c2"}
-          strokeWidth={2.5}
-          strokeLinecap="round"
-        />
+        {withered ? (
+          <Path
+            d="M60 23 C55 18 48 16 44 20"
+            stroke="#757575"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            fill="none"
+          />
+        ) : (
+          <Line
+            x1={60}
+            y1={23}
+            x2={60}
+            y2={10}
+            stroke="#7e57c2"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+          />
+        )}
         <Path d="M40 115 L44 95 L76 95 L80 115 Z" fill={withered ? "#8d6e63" : "url(#potGrad)"} />
         <Rect x={38} y={110} width={44} height={8} rx={4} fill={withered ? "#795548" : "#7e57c2"} />
         <Ellipse cx={60} cy={95} rx={18} ry={5} fill={withered ? "#6d4c41" : "#4a2e1a"} />
         {withered ? (
-          <Path d="M60 130 C51 141 54 149 60 149 C66 149 69 141 60 130 Z" fill="#63B3ED" />
+          <Path d="M44 60 C41 66 42 70 44 70 C46 70 47 66 44 60 Z" fill="#63B3ED" opacity={0.85} />
         ) : null}
       </Layer>
       {dancing ? (
@@ -289,35 +300,37 @@ export function DiscoPlant({
       ) : null}
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         <Layer size={size}>
-          <Line x1={31} y1={48} x2={37} y2={51} stroke="#111827" strokeWidth={3} />
-          <Rect
-            x={36}
-            y={45}
-            width={18}
-            height={12}
-            rx={4}
-            fill="#111827"
-            stroke="#E9D5FF"
-            strokeWidth={1.5}
-          />
-          <Rect
-            x={56}
-            y={45}
-            width={18}
-            height={12}
-            rx={4}
-            fill="#111827"
-            stroke="#E9D5FF"
-            strokeWidth={1.5}
-          />
-          <Line x1={54} y1={50} x2={56} y2={50} stroke="#111827" strokeWidth={3} />
-          <Line x1={74} y1={51} x2={80} y2={48} stroke="#111827" strokeWidth={3} />
-          {!withered ? (
-            <>
-              <Path d="M39 48 L50 48 L45 53 Z" fill="#C77DFF" opacity={0.75} />
-              <Path d="M59 48 L70 48 L65 53 Z" fill="#FF6B9D" opacity={0.7} />
-            </>
-          ) : null}
+          <G transform={withered ? "rotate(10 60 50) translate(0 3)" : undefined}>
+            <Line x1={31} y1={48} x2={37} y2={51} stroke={withered ? "#555" : "#111827"} strokeWidth={3} />
+            <Rect
+              x={36}
+              y={45}
+              width={18}
+              height={12}
+              rx={4}
+              fill={withered ? "#333" : "#111827"}
+              stroke={withered ? "#757575" : "#E9D5FF"}
+              strokeWidth={1.5}
+            />
+            <Rect
+              x={56}
+              y={45}
+              width={18}
+              height={12}
+              rx={4}
+              fill={withered ? "#333" : "#111827"}
+              stroke={withered ? "#757575" : "#E9D5FF"}
+              strokeWidth={1.5}
+            />
+            <Line x1={54} y1={50} x2={56} y2={50} stroke={withered ? "#555" : "#111827"} strokeWidth={3} />
+            <Line x1={74} y1={51} x2={80} y2={48} stroke={withered ? "#555" : "#111827"} strokeWidth={3} />
+            {!withered ? (
+              <>
+                <Path d="M39 48 L50 48 L45 53 Z" fill="#C77DFF" opacity={0.75} />
+                <Path d="M59 48 L70 48 L65 53 Z" fill="#FF6B9D" opacity={0.7} />
+              </>
+            ) : null}
+          </G>
         </Layer>
       </View>
     </Animated.View>

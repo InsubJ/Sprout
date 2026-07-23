@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { getLocalDateKey, type CreateHabitInput, type Habit } from "@sprout/shared";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { calculateHabitWilting, getLocalDateKey, type CreateHabitInput, type Habit } from "@sprout/shared";
 import { useAuth } from "../../../providers/AuthProvider";
 import { useServices } from "../../../providers/ServicesProvider";
 import { useSync } from "../../../providers/SyncProvider";
@@ -173,8 +173,13 @@ export function useHabits(): HabitsState {
     },
     [invalidate, logs, queue, refresh, refreshPending, repository, user],
   );
+  const computedHabits = useMemo(
+    () => habits.map((h) => calculateHabitWilting(h, lastWateredAt[h.id] ?? null)),
+    [habits, lastWateredAt],
+  );
+
   return {
-    habits,
+    habits: computedHabits,
     wateringsToday,
     lastWateredAt,
     loading,

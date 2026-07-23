@@ -13,10 +13,10 @@ export function validateGeneratedPlantSpec(value: unknown): GeneratedPlantValida
       errors: result.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`),
     };
   const primitiveCount = result.data.layers.reduce(
-    (total, layer) => total + (layer.count ?? layer.petalCount ?? 1),
+    (total, layer) => total + (layer.count ?? layer.petalCount ?? 1) + (layer.particles?.count ?? 0),
     0,
   );
-  if (primitiveCount > 120)
-    return { valid: false, errors: ["Rendered primitive count exceeds 120"] };
+  if (primitiveCount > 160)
+    return { valid: false, errors: ["Rendered primitive count exceeds 160"] };
   return { valid: true, errors: [], spec: result.data };
 }

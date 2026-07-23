@@ -14,6 +14,7 @@ import { colors, spacing } from "@sprout/design-tokens";
 import { useRouter } from "expo-router";
 import { AppButton } from "../../../components/AppButton";
 import { ResponsivePageContent } from "../../../components/ResponsivePageContent";
+import { LoadingState } from "../../../components/LoadingState";
 import { ScreenState } from "../../../components/ScreenState";
 import { useAuth } from "../../../providers/AuthProvider";
 import { useSync } from "../../../providers/SyncProvider";
@@ -32,7 +33,7 @@ import { ReflectionBookSheet } from "../components/ReflectionBookSheet";
 import { WaterReflectionSheet } from "../components/WaterReflectionSheet";
 import { useForestFilter } from "../hooks/useForestFilter";
 import { useHabits } from "../hooks/useHabits";
-import { usePersistedHabitSelection } from "../hooks/usePersistedHabitSelection";
+import { useHabitSelection } from "../hooks/useHabitSelection";
 import { useWaterReflectionDraft } from "../hooks/useWaterReflectionDraft";
 
 type ForestCarouselItem = { kind: "habit"; habit: Habit } | { kind: "empty" } | { kind: "disco" };
@@ -52,7 +53,7 @@ export function ForestScreen(): React.JSX.Element {
     () => habitState.habits.find((habit) => habit.id === wateringDraft.habitId) ?? null,
     [habitState.habits, wateringDraft.habitId],
   );
-  const reflectionBook = usePersistedHabitSelection(user?.id, "forest", habitState.habits);
+  const reflectionBook = useHabitSelection(habitState.habits);
   const forest = useForestFilter(
     habitState.habits,
     habitState.wateringsToday,
@@ -115,7 +116,7 @@ export function ForestScreen(): React.JSX.Element {
             onFilterChange={forest.setFilter}
           />
           {habitState.loading && !habitState.habits.length ? (
-            <ScreenState message="Walking into the woods…" />
+            <LoadingState message="Walking into the woods…" />
           ) : habitState.error && !habitState.habits.length ? (
             <ScreenState message={habitState.error} error />
           ) : (

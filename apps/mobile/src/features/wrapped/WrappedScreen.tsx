@@ -5,7 +5,7 @@ import { colors, radii, spacing } from "@sprout/design-tokens";
 import { AppButton } from "../../components/AppButton";
 import { ProgressBar } from "../../components/ProgressBar";
 import { ResponsivePageContent } from "../../components/ResponsivePageContent";
-import { ScreenState } from "../../components/ScreenState";
+import { LoadingState } from "../../components/LoadingState";
 import { useTheme } from "../../providers/ThemeProvider";
 import { nativePlantRegistry } from "../plants/plantRegistry";
 import { useNativeYearlyWrapped } from "./useNativeYearlyWrapped";
@@ -25,7 +25,7 @@ export function WrappedScreen() {
     ? (nativePlantRegistry[data.highlight.plant_type as keyof typeof nativePlantRegistry] ??
       nativePlantRegistry.bonsai)
     : null;
-  if (loading) return <ScreenState message="Gathering logs and counting rings…" />;
+  if (loading) return <LoadingState message="Gathering logs and counting rings…" />;
   return (
     <ScrollView
       style={{ backgroundColor: theme.background }}

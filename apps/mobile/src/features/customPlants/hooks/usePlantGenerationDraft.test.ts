@@ -3,7 +3,7 @@ import { parsePlantGenerationDraft } from "./usePlantGenerationDraft";
 describe("custom plant prompt draft", () => {
   it("restores prompt text and whether its sheet was open", () => {
     expect(parsePlantGenerationDraft({ open: true, prompt: "A walking moon tree" })).toEqual({
-      open: true,
+      open: false,
       prompt: "A walking moon tree",
     });
   });

@@ -1,4 +1,5 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
+import { AppState, type AppStateStatus } from "react-native";
 import { usePersistedState } from "../../../hooks/usePersistedState";
 
 interface PlantGenerationDraft {
@@ -22,7 +23,7 @@ export function parsePlantGenerationDraft(value: unknown): PlantGenerationDraft 
   if (typeof candidate.open !== "boolean") throw new Error("Saved prompt visibility is invalid");
   if (typeof candidate.prompt !== "string" || candidate.prompt.length > 1000)
     throw new Error("Saved plant prompt is invalid");
-  return { open: candidate.open, prompt: candidate.prompt };
+  return { open: false, prompt: candidate.prompt };
 }
 
 export function usePlantGenerationDraft(userId?: string): PlantGenerationDraftState {
@@ -35,6 +36,18 @@ export function usePlantGenerationDraft(userId?: string): PlantGenerationDraftSt
     (open: boolean): void => persisted.setValue((current) => ({ ...current, open })),
     [persisted.setValue],
   );
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (status: AppStateStatus) => {
+      if (status === "active") {
+        setOpen(false);
+      }
+    });
+    return () => {
+      subscription.remove();
+    };
+  }, [setOpen]);
+
   const setPrompt = useCallback(
     (prompt: string): void => persisted.setValue((current) => ({ ...current, prompt })),
     [persisted.setValue],

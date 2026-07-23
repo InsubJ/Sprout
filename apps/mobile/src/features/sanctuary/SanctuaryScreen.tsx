@@ -1,5 +1,6 @@
 import { Platform, ScrollView, StyleSheet, Text } from "react-native";
 import { colors, spacing } from "@sprout/design-tokens";
+import { LoadingState } from "../../components/LoadingState";
 import { ScreenState } from "../../components/ScreenState";
 import { ResponsivePageContent } from "../../components/ResponsivePageContent";
 import { useTheme } from "../../providers/ThemeProvider";
@@ -7,7 +8,7 @@ import { useAuth } from "../../providers/AuthProvider";
 import { useCarouselPosition } from "../../providers/CarouselPositionProvider";
 import { GardenCarousel } from "../habits/components/GardenCarousel";
 import { ReflectionBookSheet } from "../habits/components/ReflectionBookSheet";
-import { usePersistedHabitSelection } from "../habits/hooks/usePersistedHabitSelection";
+import { useHabitSelection } from "../habits/hooks/useHabitSelection";
 import { SanctuaryCatalogueControls } from "./SanctuaryCatalogueControls";
 import { SanctuaryCustomPlantCard } from "./SanctuaryCustomPlantCard";
 import { SanctuaryPlantCard } from "./SanctuaryPlantCard";
@@ -21,7 +22,7 @@ export function SanctuaryScreen() {
     catalogue = useSanctuaryCatalogue();
   const carouselPosition = useCarouselPosition(`sanctuary:${user?.id ?? "guest"}`);
   const deletion = useSanctuaryPlantDeletion(catalogue.deleteCustomPlant, catalogue.deleteHabit);
-  const reflectionBook = usePersistedHabitSelection(user?.id, "sanctuary", catalogue.classicHabits);
+  const reflectionBook = useHabitSelection(catalogue.classicHabits);
   return (
     <>
       <ScrollView
@@ -45,7 +46,7 @@ export function SanctuaryScreen() {
             onSort={catalogue.setSort}
           />
           {catalogue.loading && !catalogue.items.length ? (
-            <ScreenState message="Opening the Sanctuary…" />
+            <LoadingState message="Opening the Sanctuary…" />
           ) : catalogue.items.length ? (
             <GardenCarousel
               items={catalogue.items}

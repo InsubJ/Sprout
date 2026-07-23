@@ -10,6 +10,7 @@ import { useUsernameOnboarding } from "../../src/features/auth/useUsernameOnboar
 import { useAuth } from "../../src/providers/AuthProvider";
 import { useAppLock } from "../../src/providers/AppLockProvider";
 import { useTheme } from "../../src/providers/ThemeProvider";
+import { useResetOnReopen } from "../../src/hooks/useResetOnReopen";
 
 const Icon = ({ value }: { value: string }): React.JSX.Element => (
   <Text accessible={false} importantForAccessibility="no" style={{ fontSize: 20 }}>
@@ -25,6 +26,9 @@ export default function TabsLayout(): React.JSX.Element | null {
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
   const router = useRouter();
+
+  useResetOnReopen();
+
   const activeTabColor = theme.dark ? "#9BCB8E" : colors.forest;
   const visitingFriend =
     pathname.startsWith("/friend-forest/") || pathname.startsWith("/friend-sanctuary/");

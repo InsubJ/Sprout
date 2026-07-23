@@ -9,7 +9,7 @@ describe("watering reflection draft", () => {
         imageUri: "file:///reflection.jpg",
       }),
     ).toEqual({
-      habitId: "habit-1",
+      habitId: null,
       note: "A useful thought",
       imageUri: "file:///reflection.jpg",
     });

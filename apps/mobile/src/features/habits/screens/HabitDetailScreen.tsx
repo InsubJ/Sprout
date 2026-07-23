@@ -4,6 +4,7 @@ import type { PlantSpecies } from "@sprout/shared";
 import { spacing } from "@sprout/design-tokens";
 import { ProgressBar } from "../../../components/ProgressBar";
 import { ResponsivePageContent } from "../../../components/ResponsivePageContent";
+import { LoadingState } from "../../../components/LoadingState";
 import { ScreenState } from "../../../components/ScreenState";
 import { useTheme } from "../../../providers/ThemeProvider";
 import { nativePlantRegistry } from "../../plants/plantRegistry";
@@ -12,7 +13,7 @@ import { useHabitDetail } from "../hooks/useHabitDetail";
 export function HabitDetailScreen({ id }: { id?: string }): React.JSX.Element {
   const theme = useTheme();
   const { habit } = useHabitDetail(id);
-  if (habit === undefined) return <ScreenState message="Finding this plant…" />;
+  if (habit === undefined) return <LoadingState message="Finding this plant…" />;
   if (!habit) return <ScreenState message="This plant is unavailable or private." error />;
   const Plant = nativePlantRegistry[habit.plant_type as PlantSpecies] ?? nativePlantRegistry.bonsai;
   return (

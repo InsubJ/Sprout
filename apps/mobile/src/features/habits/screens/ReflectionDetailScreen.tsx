@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { spacing } from "@sprout/design-tokens";
 import { ResponsivePageContent } from "../../../components/ResponsivePageContent";
+import { LoadingState } from "../../../components/LoadingState";
 import { ScreenState } from "../../../components/ScreenState";
 import { useTheme } from "../../../providers/ThemeProvider";
 import { ReflectionInteractions } from "../../sanctuary/ReflectionInteractions";
@@ -11,7 +12,7 @@ import { useReflectionDetail } from "../hooks/useReflectionDetail";
 export function ReflectionDetailScreen({ id }: { id?: string }): React.JSX.Element {
   const theme = useTheme();
   const entry = useReflectionDetail(id);
-  if (entry === undefined) return <ScreenState message="Opening reflection…" />;
+  if (entry === undefined) return <LoadingState message="Opening reflection…" />;
   if (!entry) return <ScreenState message="This reflection is unavailable or private." error />;
   return (
     <View style={[styles.root, { backgroundColor: theme.background }]}>

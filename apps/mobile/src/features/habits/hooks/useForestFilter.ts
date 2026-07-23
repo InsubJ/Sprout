@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { AppState, type AppStateStatus } from "react-native";
 import type { Habit } from "@sprout/shared";
 
 export type ForestFilter = "all" | "watered" | "needs-water";
@@ -9,13 +10,43 @@ export function habitNeedsWater(habit: Habit, wateringsToday: number): boolean {
   return wateringsToday < (habit.frequency === "twice_daily" ? 2 : 1);
 }
 
+export interface ForestFilterState {
+  query: string;
+  setQuery: (query: string) => void;
+  filter: ForestFilter;
+  setFilter: (filter: ForestFilter) => void;
+  visibleHabits: Habit[];
+}
+
 export function useForestFilter(
   habits: Habit[],
   wateringsToday: Record<string, number>,
   lastWateredAt: Record<string, string | null>,
-) {
+): ForestFilterState {
+  if (!Array.isArray(habits)) {
+    throw new Error("Habits list must be an array");
+  }
+  if (!wateringsToday || typeof wateringsToday !== "object") {
+    throw new Error("Waterings today mapping must be a valid object");
+  }
+  if (!lastWateredAt || typeof lastWateredAt !== "object") {
+    throw new Error("Last watered at mapping must be a valid object");
+  }
+
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<ForestFilter>("all");
+  const [filter, setFilter] = useState<ForestFilter>("needs-water");
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (status: AppStateStatus) => {
+      if (status === "active") {
+        setFilter("needs-water");
+        setQuery("");
+      }
+    });
+    return () => {
+      subscription.remove();
+    };
+  }, []);
   const visibleHabits = useMemo(
     () =>
       habits

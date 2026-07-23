@@ -3,6 +3,7 @@ import { Alert, Platform, ScrollView, StyleSheet } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import type { Habit } from "@sprout/shared";
 import { ResponsivePageContent } from "../../components/ResponsivePageContent";
+import { LoadingState } from "../../components/LoadingState";
 import { ScreenState } from "../../components/ScreenState";
 import { useAuth } from "../../providers/AuthProvider";
 import { useTheme } from "../../providers/ThemeProvider";
@@ -11,7 +12,7 @@ import { GardenCarousel } from "../habits/components/GardenCarousel";
 import { GardenEmptyCard } from "../habits/components/GardenEmptyCard";
 import { HabitCard } from "../habits/components/HabitCard";
 import { ReflectionBookSheet } from "../habits/components/ReflectionBookSheet";
-import { usePersistedHabitSelection } from "../habits/hooks/usePersistedHabitSelection";
+import { useHabitSelection } from "../habits/hooks/useHabitSelection";
 import { FriendForestFilters } from "./FriendForestFilters";
 import { FriendGardenHeader } from "./FriendGardenHeader";
 import { visibleHabitForVisitor } from "./friendHabitVisibility";
@@ -44,10 +45,10 @@ export function FriendForestScreen(): React.JSX.Element {
     [forest.visibleHabits],
   );
   const { nudged, nudge } = useFriendNudges(id, Boolean(garden.profile));
-  const reflectionBook = usePersistedHabitSelection(user?.id, `friend-forest:${id}`, activeHabits);
+  const reflectionBook = useHabitSelection(activeHabits);
 
   if (garden.profile === undefined && !garden.error)
-    return <ScreenState message="Walking to your bud's forest…" />;
+    return <LoadingState message="Walking to your bud's forest…" />;
   if (!garden.profile)
     return <ScreenState message={garden.error ?? "This forest is unavailable."} error />;
 

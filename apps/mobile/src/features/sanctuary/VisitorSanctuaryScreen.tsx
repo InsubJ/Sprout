@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Platform, ScrollView, StyleSheet } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { ResponsivePageContent } from "../../components/ResponsivePageContent";
+import { LoadingState } from "../../components/LoadingState";
 import { ScreenState } from "../../components/ScreenState";
 import { useAuth } from "../../providers/AuthProvider";
 import { useTheme } from "../../providers/ThemeProvider";
@@ -9,7 +10,7 @@ import { useCarouselPosition } from "../../providers/CarouselPositionProvider";
 import { GardenCarousel } from "../habits/components/GardenCarousel";
 import { GardenEmptyCard } from "../habits/components/GardenEmptyCard";
 import { ReflectionBookSheet } from "../habits/components/ReflectionBookSheet";
-import { usePersistedHabitSelection } from "../habits/hooks/usePersistedHabitSelection";
+import { useHabitSelection } from "../habits/hooks/useHabitSelection";
 import { FriendGardenHeader } from "../social/FriendGardenHeader";
 import { visibleHabitForVisitor } from "../social/friendHabitVisibility";
 import { useFriendGarden } from "../social/useFriendGarden";
@@ -42,10 +43,10 @@ export function VisitorSanctuaryScreen(): React.JSX.Element {
     () => (catalogue.items.length ? catalogue.items : [{ kind: "empty" }]),
     [catalogue.items],
   );
-  const reflectionBook = usePersistedHabitSelection(user?.id, `friend-sanctuary:${id}`, habits);
+  const reflectionBook = useHabitSelection(habits);
 
   if (garden.profile === undefined && !garden.error)
-    return <ScreenState message="Opening your bud's Sanctuary…" />;
+    return <LoadingState message="Opening your bud's Sanctuary…" />;
   if (!garden.profile)
     return <ScreenState message={garden.error ?? "This Sanctuary is unavailable."} error />;
 

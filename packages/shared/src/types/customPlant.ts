@@ -15,6 +15,7 @@ export const GENERATED_PLANT_LAYER_TYPES = [
   "decorative_shape",
   "face",
   "accessory",
+  "custom_path",
 ] as const;
 
 export type GeneratedPlantLayerType = (typeof GENERATED_PLANT_LAYER_TYPES)[number];
@@ -27,8 +28,32 @@ export const GENERATED_PLANT_ARCHETYPES = [
   "flowering",
   "leafy",
   "fantasy_hybrid",
+  "floating_island",
+  "bioluminescent_fungi",
+  "crystal_spire",
+  "terrarium_jar",
+  "elemental_spirit",
 ] as const;
 export type GeneratedPlantArchetype = (typeof GENERATED_PLANT_ARCHETYPES)[number];
+
+export interface GeneratedPlantGradientStop {
+  offset: number;
+  color: string;
+  opacity?: number;
+}
+
+export interface GeneratedPlantGradient {
+  type: "linear" | "radial";
+  stops: GeneratedPlantGradientStop[];
+  angle?: number;
+}
+
+export interface GeneratedPlantParticles {
+  type: "spores" | "sparkles" | "fireflies" | "petals" | "runes";
+  count: number;
+  color: string;
+  spreadRadius?: number;
+}
 
 export interface GeneratedPlantLayer {
   type: GeneratedPlantLayerType;
@@ -40,6 +65,10 @@ export interface GeneratedPlantLayer {
   petalCount?: number;
   fill: string;
   stroke?: string;
+  strokeWidth?: number;
+  pathData?: string;
+  gradient?: GeneratedPlantGradient;
+  particles?: GeneratedPlantParticles;
   zIndex: number;
 }
 
@@ -50,7 +79,10 @@ export interface GeneratedPlantSpec {
   rarity: "custom";
   canvas: { viewBoxWidth: 400; viewBoxHeight: 400 };
   palette: Record<string, string>;
-  base: { potStyle: "classic" | "rounded" | "none"; groundShadow: boolean };
+  base: {
+    potStyle: "classic" | "rounded" | "none" | "floating_island" | "terrarium_jar" | "crystal_base";
+    groundShadow: boolean;
+  };
   layers: GeneratedPlantLayer[];
   stateVariants: {
     healthy: Record<string, unknown>;

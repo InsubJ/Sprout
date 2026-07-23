@@ -3,12 +3,13 @@ import { StyleSheet, Text, View } from "react-native";
 import { colors, spacing } from "@sprout/design-tokens";
 import { Avatar } from "../../components/Avatar";
 import { ResponsivePageContent } from "../../components/ResponsivePageContent";
+import { LoadingState } from "../../components/LoadingState";
 import { ScreenState } from "../../components/ScreenState";
 import { useProfileDetail } from "./useProfileDetail";
 
 export function ProfileDetailScreen({ id }: { id?: string }): React.JSX.Element {
   const profile = useProfileDetail(id);
-  if (profile === undefined) return <ScreenState message="Finding this gardener…" />;
+  if (profile === undefined) return <LoadingState message="Finding this gardener…" />;
   if (!profile) return <ScreenState message="This profile is unavailable." error />;
   return (
     <View style={styles.root}>

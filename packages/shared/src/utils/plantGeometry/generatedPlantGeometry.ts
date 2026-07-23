@@ -118,3 +118,40 @@ export function computeGeneratedTree(layer: GeneratedPlantLayer): GeneratedTreeG
     leafShape: resolveGeneratedLeafShape(layer.geometry, layer.type),
   };
 }
+
+export interface GeneratedParticlePosition {
+  x: number;
+  y: number;
+  size: number;
+  opacity: number;
+  color: string;
+}
+
+export function computeGeneratedParticles(
+  layer: GeneratedPlantLayer,
+): GeneratedParticlePosition[] {
+  if (!layer.particles) return [];
+  const { type, count, color, spreadRadius = 50 } = layer.particles;
+  const safeCount = Math.min(30, Math.max(1, count));
+  const baseRadius = spreadRadius * layer.scale;
+
+  return Array.from({ length: safeCount }, (_, index) => {
+    // Golden ratio spiral distribution around layer anchor
+    const angle = index * 137.5 * (Math.PI / 180);
+    const dist = Math.sqrt((index + 1) / safeCount) * baseRadius;
+    const offsetX = Math.cos(angle) * dist;
+    const offsetY = Math.sin(angle) * dist;
+
+    const sizeBase = type === "spores" ? 2.5 : type === "sparkles" ? 3.5 : type === "runes" ? 5 : 4;
+    const size = sizeBase * (0.6 + (index % 5) * 0.2) * layer.scale;
+    const opacity = 0.4 + (index % 4) * 0.18;
+
+    return {
+      x: layer.anchor.x + offsetX,
+      y: layer.anchor.y + offsetY,
+      size,
+      opacity,
+      color,
+    };
+  });
+}

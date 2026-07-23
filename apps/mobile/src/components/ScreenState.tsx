@@ -3,7 +3,7 @@ import { colors, spacing } from "@sprout/design-tokens";
 export function ScreenState({
   message,
   error = false,
-  loading = !error,
+  loading = false,
 }: {
   message: string;
   error?: boolean;

@@ -1,5 +1,5 @@
 import type { CreateHabitInput, Habit, UpdateHabitInput } from "@sprout/shared";
-import { assignSpecies, getDifficultyTier, validateCreateHabitInput } from "@sprout/shared";
+import { assignSpecies, calculateHabitWilting, getDifficultyTier, validateCreateHabitInput } from "@sprout/shared";
 import { RepositoryError, type HabitRepository } from "@sprout/services";
 const userId = "11111111-1111-1111-1111-111111111111";
 let habits: Habit[] = [
@@ -95,11 +95,14 @@ let habits: Habit[] = [
 export class DemoHabitRepository implements HabitRepository {
   async getById(id: string): Promise<Habit | null> {
     if (!id.trim()) throw new RepositoryError("Habit ID is required", "validation");
-    return habits.find((h) => h.id === id) ?? null;
+    const habit = habits.find((h) => h.id === id);
+    return habit ? calculateHabitWilting(habit, null) : null;
   }
   async getByUserId(requestedUserId: string): Promise<Habit[]> {
     if (!requestedUserId.trim()) throw new RepositoryError("User ID is required", "validation");
-    return habits.filter((h) => h.user_id === requestedUserId);
+    return habits
+      .filter((h) => h.user_id === requestedUserId)
+      .map((h) => calculateHabitWilting(h, null));
   }
   async create(input: CreateHabitInput): Promise<Habit> {
     const validation = validateCreateHabitInput(input);

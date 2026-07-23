@@ -32,7 +32,7 @@ export function parseWaterReflectionDraft(value: unknown): WaterReflectionDraft 
   if (typeof candidate.imageUri === "string" && !candidate.imageUri.trim())
     throw new Error("Saved reflection image is invalid");
   return {
-    habitId: candidate.habitId,
+    habitId: null, // Always start with sheet closed on cold start
     note: candidate.note,
     imageUri: candidate.imageUri,
   } as WaterReflectionDraft;
